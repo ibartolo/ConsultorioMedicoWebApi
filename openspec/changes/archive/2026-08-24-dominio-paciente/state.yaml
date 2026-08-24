@@ -1,0 +1,13 @@
+change: dominio-paciente
+phase: archive
+artifact_store: openspec
+artifacts:
+  proposal: true
+  specs: true
+  design: true
+  tasks: true
+  verify: true
+tasks_progress:
+  completed: []
+  pending: []
+last_updated: 2026-08-24
