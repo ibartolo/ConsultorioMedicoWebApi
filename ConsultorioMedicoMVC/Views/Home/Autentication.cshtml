@@ -1,0 +1,287 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio Médico - Iniciar Sesión</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="@Url.Content("~/Content/login.css")" rel="stylesheet" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <span class="logo-icon">🏥</span>
+            <h2>Consultorio Médico</h2>
+            <p>Sistema de Administración de Consultorio</p>
+        </div>
+
+        <div class="login-body">
+            <div id="alertMessage" class="alert-message">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="alertText">Credenciales incorrectas. Intente nuevamente.</span>
+            </div>
+
+            <form id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Usuario
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" class="form-control" id="username" placeholder="Ingrese su usuario" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Contraseña
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-key"></i>
+                        </span>
+                        <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña" required>
+                        <button type="button" class="password-toggle" id="togglePassword" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="remember-forgot">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Recordar mi usuario</label>
+                    </div>
+                    <a href="#" class="forgot-password" id="forgotPassword">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+
+                <div class="login-footer">
+                    <p>¿No tienes una cuenta? <a href="#" id="registerLink">Solicitar acceso</a></p>
+                </div>
+
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-user-md"></i>
+                        <span>Gestión de Pacientes</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Citas Médicas</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Reportes en Tiempo Real</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+
+            const loginForm = document.getElementById('loginForm');
+            const alertMessage = document.getElementById('alertMessage');
+            const alertText = document.getElementById('alertText');
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                alertMessage.style.display = 'none';
+
+                if (!username || !password) {
+                    mostrarAlerta('Por favor, ingrese usuario y contraseña.', 'warning');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="loading-spinner"></span> Iniciando sesión...';
+
+                $.ajax({
+                    url: '@Url.Action("LogIn", "Home")',
+                    type: 'POST',
+                    data: { user: username, pass: password },
+                    dataType: 'text',
+                    success: function(response) {
+                        var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (result.IsSuccess) {
+                            Swal.fire({
+                                title: '¡Bienvenido!',
+                                text: 'Iniciando sesión en el sistema...',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false,
+                                confirmButtonColor: '#0099CC',
+                                background: 'white',
+                                iconColor: '#0099CC'
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "Home")';
+                            });
+                        } else {
+                            mostrarAlerta(result.Message || 'Credenciales incorrectas. Por favor, verifique sus datos.', 'error');
+                            loginBtn.disabled = false;
+                            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                            $('#username, #password').css('border-color', '#e74a3b');
+                            setTimeout(() => {
+                                $('#username, #password').css('border-color', '#e3e6f0');
+                            }, 3000);
+                        }
+                    },
+                    error: function() {
+                        mostrarAlerta('Error de conexión. Intente nuevamente.', 'error');
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                    }
+                });
+            });
+
+            function mostrarAlerta(mensaje, tipo) {
+                alertMessage.style.display = 'flex';
+                alertMessage.className = 'alert-message alert-' + tipo;
+                alertText.textContent = mensaje;
+                setTimeout(() => {
+                    alertMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            $('#username, #password').on('input', function() {
+                $(this).css('border-color', '#e3e6f0');
+            });
+
+            const forgotPassword = document.getElementById('forgotPassword');
+            forgotPassword.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Recuperar Contraseña',
+                    html: `
+                        <p style="color: #6c757d;">Ingrese su correo electrónico para recibir instrucciones:</p>
+                        <div class="input-group mt-3" style="border: 2px solid #e3e6f0; border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text" style="background: #f8f9fc; border: none; color: #00CCFF;">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="resetEmail" class="form-control" placeholder="Ingrese su correo" style="border: none; padding: 12px 15px;">
+                        </div>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'Enviar',
+                    cancelButtonText: 'Cancelar',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0099CC',
+                    cancelButtonColor: '#858796',
+                    preConfirm: () => {
+                        const email = document.getElementById('resetEmail').value.trim();
+                        if (!email) {
+                            Swal.showValidationMessage('Por favor, ingrese un correo electrónico');
+                            return false;
+                        }
+                        if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+                            Swal.showValidationMessage('Por favor, ingrese un correo válido');
+                            return false;
+                        }
+                        return email;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        Swal.fire({
+                            title: 'Correo Enviado',
+                            text: 'Se han enviado instrucciones a ' + result.value,
+                            icon: 'success',
+                            confirmButtonColor: '#0099CC'
+                        });
+                    }
+                });
+            });
+
+            const registerLink = document.getElementById('registerLink');
+            registerLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Solicitar Acceso',
+                    html: `
+                        <form id="registerForm">
+                            <div class="mb-3 text-start">
+                                <label class="form-label">Nombre completo</label>
+                                <input type="text" class="form-control" placeholder="Ingrese su nombre completo" required>
+                            </div>
+                            <div class="mb-3 text-start">
+                                <label class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" placeholder="Ingrese su correo" required>
+                            </div>
+                            <div class="mb-3 text-start">
+                                <label class="form-label">Rol / Puesto</label>
+                                <select class="form-select" required>
+                                    <option value="">Seleccione su rol</option>
+                                    <option value="medico">Médico</option>
+                                    <option value="enfermero">Enfermero/a</option>
+                                    <option value="administrativo">Personal Administrativo</option>
+                                    <option value="director">Director</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                        </form>
+                    `,
+                    icon: 'question',
+                    confirmButtonText: 'Solicitar Acceso',
+                    cancelButtonText: 'Cancelar',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0099CC',
+                    cancelButtonColor: '#858796'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Solicitud Enviada',
+                            text: 'Su solicitud ha sido enviada. Recibirá una respuesta en su correo electrónico.',
+                            icon: 'success',
+                            confirmButtonColor: '#0099CC'
+                        });
+                    }
+                });
+            });
+
+            $('#password, #username').on('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    $('#loginForm').submit();
+                }
+            });
+
+            $('.login-container').css('opacity', '0');
+            setTimeout(() => {
+                $('.login-container').css('opacity', '1');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

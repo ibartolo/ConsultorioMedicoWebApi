@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "Pacientes";
+}
+<h2 class="page-title"><i class="fas fa-user-injured me-2" style="color: var(--primary);"></i>Pacientes</h2>
+
+<div class="card-custom">
+    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span><i class="fas fa-users"></i> Lista de Pacientes</span>
+        <a href="@Url.Action("Nuevo", "Paciente")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nuevo Paciente</a>
+    </div>
+
+    <div class="table-container">
+        <table id="pacientesTable" class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre Completo</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Sexo</th>
+                    <th>Edad</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var editUrl = '@Url.Action("Nuevo", "Paciente")';
+            var listUrl = '@Url.Action("ConsultarTodosPacientes", "Paciente")';
+
+            $('#pacientesTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 10,
+                responsive: true,
+                columns: [
+                    { data: 'Id' },
+                    { data: 'NombreCompleto' },
+                    { data: 'TelefonoCel' },
+                    { data: 'Email' },
+                    { data: 'Sexo' },
+                    { data: 'Edad' },
+                    {
+                        data: 'Estatus',
+                        render: function (data) {
+                            return data
+                                ? '<span class="badge-status badge-active">Activo</span>'
+                                : '<span class="badge-status badge-inactive">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data) {
+                            return '<a href="' + editUrl + '?id=' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>';
+                        }
+                    }
+                ],
+                ajax: {
+                    url: listUrl,
+                    dataSrc: function (json) {
+                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
+                        return result.IsSuccess ? result.Response : [];
+                    }
+                }
+            });
+        });
+    </script>
+}
