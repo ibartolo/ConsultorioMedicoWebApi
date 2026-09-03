@@ -1,72 +1,174 @@
 ﻿@{
     ViewBag.Title = "Citas";
 }
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
 <h2 class="page-title"><i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>Citas</h2>
 
 <div class="card-custom">
     <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-        <span><i class="fas fa-calendar-check"></i> Lista de Citas</span>
-        <a href="@Url.Action("Nuevo", "Cita")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nueva Cita</a>
+        <span><i class="fas fa-calendar-check"></i> Calendario de Citas</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="nuevaCita()"><i class="fas fa-plus me-1"></i> Nueva Cita</button>
     </div>
+    <div id="calendarioCitas"></div>
+</div>
 
-    <div class="table-container">
-        <table id="citasTable" class="table table-hover table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Paciente</th>
-                    <th>Tratamiento</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Estatus</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+<!-- Modal Cita -->
+<div class="modal fade" id="modalCita" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="citaForm" autocomplete="off" novalidate>
+                    <input type="hidden" name="Id" id="Id" />
+                    <input type="hidden" name="Estatus" id="Estatus" value="true" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Paciente <span class="required">*</span></label>
+                            <select class="form-select" name="PacienteID" id="PacienteID">
+                                <option value="">Seleccione...</option>
+                                @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                                {
+                                    <option value="@p.Id">@p.NombreCompleto</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tratamiento</label>
+                            <select class="form-select" name="TratamientoID" id="TratamientoID">
+                                <option value="">Seleccione...</option>
+                                @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y Hora <span class="required">*</span></label>
+                            <input type="datetime-local" class="form-control" name="FechaCita" id="FechaCita">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" name="Estado" id="Estado">
+                                <option value="">Seleccione...</option>
+                                <option value="1">Pendiente</option>
+                                <option value="2">Confirmada</option>
+                                <option value="3">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label class="form-label">Comentarios</label>
+                            <input type="text" class="form-control" name="Comentarios" id="Comentarios" placeholder="Comentarios de la cita">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarCita()" />
+            </div>
+        </div>
     </div>
 </div>
 
 @section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script>
-        $(document).ready(function () {
-            var editUrl = '@Url.Action("Nuevo", "Cita")';
-            var listUrl = '@Url.Action("ConsultarTodasCitas", "Cita")';
+        var listUrl = '@Url.Action("ConsultarTodasCitas", "Cita")';
+        var guardarUrl = '@Url.Action("GuardarOActualizarCita", "Cita")';
+        var calendar;
 
-            $('#citasTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-                pageLength: 10,
-                responsive: true,
-                columns: [
-                    { data: 'Id' },
-                    { data: 'PacienteNombre' },
-                    { data: 'TratamientoNombre' },
-                    { data: 'FechaCita' },
-                    { data: 'Estado' },
-                    {
-                        data: 'Estatus',
-                        render: function (data) {
-                            return data
-                                ? '<span class="badge-status badge-active">Activa</span>'
-                                : '<span class="badge-status badge-inactive">Inactiva</span>';
-                        }
-                    },
-                    {
-                        data: 'Id',
-                        orderable: false,
-                        render: function (data) {
-                            return '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>';
-                        }
+        $(document).ready(function () {
+            $('#citaForm').validate({
+                rules: { PacienteID: { required: true }, FechaCita: { required: true } },
+                messages: { PacienteID: { required: "Seleccione el paciente." }, FechaCita: { required: "La fecha de la cita es requerida." } },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (e) { $(e).addClass('is-invalid'); },
+                unhighlight: function (e) { $(e).removeClass('is-invalid'); }
+            });
+
+            var el = document.getElementById('calendarioCitas');
+            calendar = new FullCalendar.Calendar(el, {
+                locale: 'es',
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+                events: function (info, success, failure) {
+                    $.ajax({
+                        url: listUrl,
+                        dataType: 'json',
+                        success: function (response) {
+                            var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                            var events = [];
+                            if (r.IsSuccess && r.Response) {
+                                r.Response.forEach(function (c) {
+                                    events.push({
+                                        id: c.Id,
+                                        title: c.PacienteNombre + (c.TratamientoNombre ? ' - ' + c.TratamientoNombre : ''),
+                                        start: c.FechaCita,
+                                        extendedProps: c
+                                    });
+                                });
+                            }
+                            success(events);
+                        },
+                        error: failure
+                    });
+                },
+                eventClick: function (info) { abrirModalCita(info.event.extendedProps); }
+            });
+            calendar.render();
+        });
+
+        function nuevaCita() { abrirModalCita(null); }
+
+        function abrirModalCita(c) {
+            $('#citaForm')[0].reset();
+            $('#Id').val(c ? c.Id : 0);
+            $('#Estatus').val(c ? (c.Estatus ? 'true' : 'false') : 'true');
+            $('#PacienteID').val(c ? c.PacienteID : '');
+            $('#TratamientoID').val(c ? (c.TratamientoID || '') : '');
+            $('#FechaCita').val(c ? formatFechaLocal(c.FechaCita) : '');
+            $('#Estado').val(c ? (c.Estado || '') : '');
+            $('#Comentarios').val(c ? (c.Comentarios || '') : '');
+            $('#modalCita').modal('show');
+        }
+
+        function formatFechaLocal(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            var p = function (n) { return n < 10 ? '0' + n : n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+
+        function guardarCita() {
+            if (!$('#citaForm').valid()) return;
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#citaForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (r.IsSuccess) {
+                        Swal.fire({ title: '¡Cita guardada!', icon: 'success', timer: 1500, showConfirmButton: false }).then(function () {
+                            $('#modalCita').modal('hide');
+                            calendar.refetchEvents();
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: r.Message || 'No fue posible guardar la cita.', icon: 'error', confirmButtonColor: '#0099CC' });
                     }
-                ],
-                ajax: {
-                    url: listUrl,
-                    dataSrc: function (json) {
-                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
-                        return result.IsSuccess ? result.Response : [];
-                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
                 }
             });
-        });
+        }
     </script>
 }

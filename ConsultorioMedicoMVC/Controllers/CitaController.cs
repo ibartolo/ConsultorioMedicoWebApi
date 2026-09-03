@@ -19,9 +19,15 @@ namespace ConsultorioMedicoMVC.Controllers
         }
 
         #region Views
-        // GET: Cita (catálogo / listado)
-        public ActionResult Index()
+        // GET: Cita (calendario)
+        public async Task<ActionResult> Index()
         {
+            var pacientes = await _pacienteService.ConsultarTodosPacientes();
+            ViewBag.Pacientes = (pacientes.IsSuccess && pacientes.Response != null) ? pacientes.Response : new List<PacienteDTO>();
+
+            var tratamientos = await _citaService.ConsultarTratamientos();
+            ViewBag.Tratamientos = (tratamientos.IsSuccess && tratamientos.Response != null) ? tratamientos.Response : new List<Tratamiento>();
+
             return View();
         }
 

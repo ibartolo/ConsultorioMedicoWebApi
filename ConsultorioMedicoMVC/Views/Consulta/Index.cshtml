@@ -1,71 +1,202 @@
 ﻿@{
     ViewBag.Title = "Consultas";
 }
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
 <h2 class="page-title"><i class="fas fa-stethoscope me-2" style="color: var(--primary);"></i>Consultas</h2>
 
 <div class="card-custom">
     <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-        <span><i class="fas fa-stethoscope"></i> Lista de Consultas</span>
-        <a href="@Url.Action("Nuevo", "Consulta")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nueva Consulta</a>
+        <span><i class="fas fa-stethoscope"></i> Calendario de Consultas</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="nuevaConsulta()"><i class="fas fa-plus me-1"></i> Nueva Consulta</button>
     </div>
+    <div id="calendarioConsultas"></div>
+</div>
 
-    <div class="table-container">
-        <table id="consultasTable" class="table table-hover table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Paciente</th>
-                    <th>Tipo de Consulta</th>
-                    <th>Fecha</th>
-                    <th>Estatus</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+<!-- Modal Consulta -->
+<div class="modal fade" id="modalConsulta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Consulta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="consultaForm" autocomplete="off" novalidate>
+                    <input type="hidden" name="Id" id="Id" />
+                    <input type="hidden" name="Estatus" id="Estatus" value="true" />
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Paciente <span class="required">*</span></label>
+                            <select class="form-select" name="PacienteID" id="PacienteID">
+                                <option value="">Seleccione...</option>
+                                @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                                {
+                                    <option value="@p.Id">@p.NombreCompleto</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo de Consulta</label>
+                            <select class="form-select" name="TipoConsultaID" id="TipoConsultaID">
+                                <option value="">Seleccione...</option>
+                                @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.TipoConsulta>)ViewBag.TiposConsulta)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tratamiento</label>
+                            <select class="form-select" name="TratamientoID" id="TratamientoID">
+                                <option value="">Seleccione...</option>
+                                @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y Hora <span class="required">*</span></label>
+                            <input type="datetime-local" class="form-control" name="FechaConsulta" id="FechaConsulta">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Próxima Consulta</label>
+                            <input type="datetime-local" class="form-control" name="FechaProximaConsulta" id="FechaProximaConsulta">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" class="form-control" name="Descripcion" id="Descripcion" placeholder="Descripción de la consulta">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label class="form-label">Receta</label>
+                            <textarea class="form-control" name="DescripcionReceta" id="DescripcionReceta" rows="2" placeholder="Descripción de la receta..."></textarea>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label class="form-label">Comentarios</label>
+                            <textarea class="form-control" name="Comentarios" id="Comentarios" rows="2" placeholder="Comentarios de la consulta..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="btnReceta" class="btn btn-info me-auto" style="display:none;"><i class="fas fa-prescription me-1"></i> Ver Receta</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarConsulta()" />
+            </div>
+        </div>
     </div>
 </div>
 
 @section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script>
-        $(document).ready(function () {
-            var editUrl = '@Url.Action("Nuevo", "Consulta")';
-            var listUrl = '@Url.Action("ConsultarTodasConsultas", "Consulta")';
+        var listUrl = '@Url.Action("ConsultarTodasConsultas", "Consulta")';
+        var guardarUrl = '@Url.Action("GuardarOActualizarConsulta", "Consulta")';
+        var recetaUrl = '@Url.Action("Receta", "Consulta")';
+        var calendar;
 
-            $('#consultasTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-                pageLength: 10,
-                responsive: true,
-                columns: [
-                    { data: 'Id' },
-                    { data: 'PacienteNombre' },
-                    { data: 'TipoConsultaNombre' },
-                    { data: 'FechaConsulta' },
-                    {
-                        data: 'Estatus',
-                        render: function (data) {
-                            return data
-                                ? '<span class="badge-status badge-active">Activa</span>'
-                                : '<span class="badge-status badge-inactive">Inactiva</span>';
-                        }
-                    },
-                    {
-                        data: 'Id',
-                        orderable: false,
-                        render: function (data) {
-                            return '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a> ' +
-                                   '<a href="@Url.Action("Receta", "Consulta")/' + data + '" class="btn btn-sm btn-primary" title="Receta"><i class="fas fa-prescription"></i></a>';
-                        }
+        $(document).ready(function () {
+            $('#consultaForm').validate({
+                rules: { PacienteID: { required: true }, FechaConsulta: { required: true } },
+                messages: { PacienteID: { required: "Seleccione el paciente." }, FechaConsulta: { required: "La fecha de la consulta es requerida." } },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (e) { $(e).addClass('is-invalid'); },
+                unhighlight: function (e) { $(e).removeClass('is-invalid'); }
+            });
+
+            var el = document.getElementById('calendarioConsultas');
+            calendar = new FullCalendar.Calendar(el, {
+                locale: 'es',
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+                events: function (info, success, failure) {
+                    $.ajax({
+                        url: listUrl,
+                        dataType: 'json',
+                        success: function (response) {
+                            var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                            var events = [];
+                            if (r.IsSuccess && r.Response) {
+                                r.Response.forEach(function (c) {
+                                    events.push({
+                                        id: c.Id,
+                                        title: c.PacienteNombre + (c.TipoConsultaNombre ? ' - ' + c.TipoConsultaNombre : ''),
+                                        start: c.FechaConsulta,
+                                        extendedProps: c
+                                    });
+                                });
+                            }
+                            success(events);
+                        },
+                        error: failure
+                    });
+                },
+                eventClick: function (info) { abrirModalConsulta(info.event.extendedProps); }
+            });
+            calendar.render();
+        });
+
+        function nuevaConsulta() { abrirModalConsulta(null); }
+
+        function abrirModalConsulta(c) {
+            $('#consultaForm')[0].reset();
+            $('#Id').val(c ? c.Id : 0);
+            $('#Estatus').val(c ? (c.Estatus ? 'true' : 'false') : 'true');
+            $('#PacienteID').val(c ? c.PacienteID : '');
+            $('#TipoConsultaID').val(c ? (c.TipoConsultaID || '') : '');
+            $('#TratamientoID').val(c ? (c.TratamientoID || '') : '');
+            $('#FechaConsulta').val(c ? formatFechaLocal(c.FechaConsulta) : '');
+            $('#FechaProximaConsulta').val(c ? formatFechaLocal(c.FechaProximaConsulta) : '');
+            $('#Descripcion').val(c ? (c.Descripcion || '') : '');
+            $('#DescripcionReceta').val(c ? (c.DescripcionReceta || '') : '');
+            $('#Comentarios').val(c ? (c.Comentarios || '') : '');
+
+            if (c && c.Id > 0) {
+                $('#btnReceta').attr('href', recetaUrl + '/' + c.Id).show();
+            } else {
+                $('#btnReceta').hide();
+            }
+            $('#modalConsulta').modal('show');
+        }
+
+        function formatFechaLocal(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            var p = function (n) { return n < 10 ? '0' + n : n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+        }
+
+        function guardarConsulta() {
+            if (!$('#consultaForm').valid()) return;
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#consultaForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (r.IsSuccess) {
+                        Swal.fire({ title: '¡Consulta guardada!', icon: 'success', timer: 1500, showConfirmButton: false }).then(function () {
+                            $('#modalConsulta').modal('hide');
+                            calendar.refetchEvents();
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: r.Message || 'No fue posible guardar la consulta.', icon: 'error', confirmButtonColor: '#0099CC' });
                     }
-                ],
-                ajax: {
-                    url: listUrl,
-                    dataSrc: function (json) {
-                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
-                        return result.IsSuccess ? result.Response : [];
-                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
                 }
             });
-        });
+        }
     </script>
 }
