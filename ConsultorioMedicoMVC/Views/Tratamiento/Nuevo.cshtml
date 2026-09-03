@@ -1,0 +1,94 @@
+﻿@model ConsultorioMedicoEntities.Catalogos.Tratamiento
+@{
+    ViewBag.Title = Model.Id > 0 ? "Editar Tratamiento" : "Nuevo Tratamiento";
+}
+<h2 class="page-title"><i class="fas fa-pills me-2" style="color: var(--primary);"></i>@ViewBag.Title</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-pills"></i> Datos del Tratamiento</div>
+
+    <form id="tratamientoForm" method="post" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+        <input type="hidden" name="Estatus" id="Estatus" value="@(Model.Estatus ? "true" : "false")" />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="Nombre">Nombre <span class="required">*</span></label>
+                <input type="text" class="form-control" name="Nombre" id="Nombre" value="@Model.Nombre" placeholder="Ingrese el nombre">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Duracion">Duración (min)</label>
+                <input type="number" class="form-control" name="Duracion" id="Duracion" value="@Model.Duracion" placeholder="Duración en minutos">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-12">
+                <label class="form-label" for="Descripcion">Descripción</label>
+                <textarea class="form-control" name="Descripcion" id="Descripcion" rows="3" placeholder="Descripción del tratamiento...">@Model.Descripcion</textarea>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Index", "Tratamiento")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Guardar Tratamiento" class="btn btn-primary" onclick="guardarTratamiento()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var guardarUrl = '@Url.Action("GuardarOActualizarTratamiento", "Tratamiento")';
+        var indexUrl = '@Url.Action("Index", "Tratamiento")';
+
+        $(document).ready(function () {
+            $('#tratamientoForm').validate({
+                rules: {
+                    Nombre: { required: true }
+                },
+                messages: {
+                    Nombre: { required: "El nombre es requerido." }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+        });
+
+        function guardarTratamiento() {
+            if (!$('#tratamientoForm').valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#tratamientoForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Tratamiento guardado!',
+                            text: result.Message || 'El tratamiento se guardó correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#0099CC'
+                        }).then(function () {
+                            window.location.href = indexUrl;
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: result.Message || 'No fue posible guardar el tratamiento.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,140 @@
+﻿@model ConsultorioMedicoEntities.Catalogos.Consulta
+@{
+    ViewBag.Title = Model.Id > 0 ? "Editar Consulta" : "Nueva Consulta";
+}
+<h2 class="page-title"><i class="fas fa-stethoscope me-2" style="color: var(--primary);"></i>@ViewBag.Title</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-stethoscope"></i> Datos de la Consulta</div>
+
+    <form id="consultaForm" method="post" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+        <input type="hidden" name="Estatus" id="Estatus" value="@(Model.Estatus ? "true" : "false")" />
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label" for="PacienteID">Paciente <span class="required">*</span></label>
+                <select class="form-select" name="PacienteID" id="PacienteID">
+                    <option value="">Seleccione...</option>
+                    @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                    {
+                        <option value="@p.Id" @(Model.PacienteID == p.Id ? "selected" : "")>@p.NombreCompleto</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="TipoConsultaID">Tipo de Consulta</label>
+                <select class="form-select" name="TipoConsultaID" id="TipoConsultaID">
+                    <option value="">Seleccione...</option>
+                    @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.TipoConsulta>)ViewBag.TiposConsulta)
+                    {
+                        <option value="@t.Id" @(Model.TipoConsultaID == t.Id ? "selected" : "")>@t.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="TratamientoID">Tratamiento</label>
+                <select class="form-select" name="TratamientoID" id="TratamientoID">
+                    <option value="">Seleccione...</option>
+                    @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
+                    {
+                        <option value="@t.Id" @(Model.TratamientoID == t.Id ? "selected" : "")>@t.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="FechaConsulta">Fecha y Hora <span class="required">*</span></label>
+                <input type="datetime-local" class="form-control" name="FechaConsulta" id="FechaConsulta" value="@(Model.FechaConsulta.HasValue ? Model.FechaConsulta.Value.ToString("yyyy-MM-ddTHH:mm") : "")">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-6">
+                <label class="form-label" for="Descripcion">Descripción</label>
+                <input type="text" class="form-control" name="Descripcion" id="Descripcion" value="@Model.Descripcion" placeholder="Descripción de la consulta">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="FechaProximaConsulta">Próxima Consulta</label>
+                <input type="datetime-local" class="form-control" name="FechaProximaConsulta" id="FechaProximaConsulta" value="@(Model.FechaProximaConsulta.HasValue ? Model.FechaProximaConsulta.Value.ToString("yyyy-MM-ddTHH:mm") : "")">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-12">
+                <label class="form-label" for="DescripcionReceta">Receta</label>
+                <textarea class="form-control" name="DescripcionReceta" id="DescripcionReceta" rows="2" placeholder="Descripción de la receta...">@Model.DescripcionReceta</textarea>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-12">
+                <label class="form-label" for="Comentarios">Comentarios</label>
+                <textarea class="form-control" name="Comentarios" id="Comentarios" rows="2" placeholder="Comentarios de la consulta...">@Model.Comentarios</textarea>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Index", "Consulta")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Guardar Consulta" class="btn btn-primary" onclick="guardarConsulta()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var guardarUrl = '@Url.Action("GuardarOActualizarConsulta", "Consulta")';
+        var indexUrl = '@Url.Action("Index", "Consulta")';
+
+        $(document).ready(function () {
+            $('#consultaForm').validate({
+                rules: {
+                    PacienteID: { required: true },
+                    FechaConsulta: { required: true }
+                },
+                messages: {
+                    PacienteID: { required: "Seleccione el paciente." },
+                    FechaConsulta: { required: "La fecha de la consulta es requerida." }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+        });
+
+        function guardarConsulta() {
+            if (!$('#consultaForm').valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#consultaForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Consulta guardada!',
+                            text: result.Message || 'La consulta se guardó correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#0099CC'
+                        }).then(function () {
+                            window.location.href = indexUrl;
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: result.Message || 'No fue posible guardar la consulta.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,89 @@
+﻿@model ConsultorioMedicoEntities.Autenticacion.Usuario
+@{
+    ViewBag.Title = Model.Id > 0 ? "Editar Usuario" : "Nuevo Usuario";
+}
+<h2 class="page-title"><i class="fas fa-users me-2" style="color: var(--primary);"></i>@ViewBag.Title</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-user"></i> Datos del Usuario</div>
+
+    <form id="usuarioForm" method="post" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+        <input type="hidden" name="Estatus" id="Estatus" value="@(Model.Estatus ? "true" : "false")" />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="UserName">Usuario <span class="required">*</span></label>
+                <input type="text" class="form-control" name="UserName" id="UserName" value="@Model.UserName" placeholder="Ingrese el nombre de usuario">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Password">Contraseña <span class="required">*</span></label>
+                <input type="text" class="form-control" name="Password" id="Password" value="@Model.Password" placeholder="Contraseña (texto plano)">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Index", "Usuario")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Guardar Usuario" class="btn btn-primary" onclick="guardarUsuario()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var guardarUrl = '@Url.Action("GuardarOActualizarUsuario", "Usuario")';
+        var indexUrl = '@Url.Action("Index", "Usuario")';
+
+        $(document).ready(function () {
+            $('#usuarioForm').validate({
+                rules: {
+                    UserName: { required: true },
+                    Password: { required: true }
+                },
+                messages: {
+                    UserName: { required: "El nombre de usuario es requerido." },
+                    Password: { required: "La contraseña es requerida." }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+        });
+
+        function guardarUsuario() {
+            if (!$('#usuarioForm').valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#usuarioForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Usuario guardado!',
+                            text: result.Message || 'El usuario se guardó correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#0099CC'
+                        }).then(function () {
+                            window.location.href = indexUrl;
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: result.Message || 'No fue posible guardar el usuario.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

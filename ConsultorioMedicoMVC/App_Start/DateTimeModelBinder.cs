@@ -23,6 +23,10 @@ namespace ConsultorioMedicoMVC.App_Start
                 return parsed;
             if (DateTime.TryParseExact(attempted, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
                 return parsed;
+            if (DateTime.TryParseExact(attempted, "yyyy-MM-ddTHH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+                return parsed;
+            if (DateTime.TryParseExact(attempted, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+                return parsed;
             if (DateTime.TryParse(attempted, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
                 return parsed;
 

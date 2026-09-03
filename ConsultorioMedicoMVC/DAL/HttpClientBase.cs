@@ -83,5 +83,49 @@ namespace ConsultorioMedicoMVC.DAL
                 return new ModelResponse<TResponse> { IsSuccess = false, Message = "Error de conexión: " + ex.Message };
             }
         }
+
+        /// <summary>Envía contenido multipart/form-data (subida de archivos) y devuelve ModelResponse&lt;T&gt;.</summary>
+        public async Task<ModelResponse<T>> SendMultipartAsync<T>(string endpoint, MultipartFormDataContent content, string token = "")
+        {
+            SetParametersHttpCliente("application/json", token);
+            try
+            {
+                using (var response = await httpClient.PostAsync(endpoint, content))
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                        return JsonConvert.DeserializeObject<ModelResponse<T>>(json);
+
+                    return new ModelResponse<T>
+                    {
+                        IsSuccess = false,
+                        Message = string.Format("Error {0} ({1}) al consumir {2}.", (int)response.StatusCode, response.ReasonPhrase, endpoint)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ModelResponse<T> { IsSuccess = false, Message = "Error de conexión: " + ex.Message };
+            }
+        }
+
+        /// <summary>Descarga un archivo (bytes) desde la WebApi.</summary>
+        public async Task<byte[]> DescargarBytesAsync(string endpoint, string token = "")
+        {
+            SetParametersHttpCliente("application/json", token);
+            try
+            {
+                using (var response = await httpClient.GetAsync(endpoint))
+                {
+                    if (response.IsSuccessStatusCode)
+                        return await response.Content.ReadAsByteArrayAsync();
+                    return null;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

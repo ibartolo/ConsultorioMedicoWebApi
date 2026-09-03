@@ -1,0 +1,66 @@
+﻿@{
+    ViewBag.Title = "Usuarios";
+}
+<h2 class="page-title"><i class="fas fa-users me-2" style="color: var(--primary);"></i>Usuarios</h2>
+
+<div class="card-custom">
+    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span><i class="fas fa-users"></i> Lista de Usuarios</span>
+        <a href="@Url.Action("Nuevo", "Usuario")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nuevo Usuario</a>
+    </div>
+
+    <div class="table-container">
+        <table id="usuariosTable" class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var editUrl = '@Url.Action("Nuevo", "Usuario")';
+            var listUrl = '@Url.Action("ConsultarTodosUsuarios", "Usuario")';
+
+            $('#usuariosTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 10,
+                responsive: true,
+                columns: [
+                    { data: 'Id' },
+                    { data: 'UserName' },
+                    {
+                        data: 'Estatus',
+                        render: function (data) {
+                            return data
+                                ? '<span class="badge-status badge-active">Activo</span>'
+                                : '<span class="badge-status badge-inactive">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data) {
+                            return '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>';
+                        }
+                    }
+                ],
+                ajax: {
+                    url: listUrl,
+                    dataSrc: function (json) {
+                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
+                        return result.IsSuccess ? result.Response : [];
+                    }
+                }
+            });
+        });
+    </script>
+}

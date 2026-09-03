@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "Citas";
+}
+<h2 class="page-title"><i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>Citas</h2>
+
+<div class="card-custom">
+    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span><i class="fas fa-calendar-check"></i> Lista de Citas</span>
+        <a href="@Url.Action("Nuevo", "Cita")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nueva Cita</a>
+    </div>
+
+    <div class="table-container">
+        <table id="citasTable" class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Paciente</th>
+                    <th>Tratamiento</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var editUrl = '@Url.Action("Nuevo", "Cita")';
+            var listUrl = '@Url.Action("ConsultarTodasCitas", "Cita")';
+
+            $('#citasTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 10,
+                responsive: true,
+                columns: [
+                    { data: 'Id' },
+                    { data: 'PacienteNombre' },
+                    { data: 'TratamientoNombre' },
+                    { data: 'FechaCita' },
+                    { data: 'Estado' },
+                    {
+                        data: 'Estatus',
+                        render: function (data) {
+                            return data
+                                ? '<span class="badge-status badge-active">Activa</span>'
+                                : '<span class="badge-status badge-inactive">Inactiva</span>';
+                        }
+                    },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data) {
+                            return '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>';
+                        }
+                    }
+                ],
+                ajax: {
+                    url: listUrl,
+                    dataSrc: function (json) {
+                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
+                        return result.IsSuccess ? result.Response : [];
+                    }
+                }
+            });
+        });
+    </script>
+}

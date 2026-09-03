@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConsultorioMedicoEntities.Catalogos;
 using ConsultorioMedicoEntities.Seguridad;
@@ -25,6 +26,21 @@ namespace ConsultorioMedicoMVC.Services
         }
 
         public async Task<ModelResponse<Paciente>> GuardarOActualizarPaciente(Paciente paciente)
-            => await _httpClient.GuardarOActualizarPaciente(paciente);
+        {
+            // 1. Validación de negocio (mismas reglas que jQuery Validate)
+            var error = PacienteValidator.Validar(paciente);
+            if (error != null)
+                return new ModelResponse<Paciente> { IsSuccess = false, Message = error };
+
+            // 2. Lógica de alta (auditoría por defecto)
+            if (paciente.Id == 0)
+            {
+                paciente.Estatus = true;
+                paciente.FechaAlta = DateTime.Now;
+            }
+
+            // 3. Enviar a la WebApi
+            return await _httpClient.GuardarOActualizarPaciente(paciente);
+        }
     }
 }

@@ -44,35 +44,12 @@ namespace ConsultorioMedicoMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
-        // AJAX: guardar o actualizar (doble encode JSON)
+        // AJAX: guardar o actualizar (recibe la entidad Paciente por model binding)
         [HttpPost]
         public async Task<string> GuardarOActualizarPaciente(Paciente paciente)
         {
-            try
-            {
-                if (paciente.Id == 0)
-                {
-                    paciente.Estatus = true;
-                    paciente.FechaAlta = DateTime.Now;
-                }
-                else
-                {
-                    var existente = await _pacienteService.ObtenerPacientePorId(paciente.Id);
-                    if (existente != null) paciente.FechaAlta = existente.FechaAlta;
-                }
-
-                var response = await _pacienteService.GuardarOActualizarPaciente(paciente);
-                return JsonConvert.SerializeObject(response);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "GuardarOActualizarPaciente error");
-                return JsonConvert.SerializeObject(new ConsultorioMedicoEntities.Seguridad.ModelResponse
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
-            }
+            var response = await _pacienteService.GuardarOActualizarPaciente(paciente);
+            return JsonConvert.SerializeObject(response);
         }
         #endregion
     }

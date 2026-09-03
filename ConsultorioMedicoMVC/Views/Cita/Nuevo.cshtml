@@ -1,0 +1,121 @@
+﻿@model ConsultorioMedicoEntities.Catalogos.Cita
+@{
+    ViewBag.Title = Model.Id > 0 ? "Editar Cita" : "Nueva Cita";
+}
+<h2 class="page-title"><i class="fas fa-calendar-plus me-2" style="color: var(--primary);"></i>@ViewBag.Title</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-calendar-check"></i> Datos de la Cita</div>
+
+    <form id="citaForm" method="post" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+        <input type="hidden" name="Estatus" id="Estatus" value="@(Model.Estatus ? "true" : "false")" />
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="PacienteID">Paciente <span class="required">*</span></label>
+                <select class="form-select" name="PacienteID" id="PacienteID">
+                    <option value="">Seleccione...</option>
+                    @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                    {
+                        <option value="@p.Id" @(Model.PacienteID == p.Id ? "selected" : "")>@p.NombreCompleto</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="TratamientoID">Tratamiento</label>
+                <select class="form-select" name="TratamientoID" id="TratamientoID">
+                    <option value="">Seleccione...</option>
+                    @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
+                    {
+                        <option value="@t.Id" @(Model.TratamientoID == t.Id ? "selected" : "")>@t.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="FechaCita">Fecha y Hora <span class="required">*</span></label>
+                <input type="datetime-local" class="form-control" name="FechaCita" id="FechaCita" value="@(Model.FechaCita.HasValue ? Model.FechaCita.Value.ToString("yyyy-MM-ddTHH:mm") : "")">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-4">
+                <label class="form-label" for="Estado">Estado</label>
+                <select class="form-select" name="Estado" id="Estado">
+                    <option value="">Seleccione...</option>
+                    <option value="1" @(Model.Estado == 1 ? "selected" : "")>Pendiente</option>
+                    <option value="2" @(Model.Estado == 2 ? "selected" : "")>Confirmada</option>
+                    <option value="3" @(Model.Estado == 3 ? "selected" : "")>Cancelada</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label" for="Comentarios">Comentarios</label>
+                <input type="text" class="form-control" name="Comentarios" id="Comentarios" value="@Model.Comentarios" placeholder="Comentarios de la cita">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Index", "Cita")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Guardar Cita" class="btn btn-primary" onclick="guardarCita()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var guardarUrl = '@Url.Action("GuardarOActualizarCita", "Cita")';
+        var indexUrl = '@Url.Action("Index", "Cita")';
+
+        $(document).ready(function () {
+            $('#citaForm').validate({
+                rules: {
+                    PacienteID: { required: true },
+                    FechaCita: { required: true }
+                },
+                messages: {
+                    PacienteID: { required: "Seleccione el paciente." },
+                    FechaCita: { required: "La fecha de la cita es requerida." }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+        });
+
+        function guardarCita() {
+            if (!$('#citaForm').valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#citaForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Cita guardada!',
+                            text: result.Message || 'La cita se guardó correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#0099CC'
+                        }).then(function () {
+                            window.location.href = indexUrl;
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: result.Message || 'No fue posible guardar la cita.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

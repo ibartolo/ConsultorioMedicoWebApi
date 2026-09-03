@@ -1,0 +1,94 @@
+﻿@model ConsultorioMedicoEntities.Catalogos.Paquete
+@{
+    ViewBag.Title = Model.Id > 0 ? "Editar Paquete" : "Nuevo Paquete";
+}
+<h2 class="page-title"><i class="fas fa-box me-2" style="color: var(--primary);"></i>@ViewBag.Title</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-box"></i> Datos del Paquete</div>
+
+    <form id="paqueteForm" method="post" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+        <input type="hidden" name="Estatus" id="Estatus" value="@(Model.Estatus ? "true" : "false")" />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="Nombre">Nombre <span class="required">*</span></label>
+                <input type="text" class="form-control" name="Nombre" id="Nombre" value="@Model.Nombre" placeholder="Ingrese el nombre">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Costo">Costo</label>
+                <input type="number" class="form-control" name="Costo" id="Costo" value="@Model.Costo" placeholder="Costo del paquete">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-12">
+                <label class="form-label" for="Descripcion">Descripción</label>
+                <textarea class="form-control" name="Descripcion" id="Descripcion" rows="3" placeholder="Descripción del paquete...">@Model.Descripcion</textarea>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Index", "Paquete")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Guardar Paquete" class="btn btn-primary" onclick="guardarPaquete()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var guardarUrl = '@Url.Action("GuardarOActualizarPaquete", "Paquete")';
+        var indexUrl = '@Url.Action("Index", "Paquete")';
+
+        $(document).ready(function () {
+            $('#paqueteForm').validate({
+                rules: {
+                    Nombre: { required: true }
+                },
+                messages: {
+                    Nombre: { required: "El nombre es requerido." }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+        });
+
+        function guardarPaquete() {
+            if (!$('#paqueteForm').valid()) {
+                return;
+            }
+
+            $.ajax({
+                url: guardarUrl,
+                type: 'POST',
+                data: $('#paqueteForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (result.IsSuccess) {
+                        Swal.fire({
+                            title: '¡Paquete guardado!',
+                            text: result.Message || 'El paquete se guardó correctamente.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#0099CC'
+                        }).then(function () {
+                            window.location.href = indexUrl;
+                        });
+                    } else {
+                        Swal.fire({ title: 'Error', text: result.Message || 'No fue posible guardar el paquete.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

@@ -37,8 +37,8 @@ namespace ConsultorioMedicoMVC.DAL
             => await TokenAsync<Token>("token", new[]
             {
                 new KeyValuePair<string, string>("grant_type", "password"),
-                new KeyValuePair<string, string>("UserName", user),
-                new KeyValuePair<string, string>("Password", pass),
+                new KeyValuePair<string, string>("username", user),
+                new KeyValuePair<string, string>("password", pass),
                 new KeyValuePair<string, string>("client_id", ConfigurationManager.AppSettings["client_id"]),
                 new KeyValuePair<string, string>("client_secret", ConfigurationManager.AppSettings["client_secret"])
             }, "application/x-www-form-urlencoded");

@@ -71,16 +71,37 @@
     <Compile Include="Controllers\AutenticacionController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\PacienteController.cs" />
+    <Compile Include="Controllers\CitaController.cs" />
+    <Compile Include="Controllers\TratamientoController.cs" />
+    <Compile Include="Controllers\ConsultaController.cs" />
+    <Compile Include="Controllers\TipoConsultaController.cs" />
+    <Compile Include="Controllers\PaqueteController.cs" />
+    <Compile Include="Controllers\UsuarioController.cs" />
+    <Compile Include="Controllers\AnexoController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
     <Compile Include="DAL\DbWrapper.Paciente.cs" />
+    <Compile Include="DAL\DbWrapper.Cita.cs" />
+    <Compile Include="DAL\DbWrapper.Tratamiento.cs" />
+    <Compile Include="DAL\DbWrapper.Consulta.cs" />
+    <Compile Include="DAL\DbWrapper.TipoConsulta.cs" />
+    <Compile Include="DAL\DbWrapper.Paquete.cs" />
+    <Compile Include="DAL\DbWrapper.Usuario.cs" />
+    <Compile Include="DAL\DbWrapper.Anexo.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AutenticacionService.cs" />
     <Compile Include="Services\PacienteService.cs" />
+    <Compile Include="Services\CitaService.cs" />
+    <Compile Include="Services\TratamientoService.cs" />
+    <Compile Include="Services\ConsultaService.cs" />
+    <Compile Include="Services\TipoConsultaService.cs" />
+    <Compile Include="Services\PaqueteService.cs" />
+    <Compile Include="Services\UsuarioService.cs" />
+    <Compile Include="Services\AnexoService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

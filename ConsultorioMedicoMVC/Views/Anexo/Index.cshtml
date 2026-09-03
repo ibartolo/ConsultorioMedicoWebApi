@@ -1,0 +1,111 @@
+﻿@{
+    ViewBag.Title = "Anexos";
+}
+<h2 class="page-title"><i class="fas fa-paperclip me-2" style="color: var(--primary);"></i>Anexos</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-upload"></i> Subir Anexo</div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success">@TempData["Exito"]</div>
+    }
+    <form method="post" action="@Url.Action("Guardar", "Anexo")" enctype="multipart/form-data">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Paciente <span class="required">*</span></label>
+                <select name="pacienteId" class="form-select" required>
+                    <option value="">Seleccione...</option>
+                    @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                    {
+                        <option value="@p.Id">@p.NombreCompleto</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Comentarios</label>
+                <input type="text" name="comentarios" class="form-control" placeholder="Comentarios del anexo">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Archivo <span class="required">*</span></label>
+                <input type="file" name="archivo" class="form-control" required>
+            </div>
+        </div>
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-upload me-1"></i> Subir Anexo</button>
+        </div>
+    </form>
+</div>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-paperclip"></i> Lista de Anexos</div>
+    <div class="row mb-2">
+        <div class="col-md-4">
+            <label class="form-label">Filtrar por paciente</label>
+            <select id="filtroPaciente" class="form-select">
+                <option value="">Seleccione...</option>
+                @foreach (var p in (List<ConsultorioMedicoEntities.Catalogos.PacienteDTO>)ViewBag.Pacientes)
+                {
+                    <option value="@p.Id">@p.NombreCompleto</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="anexosTable" class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha</th>
+                    <th>Comentarios</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var tabla = $('#anexosTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 10,
+                responsive: true,
+                columns: [
+                    { data: 'Id' },
+                    { data: 'Nombre' },
+                    { data: 'Fecha' },
+                    { data: 'Comentarios' },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data) {
+                            return '<a href="@Url.Action("Descargar", "Anexo")/' + data + '" class="btn btn-sm btn-primary" title="Descargar"><i class="fas fa-download"></i></a>';
+                        }
+                    }
+                ],
+                ajax: {
+                    url: '@Url.Action("ConsultarAnexos", "Anexo")',
+                    data: function (d) {
+                        d.pacienteId = $('#filtroPaciente').val() || 0;
+                        return d;
+                    },
+                    dataSrc: function (json) {
+                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
+                        return result.IsSuccess ? result.Response : [];
+                    }
+                }
+            });
+
+            $('#filtroPaciente').on('change', function () {
+                tabla.ajax.reload();
+            });
+        });
+    </script>
+}

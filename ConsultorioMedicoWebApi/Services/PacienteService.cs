@@ -47,8 +47,17 @@ namespace ConsultorioMedicoWebApi.Services
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(paciente.Nombre))
-                    return new ModelResponse<Paciente> { IsSuccess = false, Message = "El nombre es requerido." };
+                // 1. Validación de negocio (garantiza integridad, también para app móvil)
+                var error = PacienteValidator.Validar(paciente);
+                if (error != null)
+                    return new ModelResponse<Paciente> { IsSuccess = false, Message = error };
+
+                // 2. Lógica de alta (fallback para clientes que no envían auditoría)
+                if (paciente.Id == 0)
+                {
+                    paciente.Estatus = true;
+                    if (paciente.FechaAlta == null) paciente.FechaAlta = DateTime.Now;
+                }
 
                 return _dbWrapper.GuardarOActualizarPaciente(paciente, usuario);
             }

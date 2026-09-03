@@ -37,6 +37,13 @@ namespace ConsultorioMedicoWebApi.App_Start
 
     public class SimpleAuthorizationServerProvider : OAuthAuthorizationServerProvider
     {
+        public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        {
+            // Permite todos los clientes (client_id/client_secret no se validan por ahora)
+            context.Validated();
+            return Task.FromResult<object>(null);
+        }
+
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             var user = new DbWrapper().AutenticarUsuario(context.UserName, context.Password);
