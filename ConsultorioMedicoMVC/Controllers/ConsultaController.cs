@@ -58,10 +58,10 @@ namespace ConsultorioMedicoMVC.Controllers
             return View(new Consulta());
         }
 
-        // GET: Consulta/Receta/{consultaId} (receta imprimible)
-        public async Task<ActionResult> Receta(long consultaId)
+        // GET: Consulta/Receta/{id} (receta imprimible)
+        public async Task<ActionResult> Receta(long id)
         {
-            var receta = await _consultaService.ObtenerRecetaPorConsulta(consultaId);
+            var receta = await _consultaService.ObtenerRecetaPorConsulta(id);
             if (receta == null || !receta.IsSuccess || receta.Response == null)
                 return RedirectToAction("Index");
             return View(receta.Response);
