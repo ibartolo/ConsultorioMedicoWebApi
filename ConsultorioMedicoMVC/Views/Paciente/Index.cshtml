@@ -6,7 +6,7 @@
 <div class="card-custom">
     <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
         <span><i class="fas fa-users"></i> Lista de Pacientes</span>
-        <a href="@Url.Action("Nuevo", "Paciente")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nuevo Paciente</a>
+        <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalPaciente(0, null)"><i class="fas fa-plus me-1"></i> Nuevo Paciente</button>
     </div>
 
     <div class="table-container">
@@ -28,13 +28,69 @@
     </div>
 </div>
 
+<!-- Modal Paciente -->
+<div class="modal fade" id="modalPaciente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Paciente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @Html.Partial("_Formulario", new ConsultorioMedicoEntities.Catalogos.Paciente())
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarPacienteModal()" />
+            </div>
+        </div>
+    </div>
+</div>
+
 @section scripts {
     <script>
-        $(document).ready(function () {
-            var editUrl = '@Url.Action("Nuevo", "Paciente")';
-            var listUrl = '@Url.Action("ConsultarTodosPacientes", "Paciente")';
+        var consultarUrl = '@Url.Action("ConsultarPacientePorId", "Paciente")';
+        var guardarUrl = '@Url.Action("GuardarOActualizarPaciente", "Paciente")';
+        var eliminarUrl = '@Url.Action("EliminarPaciente", "Paciente")';
+        var expedienteUrl = '@Url.Action("Expediente", "Historial")';
+        var listUrl = '@Url.Action("ConsultarTodosPacientes", "Paciente")';
 
-            $('#pacientesTable').DataTable({
+        var tablaPacientes = null;
+        var filaActual = null;
+
+        $(document).ready(function () {
+            $.validator.addMethod("telefono10", function (value, element) {
+                return this.optional(element) || /^\d{10}$/.test(value);
+            }, "El teléfono debe tener exactamente 10 dígitos.");
+
+            $('#pacienteForm').validate({
+                rules: {
+                    Nombre: { required: true },
+                    ApellidoPaterno: { required: true },
+                    Sexo: { required: true },
+                    TelefonoCel: { required: true, telefono10: true },
+                    Email: { email: true }
+                },
+                messages: {
+                    Nombre: { required: "El nombre es requerido." },
+                    ApellidoPaterno: { required: "El apellido paterno es requerido." },
+                    Sexo: { required: "Seleccione el sexo." },
+                    TelefonoCel: {
+                        required: "El teléfono es requerido.",
+                        telefono10: "El teléfono debe tener exactamente 10 dígitos."
+                    },
+                    Email: {
+                        required: "El correo es requerido.",
+                        email: "Ingrese un formato de correo válido."
+                    }
+                },
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+
+            tablaPacientes = $('#pacientesTable').DataTable({
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
                 pageLength: 10,
                 responsive: true,
@@ -57,7 +113,9 @@
                         data: 'Id',
                         orderable: false,
                         render: function (data) {
-                            return '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>';
+                            return '<a href="' + expedienteUrl + '/' + data + '" class="btn btn-sm btn-info me-1" title="Expediente Clínico"><i class="fas fa-folder-open"></i></a>' +
+                                   '<button type="button" class="btn btn-sm btn-warning btn-editar-paciente me-1" data-id="' + data + '" title="Editar"><i class="fas fa-edit"></i></button>' +
+                                   '<button type="button" class="btn btn-sm btn-danger btn-eliminar-paciente" data-id="' + data + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                         }
                     }
                 ],
@@ -69,6 +127,171 @@
                     }
                 }
             });
+
+            $('#pacientesTable').on('click', '.btn-editar-paciente', function () {
+                var id = $(this).data('id');
+                var tr = $(this).closest('tr');
+                abrirModalPaciente(id, tr);
+            });
+
+            $('#pacientesTable').on('click', '.btn-eliminar-paciente', function () {
+                var id = $(this).data('id');
+                var tr = $(this).closest('tr');
+                eliminarPaciente(id, tr);
+            });
         });
+
+        function formatoFecha(iso) {
+            if (!iso) return '';
+            return iso.substring(0, 10);
+        }
+
+        function formatoFechaHora(iso) {
+            if (!iso) return '';
+            return iso.replace('T', ' ').substring(0, 19);
+        }
+
+        function poblarForm(dto) {
+            if (!dto) return;
+            $('#Id').val(dto.Id);
+            $('#Estatus').val(dto.Estatus ? 'true' : 'false');
+            $('#Nombre').val(dto.Nombre || '');
+            $('#ApellidoPaterno').val(dto.ApellidoPaterno || '');
+            $('#ApellidoMaterno').val(dto.ApellidoMaterno || '');
+            $('#Sexo').val(dto.Sexo || '');
+            $('#FechaNacimiento').val(formatoFecha(dto.FechaNacimiento));
+            $('#TelefonoCel').val(dto.TelefonoCel || '');
+            $('#Email').val(dto.Email || '');
+            $('#Comentarios').val(dto.Comentarios || '');
+            $('#Edad').val(dto.Edad == null ? '' : dto.Edad);
+            $('#FechaAlta').val(formatoFechaHora(dto.FechaAlta));
+            $('#CreatedBY').val(dto.CreatedBY || '');
+            $('#CreatedDT').val(formatoFechaHora(dto.CreatedDT));
+            $('#UpdatedBY').val(dto.UpdatedBY || '');
+            $('#UpdatedDT').val(formatoFechaHora(dto.UpdatedDT));
+        }
+
+        function resetForm() {
+            $('#pacienteForm')[0].reset();
+            $('#Id').val(0);
+            $('#Estatus').val('true');
+        }
+
+        function abrirModalPaciente(id, tr) {
+            filaActual = tr || null;
+            $('#modalPaciente .modal-title').text(id > 0 ? 'Editar Paciente' : 'Nuevo Paciente');
+            if (id > 0) {
+                $.get(consultarUrl, { id: id }, function (response) {
+                    var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (r && r.IsSuccess && r.Response) {
+                        poblarForm(r.Response);
+                    } else {
+                        var dto = filaActual ? tablaPacientes.row(filaActual).data() : null;
+                        if (dto) { poblarForm(dto); } else { resetForm(); $('#Id').val(id); }
+                        Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible cargar el paciente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                    $('#modalPaciente').modal('show');
+                }).fail(function () {
+                    var dto = filaActual ? tablaPacientes.row(filaActual).data() : null;
+                    if (dto) { poblarForm(dto); } else { resetForm(); $('#Id').val(id); }
+                    $('#modalPaciente').modal('show');
+                });
+            } else {
+                resetForm();
+                $('#modalPaciente').modal('show');
+            }
+        }
+
+        function refrescarFila(id) {
+            $.get(consultarUrl, { id: id }, function (response) {
+                var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                var dto = (r && r.IsSuccess && r.Response) ? r.Response : null;
+                if (dto) {
+                    if (filaActual) {
+                        tablaPacientes.row(filaActual).data(dto).invalidate().draw(false);
+                    } else {
+                        tablaPacientes.row.add(dto).draw(false);
+                    }
+                } else {
+                    Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible recargar el paciente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            }).fail(function () {
+                Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+            });
+        }
+
+        function guardarPacienteModal() {
+            if (!$('#pacienteForm').valid()) {
+                return;
+            }
+            Swal.fire({
+                title: '¿Confirmás guardar los cambios?',
+                showCancelButton: true,
+                confirmButtonColor: '#0099CC',
+                cancelButtonColor: '#6C757D',
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) {
+                    return;
+                }
+                $.ajax({
+                    url: guardarUrl,
+                    type: 'POST',
+                    data: $('#pacienteForm').serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r && r.IsSuccess) {
+                            var nuevoId = (r.Response && r.Response.Id) ? r.Response.Id : 0;
+                            Swal.fire({ title: '¡Paciente guardado!', text: r.Message || 'El paciente se guardó correctamente.', icon: 'success', timer: 1500, showConfirmButton: false, confirmButtonColor: '#0099CC' }).then(function () {
+                                $('#modalPaciente').modal('hide');
+                                refrescarFila(nuevoId);
+                            });
+                        } else {
+                            Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible guardar el paciente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                });
+            });
+        }
+
+        function eliminarPaciente(id, tr) {
+            Swal.fire({
+                title: '¿Estás seguro que quieres eliminar a este paciente?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC3545',
+                cancelButtonColor: '#6C757D',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) {
+                    return;
+                }
+                $.ajax({
+                    url: eliminarUrl,
+                    type: 'POST',
+                    data: { id: id },
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r && r.IsSuccess) {
+                            Swal.fire({ title: '¡Paciente eliminado!', text: r.Message || 'El paciente se eliminó correctamente.', icon: 'success', timer: 1500, showConfirmButton: false, confirmButtonColor: '#DC3545' }).then(function () {
+                                tablaPacientes.row($(tr)).remove().draw(false);
+                            });
+                        } else {
+                            Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible eliminar el paciente.', icon: 'error', confirmButtonColor: '#DC3545' });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#DC3545' });
+                    }
+                });
+            });
+        }
     </script>
 }

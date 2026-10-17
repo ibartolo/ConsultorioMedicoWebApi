@@ -142,5 +142,34 @@ namespace ConsultorioMedicoWebApi.DAL
             }
             return mr;
         }
+
+        /// <summary>Baja lógica de un paciente (Estatus=0). SP nuevo: sp_nh_DeletePaciente.</summary>
+        public ModelResponse<bool> EliminarPaciente(int id, string usuario)
+        {
+            var mr = new ModelResponse<bool>();
+            try
+            {
+                var filas = ExecuteNonQuery("sp_nh_DeletePaciente", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Id", id) });
+
+                if (filas <= 0)
+                {
+                    mr.IsSuccess = false;
+                    mr.Message = "Paciente no encontrado.";
+                    return mr;
+                }
+
+                mr.IsSuccess = true;
+                mr.Response = true;
+                mr.Message = "Paciente eliminado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al eliminar paciente {Id} para {Usuario}", id, usuario);
+                mr.IsSuccess = false;
+                mr.Message = "Ocurrió un error al eliminar el paciente.";
+            }
+            return mr;
+        }
     }
 }

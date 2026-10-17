@@ -70,6 +70,7 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" id="btnEliminarCita" class="btn btn-danger me-auto" style="display:none;" onclick="eliminarCita()"><i class="fas fa-trash me-1"></i> Eliminar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarCita()" />
             </div>
@@ -82,6 +83,7 @@
     <script>
         var listUrl = '@Url.Action("ConsultarTodasCitas", "Cita")';
         var guardarUrl = '@Url.Action("GuardarOActualizarCita", "Cita")';
+        var eliminarUrl = '@Url.Action("EliminarCita", "Cita")';
         var calendar;
 
         $(document).ready(function () {
@@ -97,7 +99,9 @@
             var el = document.getElementById('calendarioCitas');
             calendar = new FullCalendar.Calendar(el, {
                 locale: 'es',
-                initialView: 'dayGridMonth',
+                initialView: 'timeGridWeek',
+                slotDuration: '00:15:00',
+                slotLabelInterval: '00:15:00',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
                 events: function (info, success, failure) {
                     $.ajax({
@@ -108,10 +112,14 @@
                             var events = [];
                             if (r.IsSuccess && r.Response) {
                                 r.Response.forEach(function (c) {
+                                    var col = colorEstado(c.Estado);
                                     events.push({
                                         id: c.Id,
                                         title: c.PacienteNombre + (c.TratamientoNombre ? ' - ' + c.TratamientoNombre : ''),
                                         start: c.FechaCita,
+                                        backgroundColor: col.backgroundColor,
+                                        borderColor: col.borderColor,
+                                        textColor: col.textColor,
                                         extendedProps: c
                                     });
                                 });
@@ -121,12 +129,33 @@
                         error: failure
                     });
                 },
-                eventClick: function (info) { abrirModalCita(info.event.extendedProps); }
+                eventClick: function (info) { abrirModalCita(info.event.extendedProps); },
+                eventDidMount: function (info) {
+                    var p = info.event.extendedProps;
+                    var t = 'Estado: ' + nombreEstado(p.Estado);
+                    if (p.PacienteNombre) t += ' - ' + p.PacienteNombre;
+                    if (p.TratamientoNombre) t += ' - ' + p.TratamientoNombre;
+                    info.el.title = t;
+                }
             });
             calendar.render();
         });
 
         function nuevaCita() { abrirModalCita(null); }
+
+        function colorEstado(e) {
+            if (e === 1) return { backgroundColor: '#FD7E14', borderColor: '#FD7E14', textColor: '#FFFFFF' };
+            if (e === 2) return { backgroundColor: '#198754', borderColor: '#198754', textColor: '#FFFFFF' };
+            if (e === 3) return { backgroundColor: '#DC3545', borderColor: '#DC3545', textColor: '#FFFFFF' };
+            return { backgroundColor: '#6C757D', borderColor: '#6C757D', textColor: '#FFFFFF' };
+        }
+
+        function nombreEstado(e) {
+            if (e === 1) return 'Pendiente';
+            if (e === 2) return 'Confirmada';
+            if (e === 3) return 'Cancelada';
+            return 'Sin estado';
+        }
 
         function abrirModalCita(c) {
             $('#citaForm')[0].reset();
@@ -137,6 +166,12 @@
             $('#FechaCita').val(c ? formatFechaLocal(c.FechaCita) : '');
             $('#Estado').val(c ? (c.Estado || '') : '');
             $('#Comentarios').val(c ? (c.Comentarios || '') : '');
+
+            if (c && c.Id > 0) {
+                $('#btnEliminarCita').show();
+            } else {
+                $('#btnEliminarCita').hide();
+            }
             $('#modalCita').modal('show');
         }
 
@@ -168,6 +203,40 @@
                 error: function () {
                     Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
                 }
+            });
+        }
+
+        function eliminarCita() {
+            Swal.fire({
+                title: '¿Estás seguro que quieres eliminar esta cita?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC3545',
+                cancelButtonColor: '#6C757D',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                $.ajax({
+                    url: eliminarUrl,
+                    type: 'POST',
+                    data: { id: $('#Id').val() },
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r.IsSuccess) {
+                            Swal.fire({ title: '¡Cita eliminada!', icon: 'success', timer: 1500, showConfirmButton: false }).then(function () {
+                                $('#modalCita').modal('hide');
+                                calendar.refetchEvents();
+                            });
+                        } else {
+                            Swal.fire({ title: 'Error', text: r.Message || 'No fue posible eliminar la cita.', icon: 'error', confirmButtonColor: '#DC3545' });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#DC3545' });
+                    }
+                });
             });
         }
     </script>

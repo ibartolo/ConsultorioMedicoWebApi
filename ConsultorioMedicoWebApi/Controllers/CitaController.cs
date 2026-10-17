@@ -29,6 +29,10 @@ namespace ConsultorioMedicoWebApi.Controllers
         public ModelResponse<Cita> GuardarOActualizarCita(Cita cita)
             => _citaService.GuardarOActualizarCita(cita, User.Identity.Name);
 
+        [HttpPost, Route("Eliminar/{id:int}")]
+        public ModelResponse<bool> EliminarCita(int id)
+            => _citaService.EliminarCita(id, User.Identity.Name);
+
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId)
             => _citaService.ObtenerCitasPorPaciente(pacienteId, User.Identity.Name);

@@ -2,11 +2,24 @@
 schema: spec-driven
 
 context: |
-  Tech stack: .NET 10 (ASP.NET Core Web API), C#. Data access: ADO.NET only (SqlConnection/SqlCommand/SqlDataReader) — NO ORM (no EF Core, no Dapper). SQL Server 2019+. Logging: Serilog. API docs: Scalar (not Swagger).
-  Architecture: Layered per domain (Dominio / Aplicacion / Infraestructura / Mensajes / Pruebas) + Common.* (Data/Http/Helpers/Mensajes) + WebApi. Solution DESI.ConsultorioMedico.sln, namespaces DESI.ConsultorioMedico.*. Active domain: Paciente; future: Usuario, Cita, Consulta, Tratamiento, Anexo.
-  Patterns: Fluent Interface (Set returns this), Factory Method (private ctor + Create), Repository, DI, DTO, Static Mapper (Mapp). JWT auth, rate limiting (100 req/min), open CORS, logical deletes (Estatus).
-  Testing: xUnit (planned, one project per domain) — no test project exists yet (greenfield repo, only specs committed).
-  Style: Spanish naming for endpoints/classes/messages; DataAnnotations validation; error handling at Controller level (no global error middleware); ModelResponse<T> as public response envelope.
+  Solución DESI.ConsultorioMedico.sln (raíz del repo) — migración de la app WinForms
+  "Consultorio Médico" (NHibernate) a MVC 5 + WebApi sobre .NET Framework 4.8, "tal como funciona".
+  Tech stack: .NET Framework 4.8, C# 7.3 (.cs) / Razor C# 5 (.cshtml).
+  3 proyectos: ConsultorioMedicoEntities (entidades/DTOs/validadores/ModelResponse),
+  ConsultorioMedicoWebApi (ASP.NET WebApi 5.3 + OWIN OAuth 2 password grant, ADO.NET + SPs),
+  ConsultorioMedicoMVC (ASP.NET MVC 5.3, Bootstrap 5 + jQuery + DataTables + SweetAlert2).
+  Data access: ADO.NET SOLO (SqlConnection/SqlCommand en DbWrapper.* parciales) vía SPs —
+  NO ORM. NHibernate muere → todo por SPs; SP nuevo con prefijo sp_nh_.
+  Frontend flujo: Vista (jQuery Validate + hidden inputs + serialize) → Controller MVC →
+  Servicio MVC → HttpClientConnection (token OAuth en cookie) → Controller WebApi →
+  Servicio WebApi → DbWrapper → BD productiva DB_9C7990_Consultorio (Smarterasp, no borrar nada).
+  Convención obligatoria: PLAYBOOK.md en la raíz (checklist de módulos, patrón de formularios,
+  validación en capas, gotchas). Referencia de arquitectura: ServiceDeskDESI.
+  Respuesta: ModelResponse<T> (IsSuccess/Message/Response), HTTP 200 siempre, mensajes en español.
+  Id = int. WebApi serializa camelCase; MVC PascalCase. Autenticación: OAuth2 bearer en cookie
+  FormsAuthentication. Idioma de specs/artefactos: español. Módulos migrados: login, Paciente,
+  Cita (FullCalendar), Consulta, Tratamiento, Paquete, Usuario, Anexo, Historial (parcial).
+  Testing: no hay runner (sin xUnit); verificación = MSBuild + aspnet_compiler.
 
 strict_tdd: false
 
@@ -25,24 +38,24 @@ rules:
     - Use hierarchical numbering (1.1, 1.2, etc.)
     - Keep tasks small enough to complete in one session
   apply:
-    - Follow existing code patterns and conventions
-    - Load relevant coding skills for the project stack
-    - Use ADO.NET only for data access (no ORM)
+    - Follow existing code patterns and conventions (PLAYBOOK.md)
+    - Load relevant coding skills for the project stack (netframework-mvc-webapi)
+    - Use ADO.NET only for data access via SPs (no ORM)
   verify:
-    - Run tests if test infrastructure exists
+    - Run MSBuild + aspnet_compiler as build verification
     - Compare implementation against every spec scenario
   archive:
     - Warn before merging destructive deltas (large removals)
 
 testing:
   strict_tdd: false
-  detected: "2026-08-23"
-  note: "No test runner present in code yet (greenfield). xUnit documented in project specs as the intended framework. Set strict_tdd: true once the first xUnit project exists."
+  detected: "2026-09-04"
+  note: "No test runner present (MVC+WebApi .NET Framework 4.8, sin xUnit). Verificación = compilar solución con MSBuild + precompilar vistas con aspnet_compiler (ver PLAYBOOK.md §9)."
   test_runner:
-    command: "dotnet test"
-    framework: "xUnit (planned — no test project exists yet)"
+    command: "& 'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe' 'DESI.ConsultorioMedico.sln' /t:Build /p:Configuration=Debug"
+    framework: "none"
   layers:
-    unit: "planned (xUnit, one project per domain)"
+    unit: "not installed"
     integration: "not installed"
     e2e: "not installed"
   coverage:
@@ -51,4 +64,4 @@ testing:
   quality:
     linter: "none"
     formatter: "none"
-    type_checker: "dotnet build (compile-time)"
+    type_checker: "MSBuild (compile-time) + aspnet_compiler (Razor views)"

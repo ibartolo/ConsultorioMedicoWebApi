@@ -78,6 +78,7 @@
     <Compile Include="Controllers\PaqueteController.cs" />
     <Compile Include="Controllers\UsuarioController.cs" />
     <Compile Include="Controllers\AnexoController.cs" />
+    <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="DAL\DbWrapper.Paquete.cs" />
     <Compile Include="DAL\DbWrapper.Usuario.cs" />
     <Compile Include="DAL\DbWrapper.Anexo.cs" />
+    <Compile Include="DAL\DbWrapper.Historial.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -102,6 +104,7 @@
     <Compile Include="Services\PaqueteService.cs" />
     <Compile Include="Services\UsuarioService.cs" />
     <Compile Include="Services\AnexoService.cs" />
+    <Compile Include="Services\HistorialService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

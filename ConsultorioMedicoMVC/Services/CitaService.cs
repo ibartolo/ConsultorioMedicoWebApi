@@ -41,6 +41,9 @@ namespace ConsultorioMedicoMVC.Services
             return await _httpClient.GuardarOActualizarCita(cita);
         }
 
+        public async Task<ModelResponse<bool>> EliminarCita(long id)
+            => await _httpClient.EliminarCita(id);
+
         public async Task<ModelResponse<List<CitaDTO>>> ConsultarCitasPorPaciente(long pacienteId)
             => await _httpClient.ObtenerCitasPorPaciente(pacienteId);
     }

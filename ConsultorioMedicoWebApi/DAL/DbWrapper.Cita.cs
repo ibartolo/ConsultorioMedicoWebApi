@@ -129,6 +129,35 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
+        /// <summary>Baja lógica de una cita (Estatus=0). SP nuevo: sp_nh_DeleteCita.</summary>
+        public ModelResponse<bool> EliminarCita(int id, string usuario)
+        {
+            var mr = new ModelResponse<bool>();
+            try
+            {
+                var filas = ExecuteNonQuery("sp_nh_DeleteCita", CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@Id", id) });
+
+                if (filas <= 0)
+                {
+                    mr.IsSuccess = false;
+                    mr.Message = "Cita no encontrada.";
+                    return mr;
+                }
+
+                mr.IsSuccess = true;
+                mr.Response = true;
+                mr.Message = "Cita eliminada correctamente.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al eliminar cita {Id} para {Usuario}", id, usuario);
+                mr.IsSuccess = false;
+                mr.Message = "Ocurrió un error al eliminar la cita.";
+            }
+            return mr;
+        }
+
         /// <summary>Lista citas por paciente. Reutiliza el SP existente GetAllCitaByPacienteID.</summary>
         public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario)
         {

@@ -116,7 +116,9 @@
             var el = document.getElementById('calendarioConsultas');
             calendar = new FullCalendar.Calendar(el, {
                 locale: 'es',
-                initialView: 'dayGridMonth',
+                initialView: 'timeGridWeek',
+                slotDuration: '00:15:00',
+                slotLabelInterval: '00:15:00',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
                 events: function (info, success, failure) {
                     $.ajax({

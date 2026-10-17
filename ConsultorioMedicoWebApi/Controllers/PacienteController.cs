@@ -28,5 +28,9 @@ namespace ConsultorioMedicoWebApi.Controllers
         [HttpPost, Route("Guardar")]
         public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente paciente)
             => _pacienteService.GuardarOActualizarPaciente(paciente, User.Identity.Name);
+
+        [HttpPost, Route("Eliminar/{id:int}")]
+        public ModelResponse<bool> EliminarPaciente(int id)
+            => _pacienteService.EliminarPaciente(id, User.Identity.Name);
     }
 }

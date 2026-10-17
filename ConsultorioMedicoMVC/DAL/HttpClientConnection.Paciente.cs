@@ -16,5 +16,8 @@ namespace ConsultorioMedicoMVC.DAL
 
         public async Task<ModelResponse<Paciente>> GuardarOActualizarPaciente(Paciente paciente)
             => await RequestAsync<Paciente>("api/Paciente/Guardar", HttpMethod.Post, paciente, token.Token.access_token);
+
+        public async Task<ModelResponse<bool>> EliminarPaciente(long id)
+            => await RequestAsync<bool>("api/Paciente/Eliminar/" + id, HttpMethod.Post, null, token.Token.access_token);
     }
 }

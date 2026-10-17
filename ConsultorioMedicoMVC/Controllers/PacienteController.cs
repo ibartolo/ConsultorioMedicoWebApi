@@ -51,6 +51,21 @@ namespace ConsultorioMedicoMVC.Controllers
             var response = await _pacienteService.GuardarOActualizarPaciente(paciente);
             return JsonConvert.SerializeObject(response);
         }
+
+        // AJAX: consultar paciente por Id para poblar el modal (devuelve PacienteDTO con NombreCompleto)
+        public async Task<string> ConsultarPacientePorId(long id)
+        {
+            var response = await _pacienteService.ConsultarPacientePorId(id);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        // AJAX: baja lógica de paciente (Estatus=0)
+        [HttpPost]
+        public async Task<string> EliminarPaciente(long id)
+        {
+            var response = await _pacienteService.EliminarPaciente(id);
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
     }
 }

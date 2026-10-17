@@ -67,5 +67,21 @@ namespace ConsultorioMedicoWebApi.Services
                 return new ModelResponse<Paciente> { IsSuccess = false, Message = "Ocurrió un error al guardar el paciente." };
             }
         }
+
+        public ModelResponse<bool> EliminarPaciente(int id, string usuario)
+        {
+            try
+            {
+                if (id <= 0)
+                    return new ModelResponse<bool> { IsSuccess = false, Message = "El identificador del paciente es inválido." };
+
+                return _dbWrapper.EliminarPaciente(id, usuario);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en EliminarPaciente");
+                return new ModelResponse<bool> { IsSuccess = false, Message = "Ocurrió un error al eliminar el paciente." };
+            }
+        }
     }
 }

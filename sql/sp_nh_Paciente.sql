@@ -1,4 +1,4 @@
-/*
+﻿/*
     =====================================================================
     SPs NUEVOS para el módulo Paciente (migración WinForms -> WebApi)
     =====================================================================
@@ -9,6 +9,7 @@
     Listado  -> reutiliza el SP EXISTENTE dbo.GetAllPacienteByEstatus (ya lo usaba la WinForms).
     Detalle  -> sp_nh_GetPacienteById  (reemplaza PacienteBL.GetPacienteById, NHibernate Get<T>).
     Guardar  -> sp_nh_SavePaciente     (reemplaza PacienteBL.SavePaciente, NHibernate SaveOrUpdate).
+    Eliminar -> sp_nh_DeletePaciente   (baja lógica: UPDATE Estatus = 0).
 
     FIDELIDAD: sp_nh_SavePaciente NO escribe las columnas de auditoría (CreatedBY/DT, UpdatedBY/DT),
     igual que lo hacía NHibernate en la app actual (quedan NULL).
@@ -99,5 +100,26 @@ END
 ELSE
 BEGIN
     PRINT 'El SP dbo.sp_nh_SavePaciente ya existe. No se recrea.';
+END
+GO
+
+IF OBJECT_ID('dbo.sp_nh_DeletePaciente', 'P') IS NULL
+BEGIN
+    EXEC('
+    CREATE PROCEDURE [dbo].[sp_nh_DeletePaciente]
+    (
+        @Id INT
+    )
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+        UPDATE dbo.Paciente SET Estatus = 0 WHERE Id = @Id;
+    END
+    ');
+    PRINT 'SP dbo.sp_nh_DeletePaciente creado correctamente.';
+END
+ELSE
+BEGIN
+    PRINT 'El SP dbo.sp_nh_DeletePaciente ya existe. No se recrea.';
 END
 GO

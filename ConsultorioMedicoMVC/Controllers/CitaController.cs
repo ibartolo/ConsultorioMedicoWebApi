@@ -70,6 +70,14 @@ namespace ConsultorioMedicoMVC.Controllers
             var response = await _citaService.GuardarOActualizarCita(cita);
             return JsonConvert.SerializeObject(response);
         }
+
+        // AJAX: baja lógica de cita (Estatus=0)
+        [HttpPost]
+        public async Task<string> EliminarCita(long id)
+        {
+            var response = await _citaService.EliminarCita(id);
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
     }
 }

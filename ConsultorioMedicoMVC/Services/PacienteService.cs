@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ConsultorioMedicoEntities.Catalogos;
 using ConsultorioMedicoEntities.Seguridad;
@@ -42,5 +43,40 @@ namespace ConsultorioMedicoMVC.Services
             // 3. Enviar a la WebApi
             return await _httpClient.GuardarOActualizarPaciente(paciente);
         }
+
+        public async Task<ModelResponse<PacienteDTO>> ConsultarPacientePorId(long id)
+        {
+            var r = await _httpClient.ObtenerPacientePorId(id); // ModelResponse<Paciente>
+            if (!r.IsSuccess || r.Response == null)
+                return new ModelResponse<PacienteDTO> { IsSuccess = false, Message = r.Message ?? "Paciente no encontrado." };
+
+            var p = r.Response;
+            var dto = new PacienteDTO
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                ApellidoPaterno = p.ApellidoPaterno,
+                ApellidoMaterno = p.ApellidoMaterno,
+                Email = p.Email,
+                FechaAlta = p.FechaAlta,
+                TelefonoCel = p.TelefonoCel,
+                Comentarios = p.Comentarios,
+                Edad = p.Edad,
+                Sexo = p.Sexo,
+                FechaNacimiento = p.FechaNacimiento,
+                Estatus = p.Estatus,
+                CreatedBY = p.CreatedBY,
+                CreatedDT = p.CreatedDT,
+                UpdatedBY = p.UpdatedBY,
+                UpdatedDT = p.UpdatedDT
+            };
+            dto.NombreCompleto = string.Join(" ", new[] { p.Nombre, p.ApellidoPaterno, p.ApellidoMaterno }
+                .Where(x => !string.IsNullOrWhiteSpace(x))).Trim();
+
+            return new ModelResponse<PacienteDTO> { IsSuccess = true, Response = dto, Message = r.Message };
+        }
+
+        public async Task<ModelResponse<bool>> EliminarPaciente(long id)
+            => await _httpClient.EliminarPaciente(id);
     }
 }

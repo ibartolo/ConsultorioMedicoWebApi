@@ -65,6 +65,22 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
+        public ModelResponse<bool> EliminarCita(int id, string usuario)
+        {
+            try
+            {
+                if (id <= 0)
+                    return new ModelResponse<bool> { IsSuccess = false, Message = "El identificador de la cita es inválido." };
+
+                return _dbWrapper.EliminarCita(id, usuario);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error en EliminarCita");
+                return new ModelResponse<bool> { IsSuccess = false, Message = "Ocurrió un error al eliminar la cita." };
+            }
+        }
+
         public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario)
         {
             try

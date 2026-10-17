@@ -1,10 +1,11 @@
-/*
+﻿/*
     =====================================================================
     SPs NUEVOS para el módulo Cita (migración WinForms -> WebApi)
     =====================================================================
     - sp_nh_GetAllCitas : listado de citas activas (con nombre de paciente y tratamiento).
     - sp_nh_GetCitaById : detalle de cita.
     - sp_nh_SaveCita    : upsert (reemplaza el SaveOrUpdate de NHibernate).
+    - sp_nh_DeleteCita  : baja lógica de una cita (Estatus=0).
     Solo CREATE, sin modificar/eliminar objetos existentes.
     =====================================================================
 */
@@ -105,5 +106,26 @@ END
 ELSE
 BEGIN
     PRINT 'El SP dbo.sp_nh_SaveCita ya existe. No se recrea.';
+END
+GO
+
+IF OBJECT_ID('dbo.sp_nh_DeleteCita', 'P') IS NULL
+BEGIN
+    EXEC('
+    CREATE PROCEDURE [dbo].[sp_nh_DeleteCita]
+    (
+        @Id INT
+    )
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+        UPDATE dbo.Cita SET Estatus = 0 WHERE Id = @Id;
+    END
+    ');
+    PRINT 'SP dbo.sp_nh_DeleteCita creado correctamente.';
+END
+ELSE
+BEGIN
+    PRINT 'El SP dbo.sp_nh_DeleteCita ya existe. No se recrea.';
 END
 GO

@@ -51,6 +51,7 @@
     <Compile Include="Catalogos\Paquete.cs" />
     <Compile Include="Catalogos\PaqueteValidator.cs" />
     <Compile Include="Catalogos\RecetaDTO.cs" />
+    <Compile Include="Catalogos\TratamientoHistoricoDTO.cs" />
     <Compile Include="Catalogos\Anexo.cs" />
     <Compile Include="Autenticacion\Usuario.cs" />
     <Compile Include="Autenticacion\UsuarioDTO.cs" />
