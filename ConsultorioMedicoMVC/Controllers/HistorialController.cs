@@ -80,6 +80,20 @@ namespace ConsultorioMedicoMVC.Controllers
             var response = await _historialService.ConsultarTratamientosPorPaciente(pacienteId);
             return JsonConvert.SerializeObject(response);
         }
+
+        // AJAX: paquetes adquiridos por el paciente (DataTable)
+        public async Task<string> ConsultarPaquetesPorPaciente(int pacienteId)
+        {
+            var response = await _historialService.ConsultarPaquetesPorPaciente(pacienteId);
+            return JsonConvert.SerializeObject(response);
+        }
+
+        // AJAX: citas-tratamientos de un paquete del paciente (DataTable)
+        public async Task<string> ConsultarCitasPorPacientePaquete(int pacientePaqueteId)
+        {
+            var response = await _historialService.ConsultarCitasPorPacientePaquete(pacientePaqueteId);
+            return JsonConvert.SerializeObject(response);
+        }
         #endregion
     }
 }

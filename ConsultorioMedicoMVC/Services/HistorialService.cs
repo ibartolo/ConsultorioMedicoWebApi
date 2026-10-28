@@ -17,5 +17,11 @@ namespace ConsultorioMedicoMVC.Services
 
         public async Task<ModelResponse<List<TratamientoHistoricoDTO>>> ConsultarTratamientosPorPaciente(long pacienteId)
             => await _httpClient.ObtenerTratamientosPorPaciente(pacienteId);
+
+        public async Task<ModelResponse<List<PacientePaqueteLecturaDTO>>> ConsultarPaquetesPorPaciente(int pacienteId)
+            => await _httpClient.ObtenerPaquetesPorPaciente(pacienteId);
+
+        public async Task<ModelResponse<List<CitaPaqueteLecturaDTO>>> ConsultarCitasPorPacientePaquete(int pacientePaqueteId)
+            => await _httpClient.ObtenerCitasPorPacientePaquete(pacientePaqueteId);
     }
 }

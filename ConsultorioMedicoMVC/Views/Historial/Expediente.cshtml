@@ -33,7 +33,7 @@
             <i class="fas fa-paperclip me-1"></i>Archivos
         </button>
     </li>
-    <li class="nav-item d-none" role="presentation">
+    <li class="nav-item" role="presentation">
         <button class="nav-link" id="tab-paquetes-tab" data-bs-toggle="tab" data-bs-target="#tab-paquetes" type="button" role="tab" aria-controls="tab-paquetes" aria-selected="false">
             <i class="fas fa-box me-1"></i>Paquetes
         </button>
@@ -108,7 +108,32 @@
     </div>
 
     <div class="tab-pane fade" id="tab-archivos" role="tabpanel" aria-labelledby="tab-archivos-tab"></div>
-    <div class="tab-pane fade" id="tab-paquetes" role="tabpanel" aria-labelledby="tab-paquetes-tab"></div>
+    <div class="tab-pane fade" id="tab-paquetes" role="tabpanel" aria-labelledby="tab-paquetes-tab">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card-custom">
+                    <div class="card-title"><i class="fas fa-box"></i> Paquetes adquiridos</div>
+                    <div class="table-container">
+                        <table id="paquetesTable" class="table table-hover table-striped" style="width:100%">
+                            <thead><tr><th>ID</th><th>Paquete</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card-custom">
+                    <div class="card-title"><i class="fas fa-calendar-check"></i> Citas del paquete</div>
+                    <div class="table-container">
+                        <table id="citasPaqueteTable" class="table table-hover table-striped" style="width:100%">
+                            <thead><tr><th>ID</th><th>Fecha</th><th>Tratamiento</th><th>Comentarios</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Cita (Nuevo Tratamiento) -->
@@ -238,7 +263,8 @@
 
 @section scripts {
     <script>
-        var tratamientosTable, consultasTable;
+        var tratamientosTable, consultasTable, paquetesTable, citasPaqueteTable;
+        var pacientePaqueteIdActual = 0;
 
         function pad2(n) { return n < 10 ? '0' + n : n; }
 
@@ -265,6 +291,8 @@
             tratamientosTable = $('#tratamientosTable').DataTable({
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
                 pageLength: 5,
+                searching: false,
+                lengthChange: false,
                 columns: [
                     { data: 'Fecha', render: function (data) { return formatFechaHoraAmPm(data); } },
                     { data: 'TratamientoNombre' },
@@ -281,9 +309,11 @@
             consultasTable = $('#consultasTable').DataTable({
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
                 pageLength: 5,
+                searching: false,
+                lengthChange: false,
                 columns: [
-                    { data: 'Id' },
-                    { data: 'FechaConsulta' },
+                    { data: 'Id', visible: false },
+                    { data: 'FechaConsulta', render: function (data) { return formatFechaHoraAmPm(data); } },
                     { data: 'TipoConsultaNombre' },
                     { data: 'Descripcion' }
                 ],
@@ -297,6 +327,46 @@
             consultasTable.on('dblclick', 'tbody tr', function () {
                 var data = consultasTable.row(this).data();
                 window.open(recetaUrl + '/' + data.Id, '_blank');
+            });
+
+            paquetesTable = $('#paquetesTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 5,
+                searching: false,
+                lengthChange: false,
+                columns: [
+                    { data: 'Id', visible: false },
+                    { data: 'PaqueteNombre' }
+                ],
+                ajax: {
+                    url: '@Url.Action("ConsultarPaquetesPorPaciente", "Historial")',
+                    data: function (d) { d.pacienteId = pacienteId; return d; },
+                    dataSrc: function (json) { var r = (typeof json === 'string') ? JSON.parse(json) : json; return r.IsSuccess ? r.Response : []; }
+                }
+            });
+
+            citasPaqueteTable = $('#citasPaqueteTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                pageLength: 5,
+                searching: false,
+                lengthChange: false,
+                columns: [
+                    { data: 'Id', visible: false },
+                    { data: 'FechaCita', render: function (data) { return formatFechaHoraAmPm(data); } },
+                    { data: 'TratamientoNombre' },
+                    { data: 'Comentarios' }
+                ],
+                ajax: {
+                    url: '@Url.Action("ConsultarCitasPorPacientePaquete", "Historial")',
+                    data: function (d) { d.pacientePaqueteId = pacientePaqueteIdActual; return d; },
+                    dataSrc: function (json) { var r = (typeof json === 'string') ? JSON.parse(json) : json; return r.IsSuccess ? r.Response : []; }
+                }
+            });
+
+            paquetesTable.on('click', 'tbody tr', function () {
+                var data = paquetesTable.row(this).data();
+                pacientePaqueteIdActual = data.Id;
+                citasPaqueteTable.ajax.reload();
             });
 
             $('#citaFormExpediente').validate({

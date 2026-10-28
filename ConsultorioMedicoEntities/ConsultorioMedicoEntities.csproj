@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -52,6 +52,8 @@
     <Compile Include="Catalogos\PaqueteValidator.cs" />
     <Compile Include="Catalogos\RecetaDTO.cs" />
     <Compile Include="Catalogos\TratamientoHistoricoDTO.cs" />
+    <Compile Include="Catalogos\PacientePaqueteLecturaDTO.cs" />
+    <Compile Include="Catalogos\CitaPaqueteLecturaDTO.cs" />
     <Compile Include="Catalogos\Anexo.cs" />
     <Compile Include="Autenticacion\Usuario.cs" />
     <Compile Include="Autenticacion\UsuarioDTO.cs" />
