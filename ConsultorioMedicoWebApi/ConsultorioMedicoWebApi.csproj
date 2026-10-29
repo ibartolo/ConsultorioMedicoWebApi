@@ -80,6 +80,7 @@
     <Compile Include="Controllers\AnexoController.cs" />
     <Compile Include="Controllers\DatosInstitucionController.cs" />
     <Compile Include="Controllers\DatosFiscalesController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="DAL\DbWrapper.Anexo.cs" />
     <Compile Include="DAL\DbWrapper.DatosInstitucion.cs" />
     <Compile Include="DAL\DbWrapper.DatosFiscales.cs" />
+    <Compile Include="DAL\DbWrapper.Dashboard.cs" />
     <Compile Include="DAL\DbWrapper.Historial.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -110,6 +112,7 @@
     <Compile Include="Services\AnexoService.cs" />
     <Compile Include="Services\DatosInstitucionService.cs" />
     <Compile Include="Services\DatosFiscalesService.cs" />
+    <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\HistorialService.cs" />
   </ItemGroup>
   <ItemGroup>

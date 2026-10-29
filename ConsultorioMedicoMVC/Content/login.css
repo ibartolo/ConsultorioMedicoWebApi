@@ -284,6 +284,26 @@
             text-decoration: underline;
         }
 
+        .legal-links {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .legal-links a {
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+
+        .legal-links a:hover {
+            text-decoration: underline;
+        }
+
+        .legal-links span {
+            margin: 0 6px;
+        }
+
         .alert-message {
             padding: 12px 15px;
             border-radius: 10px;
@@ -480,6 +500,14 @@
         html[data-bs-theme="dark"] .login-footer p,
         html[data-bs-theme="dark"] .feature span {
             color: #adb5bd;
+        }
+
+        html[data-bs-theme="dark"] .legal-links {
+            color: #adb5bd;
+        }
+
+        html[data-bs-theme="dark"] .legal-links a {
+            color: #66DDFF;
         }
 
         html[data-bs-theme="dark"] .alert-error {

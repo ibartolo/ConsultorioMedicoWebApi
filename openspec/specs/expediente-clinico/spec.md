@@ -64,15 +64,55 @@ El sistema SHALL mostrar un grid de tratamientos derivados SOLO de Cita, obtenid
 - WHEN se carga el grid
 - THEN el grid queda vacío sin error
 
-### Requirement: Historial de consultas (Tab 2) con drill-down
+### Requirement: Historial de consultas (Tab 2) con drill-down a receta en modal
 
-El sistema SHALL mostrar el grid de consultas del paciente reutilizando el endpoint existente `api/Consulta/PorPaciente/{pacienteId}`. Al hacer doble clic en una fila, el sistema SHALL abrir `Consulta/Receta/{id}` en una pestaña nueva.
+El sistema SHALL mostrar el grid de consultas del paciente reutilizando el endpoint existente `api/Consulta/PorPaciente/{pacienteId}`. Al hacer doble clic en una fila, el sistema SHALL abrir la receta en un **modal** mediante la acción `Consulta/RecetaParcial` (vista parcial), sin navegar a otra página. La acción `Consulta/Receta/{id}` SHALL permanecer como respaldo de página completa.
 
-#### Scenario: Drill-down a la receta
+#### Scenario: Drill-down a la receta en modal
 
 - GIVEN una consulta listada en la Tab 2
 - WHEN el usuario hace doble clic en la fila
-- THEN se abre `Consulta/Receta/{id}` en una pestaña nueva del navegador
+- THEN se abre el modal de la receta con el contenido de la consulta
+
+### Requirement: Acciones de anexos por consulta
+
+El grid de consultas SHALL mostrar una columna de acciones con un botón de clip por fila. Al pulsarlo, el sistema MUST abrir el modal de anexos con la consulta seleccionada, permitiendo subir o consultar los anexos de esa consulta.
+
+#### Scenario: Anexos de una consulta
+
+- GIVEN una consulta listada en la Tab 2
+- WHEN el usuario pulsa el clip de la fila
+- THEN se abre el modal de anexos filtrado por esa consulta
+
+### Requirement: Receta con membrete institucional, logo y firma
+
+La receta SHALL tomar los datos de la institución desde `DatosInstitucion` (nombre, dirección, teléfonos, correo y `LogoRuta`) y los datos del médico (`MedicoNombre`, `MedicoCedula`, `MedicoEspecialidad`). El logo y los datos del médico SHALL configurarse en **Datos de la Institución**. La receta MUST mostrar el paciente, la fecha, el tipo de consulta, el diagnóstico, la próxima consulta, el medicamento/indicaciones y la firma del médico.
+
+#### Scenario: Receta con logo y firma
+
+- GIVEN una consulta y una institución con logo y médico configurados
+- WHEN se abre la receta
+- THEN se muestran el logo, el membrete, los datos del paciente y la firma del médico
+
+### Requirement: Impresión aislada de la receta
+
+El botón **Imprimir** del modal SHALL abrir una ventana de impresión que contenga únicamente la receta, sin menú, barra lateral, encabezado del modal ni botones. La impresión MUST usar tamaño carta, fondo blanco y márgenes de 1.5 cm.
+
+#### Scenario: Impresión de solo la receta
+
+- GIVEN la receta abierta en el modal
+- WHEN el usuario pulsa Imprimir
+- THEN se genera una impresión con únicamente el contenido de la receta
+
+### Requirement: Calendario de Consultas
+
+El calendario de Consultas SHALL mostrar intervalos y etiquetas cada **30 minutos** y SHALL limitar el horario visible de **08:00 a 20:00**. La vista de semana/día SHALL iniciar en las 08:00 y MUST ocultar la fila de "todo el día".
+
+#### Scenario: Calendario de Consultas de 30 minutos
+
+- GIVEN el calendario de Consultas en vista de semana
+- WHEN se renderiza
+- THEN las celdas y etiquetas son de 30 minutos y el rango visible es 08:00–20:00
 
 ### Requirement: Endpoint de tratamientos por paciente
 

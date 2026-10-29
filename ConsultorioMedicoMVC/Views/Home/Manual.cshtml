@@ -1,0 +1,532 @@
+﻿@{
+    ViewBag.Title = "Manual de usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .ayuda-wrap { max-width: 1140px; margin: 0 auto; padding: 8px 0 40px 0; }
+    .ayuda-hero {
+        background: linear-gradient(135deg, #00CCFF 0%, #0099CC 100%);
+        color: #fff; border-radius: 14px; padding: 26px 28px; margin-bottom: 18px;
+    }
+    .ayuda-hero h2 { margin: 0 0 6px 0; font-weight: 700; }
+    .ayuda-hero p { margin: 0; opacity: .95; }
+    .ayuda-buscador {
+        background: #fff; border-radius: 12px; padding: 16px 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 18px;
+    }
+    .ayuda-buscador input {
+        width: 100%; border: 1px solid #d1d3e2; border-radius: 8px;
+        padding: 10px 14px; font-size: 1rem;
+    }
+    .ayuda-resultado-msg { margin-top: 8px; font-size: .85rem; color: #6c757d; min-height: 20px; }
+    .ayuda-indice {
+        background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .ayuda-indice a { text-decoration: none; }
+    .chip {
+        display: inline-block; background: #e6f9ff; color: #007a99; border-radius: 20px;
+        padding: 5px 12px; margin: 3px 4px 3px 0; font-size: .82rem; cursor: pointer;
+    }
+    .chip:hover { background: #c9f2ff; }
+    .seccion-card {
+        background: #fff; border: 1px solid #e3e6f0; border-radius: 12px;
+        padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    }
+    .seccion-card h3 {
+        color: #007a99; font-size: 1.25rem; font-weight: 700;
+        border-bottom: 2px solid #e6f9ff; padding-bottom: 8px; margin-bottom: 12px;
+    }
+    .seccion-card h4 { color: #333; font-size: 1.02rem; font-weight: 700; margin: 14px 0 6px 0; }
+    .seccion-card ul, .seccion-card ol { margin-bottom: 8px; }
+    .seccion-card li { margin-bottom: 3px; }
+    .enlace-app {
+        display: inline-block; background: #0099CC; color: #fff !important; text-decoration: none !important;
+        border-radius: 6px; padding: 4px 10px; font-size: .85rem; margin: 2px 4px 2px 0;
+    }
+    .enlace-app:hover { background: #007a99; }
+    .enlace-seccion { color: #007a99; text-decoration: underline; }
+    .aviso {
+        background: #fff8e6; border-left: 4px solid #f6c23e; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    .tip {
+        background: #eafaf1; border-left: 4px solid #1cc88a; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    .danger-tip {
+        background: #fdecec; border-left: 4px solid #e74a3b; padding: 8px 12px;
+        border-radius: 6px; font-size: .9rem; margin: 8px 0;
+    }
+    .flujo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 6px 0; }
+    .flujo .f-paso {
+        background: #e6f9ff; color: #1e2a4a; border: 1px solid #b8ecff; border-radius: 8px;
+        padding: 8px 12px; font-size: .85rem; font-weight: 600; text-align: center; min-width: 90px;
+    }
+    .flujo .f-paso.estado { background: #0099CC; color: #fff; border-color: #0099CC; }
+    .flujo .f-paso.accion { background: #1cc88a; color: #fff; border-color: #1cc88a; }
+    .flujo .f-paso.decision { background: #f6c23e; color: #1e2a4a; border-color: #f6c23e; }
+    .flujo .f-flecha { font-weight: 700; color: #858796; }
+    .tabla-campos { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .9rem; }
+    .tabla-campos th, .tabla-campos td { border: 1px solid #e3e6f0; padding: 6px 10px; text-align: left; }
+    .tabla-campos th { background: #f8f9fc; }
+    .faq-q { font-weight: 700; margin: 12px 0 4px 0; color: #1e2a4a; }
+    .faq-q::before { content: "P: "; color: #0099CC; }
+    .faq-a { margin: 0 0 10px 0; }
+    .faq-a::before { content: "R: "; color: #1cc88a; font-weight: 700; }
+    .volver-arriba {
+        position: fixed; right: 18px; bottom: 18px; z-index: 900;
+        background: #0099CC; color: #fff; border-radius: 50%; width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.3); cursor: pointer; text-decoration: none;
+    }
+    .volver-arriba:hover { background: #007a99; color: #fff; }
+
+    html[data-bs-theme="dark"] .ayuda-buscador,
+    html[data-bs-theme="dark"] .ayuda-indice,
+    html[data-bs-theme="dark"] .seccion-card { background: #1e1e1e; border-color: #343a40; color: #e9ecef; }
+    html[data-bs-theme="dark"] .seccion-card h3 { color: #66DDFF; border-color: #343a40; }
+    html[data-bs-theme="dark"] .seccion-card h4,
+    html[data-bs-theme="dark"] .faq-q { color: #e9ecef; }
+    html[data-bs-theme="dark"] .tabla-campos th { background: #2b3035; color: #e9ecef; }
+    html[data-bs-theme="dark"] .tabla-campos td,
+    html[data-bs-theme="dark"] .tabla-campos th { border-color: #343a40; }
+    html[data-bs-theme="dark"] .chip { background: #0b3b4a; color: #66DDFF; }
+    html[data-bs-theme="dark"] .flujo .f-paso { background: #2b3035; color: #e9ecef; border-color: #495057; }
+    html[data-bs-theme="dark"] .aviso { background: #3a2e0a; border-left-color: #f6c23e; }
+    html[data-bs-theme="dark"] .tip { background: #16342a; border-left-color: #1cc88a; }
+    html[data-bs-theme="dark"] .danger-tip { background: #3d2020; border-left-color: #e74a3b; }
+    html[data-bs-theme="dark"] .ayuda-buscador input { background: #2b3035; color: #e9ecef; border-color: #495057; }
+    html[data-bs-theme="dark"] .ayuda-resultado-msg { color: #adb5bd; }
+</style>
+
+<div class="ayuda-wrap">
+    <div class="ayuda-hero">
+        <h2><i class="fas fa-book-medical me-2"></i>Manual de usuario</h2>
+        <p>Guía del sistema Consultorio Médico. Busca una palabra clave o navega por las secciones para aprender a usar cada módulo.</p>
+    </div>
+
+    <div class="ayuda-buscador">
+        <input type="text" id="buscadorAyuda" placeholder="Buscar: paciente, cita, consulta, receta, anexo, paquete, logo, institución, fiscal, tema, usuario..." autocomplete="off">
+        <div class="ayuda-resultado-msg" id="resultadoMsg"></div>
+    </div>
+
+    <div class="ayuda-indice">
+        <strong>Índice rápido:</strong><br>
+        <a class="chip" data-ir="#que-es">¿Qué es?</a>
+        <a class="chip" data-ir="#primer-acceso">Primer acceso</a>
+        <a class="chip" data-ir="#navegacion">Navegación</a>
+        <a class="chip" data-ir="#dashboard">Dashboard</a>
+        <a class="chip" data-ir="#pacientes">Pacientes</a>
+        <a class="chip" data-ir="#citas">Citas</a>
+        <a class="chip" data-ir="#consultas">Consultas</a>
+        <a class="chip" data-ir="#tratamientos">Tratamientos</a>
+        <a class="chip" data-ir="#paquetes">Paquetes</a>
+        <a class="chip" data-ir="#usuarios">Usuarios</a>
+        <a class="chip" data-ir="#anexos">Anexos</a>
+        <a class="chip" data-ir="#expediente">Expediente</a>
+        <a class="chip" data-ir="#receta">Receta</a>
+        <a class="chip" data-ir="#institucion">Institución</a>
+        <a class="chip" data-ir="#fiscales">Datos fiscales</a>
+        <a class="chip" data-ir="#configuracion">Configuración</a>
+        <a class="chip" data-ir="#seguridad">Seguridad</a>
+        <a class="chip" data-ir="#preguntas">Preguntas</a>
+        <a class="chip" data-ir="#glosario">Glosario</a>
+    </div>
+
+    <section class="seccion-card" id="que-es" data-tags="que es sistema consultorio medico pacientes citas consultas recetas expediente">
+        <h3><i class="fas fa-info-circle me-2"></i>¿Qué es Consultorio Médico?</h3>
+        <p>Es el sistema de gestión del consultorio. Permite:</p>
+        <ul>
+            <li><strong>Administrar pacientes</strong> y su información de contacto.</li>
+            <li><strong>Agendar citas y consultas</strong> en calendario.</li>
+            <li>Consultar el <strong>expediente clínico</strong> y los tratamientos del paciente.</li>
+            <li>Registrar <strong>paquetes</strong> y sus citas asociadas.</li>
+            <li>Generar e imprimir <strong>recetas médicas</strong>.</li>
+            <li>Subir <strong>anexos</strong> (PDF e imágenes) del paciente o de una consulta.</li>
+            <li>Configurar los <strong>datos de la institución</strong>, el logo y los datos del médico.</li>
+            <li>Capturar los <strong>datos fiscales</strong> del consultorio.</li>
+            <li>Administrar <strong>usuarios</strong> y el <strong>tema claro/oscuro</strong>.</li>
+        </ul>
+    </section>
+
+    <section class="seccion-card" id="primer-acceso" data-tags="primer acceso login entrar usuario contrasena recordar usuario tema oscuro cookie sesion expira">
+        <h3><i class="fas fa-door-open me-2"></i>Primer acceso y sesión</h3>
+        <p>El acceso se realiza desde la pantalla de inicio de sesión con el <strong>usuario y contraseña</strong> que te proporcione el administrador del consultorio. No existe registro público.</p>
+        <div class="flujo">
+            <div class="f-paso accion">1. Abrir la pantalla de login</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">2. Escribir usuario y contraseña</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso accion">3. (Opcional) Recordar mi usuario</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">4. Entrar al sistema</div>
+        </div>
+        <h4>Recordar mi usuario</h4>
+        <p>Si marcas <strong>“Recordar mi usuario”</strong>, el nombre de usuario se guarda en una cookie del navegador por un año. La <strong>contraseña nunca se guarda</strong>. Si desmarcas la opción y vuelves a entrar, la cookie se borra.</p>
+        <h4>Tema claro / oscuro</h4>
+        <p>En la pantalla de login hay un botón de sol/luna. La preferencia se guarda en la cookie <strong>tema</strong> por un año y se aplica también al sistema. Si no existe la cookie, se usa el tema claro. También puedes cambiarla desde <a class="enlace-seccion" href="#configuracion">Configuración</a>.</p>
+        <h4>Olvidé mi contraseña</h4>
+        <p>La recuperación automática de contraseña no está habilitada. Solicita apoyo al administrador del consultorio para restablecer tu acceso.</p>
+        <h4>Sesión expirada</h4>
+        <p>Por seguridad, si la sesión expira o no hay sesión activa, el sistema te redirige al login. Vuelve a entrar con tus credenciales.</p>
+        <div class="danger-tip"><strong>Importante:</strong> tu usuario es personal e intransferible. No compartas tus credenciales.</div>
+    </section>
+
+    <section class="seccion-card" id="navegacion" data-tags="menu navegacion sidebar dashboard inicio pacientes citas consultas paquetes tratamientos usuarios anexos historial configuracion cerrar sesion">
+        <h3><i class="fas fa-bars me-2"></i>Navegación general</h3>
+        <p>El menú lateral contiene:</p>
+        <table class="tabla-campos">
+            <thead><tr><th>Opción</th><th>Para qué sirve</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Dashboard</strong></td><td>Pantalla de inicio con indicadores del mes.</td></tr>
+                <tr><td><strong>Pacientes</strong></td><td>Listado, alta, edición, expediente y anexos.</td></tr>
+                <tr><td><strong>Citas</strong></td><td>Calendario de citas y estados.</td></tr>
+                <tr><td><strong>Consultas</strong></td><td>Calendario de consultas y receta.</td></tr>
+                <tr><td><strong>Catálogos</strong></td><td>Submenú con Tratamientos y Paquetes.</td></tr>
+                <tr><td><strong>Usuarios</strong></td><td>Alta y edición de usuarios.</td></tr>
+                <tr><td><strong>Datos Institución</strong></td><td>Datos del consultorio, logo y médico.</td></tr>
+                <tr><td><strong>Datos Fiscales</strong></td><td>Registro fiscal único del consultorio.</td></tr>
+            </tbody>
+        </table>
+        <p class="text-muted small">Las pantallas de Anexos e Historial siguen existiendo pero no aparecen en el menú; los anexos se gestionan desde Pacientes y Expediente. Reportes está oculto por el momento.</p>
+        <p>En el menú del usuario (arriba a la derecha) están <strong>Configuración</strong>, <strong>Manual de usuario</strong> y <strong>Cerrar sesión</strong>. La opción “Perfil” aún no está habilitada.</p>
+    </section>
+
+    <section class="seccion-card" id="dashboard" data-tags="dashboard indicadores mes pacientes nuevos consultas tratamientos resumen">
+        <h3><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h3>
+        <p>Al entrar verás tres indicadores sutiles del mes en curso:</p>
+        <ul>
+            <li><strong>Pacientes nuevos del mes:</strong> pacientes dados de alta en el mes.</li>
+            <li><strong>Consultas del mes:</strong> consultas con fecha dentro del mes.</li>
+            <li><strong>Tratamientos del mes:</strong> citas con tratamiento registradas en el mes.</li>
+        </ul>
+        <p>El texto “Resumen de [mes]” indica el periodo. Los indicadores son de solo lectura y se calculan con la fecha de alta del paciente, la fecha de la consulta y las citas con tratamiento.</p>
+    </section>
+
+    <section class="seccion-card" id="pacientes" data-tags="paciente pacientes nuevo editar eliminar baja logica expediente anexos telefono correo sexo edad modal validacion">
+        <h3><i class="fas fa-user-injured me-2"></i>Pacientes</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Paciente")">Pacientes</a>. El listado muestra nombre, teléfono, sexo, edad y estatus.</p>
+        <h4>Alta y edición</h4>
+        <p>El botón <strong>Nuevo Paciente</strong> y el botón de editar abren un <strong>modal</strong> con el formulario. Los campos principales son:</p>
+        <ul>
+            <li><strong>Nombre</strong> y <strong>apellido paterno</strong>: obligatorios.</li>
+            <li><strong>Teléfono</strong>: obligatorio, exactamente 10 dígitos.</li>
+            <li><strong>Sexo</strong>: obligatorio (Masculino/Femenino).</li>
+            <li><strong>Correo</strong>: opcional, con formato válido.</li>
+            <li>Fecha de nacimiento, comentarios y estatus.</li>
+        </ul>
+        <p>Al guardar se pide confirmación. Si editas, se actualiza solo esa fila; si es nuevo, se inserta sin recargar toda la tabla.</p>
+        <h4>Acciones por paciente</h4>
+        <ul>
+            <li><strong>Expediente clínico:</strong> abre la vista completa del paciente.</li>
+            <li><strong>Anexos:</strong> abre el modal para subir y consultar archivos del paciente.</li>
+            <li><strong>Editar:</strong> abre el formulario con los datos actuales.</li>
+            <li><strong>Eliminar:</strong> baja lógica (el paciente deja de aparecer, pero no se borra físicamente de la base).</li>
+        </ul>
+        <div class="tip"><strong>Tip:</strong> usa el buscador del listado para localizar al paciente por nombre, teléfono o correo.</div>
+    </section>
+
+    <section class="seccion-card" id="citas" data-tags="cita citas calendario fullcalendar pendiente confirmada cancelada estado color nuevo editar eliminar tratamiento">
+        <h3><i class="fas fa-calendar-check me-2"></i>Citas</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Cita")">Citas</a>. El calendario muestra las citas por fecha y hora en intervalos de <strong>30 minutos</strong>, con horario visible de <strong>8:00 a 20:00</strong>.</p>
+        <h4>Colores por estado</h4>
+        <table class="tabla-campos">
+            <thead><tr><th>Estado</th><th>Color</th></tr></thead>
+            <tbody>
+                <tr><td>1 · Pendiente</td><td>Naranja</td></tr>
+                <tr><td>2 · Confirmada</td><td>Verde</td></tr>
+                <tr><td>3 · Cancelada</td><td>Rojo</td></tr>
+                <tr><td>Sin estado</td><td>Gris</td></tr>
+            </tbody>
+        </table>
+        <h4>Crear o editar una cita</h4>
+        <ol>
+            <li>Pulsa un espacio del calendario o el botón de nueva cita.</li>
+            <li>Selecciona <strong>paciente</strong>, <strong>tratamiento</strong> (opcional), fecha y hora, estado y comentarios.</li>
+            <li>Guarda. La cita aparece en el calendario con el color de su estado.</li>
+        </ol>
+        <p>Al editar una cita existente se muestra el botón <strong>Eliminar</strong>, que hace una baja lógica. Al crear una cita nueva, el botón no aparece.</p>
+        <div class="aviso"><strong>Nota:</strong> el sistema no valida choque de horarios al guardar; verifica manualmente la agenda.</div>
+    </section>
+
+    <section class="seccion-card" id="consultas" data-tags="consulta consultas calendario tipo tratamiento fecha descripcion receta comentarios proxima consulta ver receta">
+        <h3><i class="fas fa-stethoscope me-2"></i>Consultas</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Consulta")">Consultas</a>. El calendario muestra las consultas registradas en intervalos de <strong>30 minutos</strong>, con horario visible de <strong>8:00 a 20:00</strong>.</p>
+        <h4>Crear o editar una consulta</h4>
+        <ul>
+            <li>Selecciona <strong>paciente</strong> (obligatorio), <strong>tipo de consulta</strong> y <strong>tratamiento</strong> (opcionales).</li>
+            <li>Indica fecha y hora (obligatorias), próxima consulta y comentarios.</li>
+            <li>Captura la <strong>descripción/diagnóstico</strong> y la <strong>receta/indicaciones</strong> en sus campos de texto.</li>
+        </ul>
+        <p>En el modal de una consulta existente aparece el botón <strong>Ver Receta</strong>, que abre la receta en un modal sin salir de la pantalla.</p>
+        <div class="tip"><strong>Tip:</strong> la receta toma el contenido del campo <strong>Receta</strong> de la consulta; escríbelo con el detalle que quieras imprimir.</div>
+    </section>
+
+    <section class="seccion-card" id="tratamientos" data-tags="tratamiento tratamientos catalogo nombre duracion descripcion estatus">
+        <h3><i class="fas fa-pills me-2"></i>Tratamientos</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Tratamiento")">Tratamientos</a>. Es el catálogo de servicios/tratamientos que se pueden asociar a citas y consultas.</p>
+        <ul>
+            <li><strong>Nuevo Tratamiento:</strong> nombre, duración, descripción y estatus.</li>
+            <li><strong>Editar:</strong> actualiza los datos del catálogo.</li>
+            <li>Los tratamientos activos aparecen en los selects de Citas, Consultas y del expediente.</li>
+        </ul>
+    </section>
+
+    <section class="seccion-card" id="paquetes" data-tags="paquete paquetes catalogo costo descripcion estatus expediente citas del paquete">
+        <h3><i class="fas fa-box me-2"></i>Paquetes</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Paquete")">Paquetes</a>. Es el catálogo de paquetes del consultorio (nombre, descripción, costo y estatus).</p>
+        <p>En el <a class="enlace-seccion" href="#expediente">expediente del paciente</a>, la pestaña <strong>Paquetes</strong> muestra los paquetes adquiridos por el paciente y, al seleccionar uno, las citas-tratamientos asociadas. Esa vista es de solo lectura.</p>
+    </section>
+
+    <section class="seccion-card" id="usuarios" data-tags="usuario usuarios alta editar estatus contrasena acceso administrador">
+        <h3><i class="fas fa-users me-2"></i>Usuarios</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "Usuario")">Usuarios</a>. Permite dar de alta y editar a las personas que acceden al sistema.</p>
+        <ul>
+            <li><strong>Usuario:</strong> nombre de acceso.</li>
+            <li><strong>Contraseña:</strong> se define al crear o cambiar el usuario.</li>
+            <li><strong>Estatus:</strong> activo/inactivo.</li>
+        </ul>
+        <div class="aviso"><strong>Nota:</strong> actualmente no hay roles ni permisos diferenciados; todos los usuarios activos acceden a los módulos disponibles. No compartas credenciales entre personas.</div>
+    </section>
+
+    <section class="seccion-card" id="anexos" data-tags="anexo anexos archivo archivos pdf png jpg imagen subir descargar paciente consulta limite tamano">
+        <h3><i class="fas fa-paperclip me-2"></i>Anexos</h3>
+        <p>Los anexos son archivos relacionados con un <strong>paciente</strong> y, opcionalmente, con una <strong>consulta</strong>.</p>
+        <h4>Formatos y límites</h4>
+        <table class="tabla-campos">
+            <thead><tr><th>Tipo</th><th>Formatos</th><th>Tamaño máximo</th></tr></thead>
+            <tbody>
+                <tr><td>Documento</td><td>PDF</td><td>5 MB</td></tr>
+                <tr><td>Imagen</td><td>PNG, JPG, JPEG</td><td>2 MB</td></tr>
+            </tbody>
+        </table>
+        <h4>Dónde subirlos</h4>
+        <ul>
+            <li><strong>Pacientes → Anexos:</strong> modal del paciente. Puedes asociar el archivo solo al paciente o a una consulta específica.</li>
+            <li><strong>Expediente → Consultas → clip:</strong> abre el modal con la consulta seleccionada para subir un anexo de esa consulta.</li>
+        </ul>
+        <div class="aviso">La pantalla administrativa de Anexos ya no está en el menú; usa los accesos desde Pacientes y Expediente.</div>
+        <p>Los anexos se pueden descargar desde el botón de descarga del listado. El nombre original del archivo se conserva y el archivo físico se almacena con un nombre único.</p>
+        <div class="danger-tip"><strong>Recuerda:</strong> los anexos pueden contener datos clínicos sensibles. Sube solo lo necesario y no los compartas fuera del consultorio.</div>
+    </section>
+
+    <section class="seccion-card" id="expediente" data-tags="expediente clinico historial paciente tratamientos consultas paquetes anexos nuevo tratamiento nueva consulta">
+        <h3><i class="fas fa-folder-open me-2"></i>Expediente clínico</h3>
+        <p>Se abre desde <strong>Pacientes → Expediente clínico</strong>. Muestra la información del paciente y su historial.</p>
+        <div class="flujo">
+            <div class="f-paso estado">Información del paciente</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Historial de consultas</div>
+            <div class="f-flecha">&#10132;</div>
+            <div class="f-paso estado">Paquetes</div>
+        </div>
+        <h4>Información del paciente</h4>
+        <p>Muestra nombre, correo, teléfono, sexo, edad y fecha de nacimiento. Debajo aparece el grid de <strong>Tratamientos Históricos</strong> (derivado de las citas del paciente).</p>
+        <h4>Historial de consultas</h4>
+        <ul>
+            <li>Lista las consultas del paciente.</li>
+            <li><strong>Doble clic</strong> en una consulta abre la <a class="enlace-seccion" href="#receta">receta</a> en un modal.</li>
+            <li>El botón de <strong>clip</strong> de cada fila abre los anexos de esa consulta.</li>
+        </ul>
+        <h4>Paquetes</h4>
+        <p>Grid izquierdo con los paquetes adquiridos y grid derecho con las citas-tratamientos del paquete seleccionado.</p>
+        <h4>Acciones del encabezado</h4>
+        <ul>
+            <li><strong>Nuevo Tratamiento:</strong> crea una <strong>cita</strong> con el paciente en contexto fijo. Es la forma de registrar un tratamiento en el expediente.</li>
+            <li><strong>Nueva Consulta:</strong> crea una consulta con el paciente en contexto fijo.</li>
+            <li><strong>Volver a Pacientes:</strong> regresa al listado.</li>
+        </ul>
+    </section>
+
+    <section class="seccion-card" id="receta" data-tags="receta recetas imprimir modal medico cedula especialidad logo membrete institucion paciente medicamento indicaciones">
+        <h3><i class="fas fa-prescription me-2"></i>Receta médica</h3>
+        <p>La receta se genera <strong>por consulta</strong> y se abre en un <strong>modal</strong>, sin cambiar de pantalla.</p>
+        <h4>Cómo abrirla</h4>
+        <ul>
+            <li><strong>Consultas → Ver Receta</strong> dentro del modal de la consulta.</li>
+            <li><strong>Expediente → Historial de consultas → doble clic</strong> en una consulta.</li>
+        </ul>
+        <h4>Qué contiene</h4>
+        <ul>
+            <li>Logo y membrete de la institución (nombre, dirección, teléfonos y correo).</li>
+            <li>Nombre, edad y sexo del paciente; fecha y tipo de consulta.</li>
+            <li>Diagnóstico/descripción de la consulta y próxima cita.</li>
+            <li>Medicamento/indicaciones capturados en el campo <strong>Receta</strong> de la consulta.</li>
+            <li>Firma con nombre, cédula profesional y especialidad del médico.</li>
+        </ul>
+        <h4>Imprimir</h4>
+        <p>El botón <strong>Imprimir</strong> abre una ventana de impresión que contiene <strong>solo la receta</strong>, sin el menú ni los botones del sistema. Si el navegador bloquea la ventana, permite las ventanas emergentes para el sitio.</p>
+        <div class="tip"><strong>Tip:</strong> configura el logo y los datos del médico en <a class="enlace-seccion" href="#institucion">Datos de la Institución</a> para que aparezcan en la receta.</div>
+    </section>
+
+    <section class="seccion-card" id="institucion" data-tags="institucion datos institucionales logo medico nombre cedula especialidad telefono correo direccion">
+        <h3><i class="fas fa-hospital me-2"></i>Datos de la Institución</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "DatosInstitucion")">Datos Institución</a>. Es un <strong>registro único</strong> con la información del consultorio.</p>
+        <ul>
+            <li><strong>Nombre, teléfonos, correo, dirección, CP y país.</strong></li>
+            <li><strong>Logo:</strong> PNG/JPG, máximo 2 MB. Se muestra en la receta y en la pantalla.</li>
+            <li><strong>Datos del médico:</strong> nombre, cédula profesional y especialidad; se imprimen en la firma de la receta.</li>
+        </ul>
+        <p>Guarda los cambios con el botón <strong>Guardar</strong>. El logo se sube con el botón <strong>Subir logo</strong> de la tarjeta superior.</p>
+    </section>
+
+    <section class="seccion-card" id="fiscales" data-tags="fiscal fiscales datos fiscales razon social rfc direccion cp pais facturacion">
+        <h3><i class="fas fa-file-invoice me-2"></i>Datos Fiscales</h3>
+        <p>Entra en <a class="enlace-app" href="@Url.Action("Index", "DatosFiscales")">Datos Fiscales</a>. Es un <strong>registro único</strong> del consultorio.</p>
+        <ul>
+            <li>Razón social y RFC (obligatorios).</li>
+            <li>Teléfonos, correo y dirección fiscal.</li>
+            <li>CP y país.</li>
+        </ul>
+        <p>Si aún no existe, el formulario aparece vacío y al guardar se crea el registro. En posteriores visitas se carga y actualiza el mismo registro.</p>
+    </section>
+
+    <section class="seccion-card" id="configuracion" data-tags="configuracion tema claro oscuro apariencia cookie recordar usuario preferencia">
+        <h3><i class="fas fa-cog me-2"></i>Configuración y tema</h3>
+        <p>Entra desde el menú del usuario → <a class="enlace-seccion" href="@Url.Action("Index", "Configuracion")">Configuración</a>.</p>
+        <h4>Apariencia</h4>
+        <p>Elige <strong>Claro</strong> u <strong>Oscuro</strong>. La preferencia se guarda en la cookie <strong>tema</strong> por un año y se aplica a la aplicación y al login. Si no existe la cookie, el sistema usa el tema claro.</p>
+        <h4>Recordar usuario</h4>
+        <p>El checkbox “Recordar mi usuario” del login guarda únicamente el nombre de usuario en una cookie por un año. No guarda la contraseña. Puedes borrarla desmarcando el checkbox y volviendo a iniciar sesión.</p>
+        <div class="tip"><strong>Tip:</strong> si cambias el tema y no ves el cambio, recarga la página o revisa que el navegador no esté bloqueando cookies.</div>
+    </section>
+
+    <section class="seccion-card" id="seguridad" data-tags="seguridad buenas practicas contrasena sesion confidencialidad respaldo pacientes">
+        <h3><i class="fas fa-shield-alt me-2"></i>Seguridad y buenas prácticas</h3>
+        <ul>
+            <li>Usa una contraseña personal y no la compartas.</li>
+            <li>Cierra sesión al terminar, especialmente en equipos compartidos.</li>
+            <li>No dejes el expediente de un paciente abierto en pantalla sin supervisión.</li>
+            <li>Sube solo los anexos necesarios y evita duplicados.</li>
+            <li>Mantén respaldos de la información clínica conforme a los procedimientos del consultorio.</li>
+            <li>Reporta de inmediato cualquier acceso no autorizado o comportamiento extraño.</li>
+        </ul>
+        <div class="danger-tip"><strong>Confidencialidad:</strong> la información de salud de los pacientes es sensible. Su divulgación indebida puede tener consecuencias legales y éticas.</div>
+    </section>
+
+    <section class="seccion-card" id="preguntas" data-tags="preguntas frecuentes faq no carga receta no sube anexo no veo modo oscuro sesion expiro no veo modulo logo no aparece">
+        <h3><i class="fas fa-question me-2"></i>Preguntas frecuentes</h3>
+
+        <div class="faq-q">No puedo iniciar sesión.</div>
+        <p class="faq-a">Verifica usuario y contraseña. Si persiste, solicita al administrador que restablezca tu acceso. La recuperación automática de contraseña no está habilitada.</p>
+
+        <div class="faq-q">No veo el modo oscuro.</div>
+        <p class="faq-a">Cambia el tema desde Configuración. La preferencia se guarda en la cookie <code>tema</code> por un año. Si no cambia, recarga forzadamente (Ctrl + F5) y revisa que el navegador permita cookies.</p>
+
+        <div class="faq-q">No se imprime la receta o se abre una ventana en blanco.</div>
+        <p class="faq-a">El botón Imprimir abre una ventana emergente con la receta. Permite las ventanas emergentes para el sitio y vuelve a intentar. Verifica también que la consulta tenga capturado el campo Receta.</p>
+
+        <div class="faq-q">No aparece el logo en la receta.</div>
+        <p class="faq-a">Sube el logo en Datos de la Institución (PNG/JPG, máximo 2 MB) y guarda. La receta toma el logo del registro institucional.</p>
+
+        <div class="faq-q">No puedo subir un anexo.</div>
+        <p class="faq-a">Revisa el formato y tamaño: PDF hasta 5 MB; PNG/JPG/JPEG hasta 2 MB. El nombre del archivo no debe exceder 150 caracteres. Si el error continúa, avisa al administrador.</p>
+
+        <div class="faq-q">No veo un módulo en el menú.</div>
+        <p class="faq-a">Actualmente no hay roles/permisos; si el módulo no aparece, puede ser que la opción esté fuera de alcance o que tu usuario no tenga acceso. Consulta con el administrador.</p>
+
+        <div class="faq-q">Me sacó al login.</div>
+        <p class="faq-a">La sesión expiró o se perdió. Vuelve a iniciar sesión; no se pierden los datos ya guardados.</p>
+
+        <div class="faq-q">¿Puedo editar una cita o consulta ya guardada?</div>
+        <p class="faq-a">Sí, desde el calendario o el modal correspondiente. La eliminación de citas es lógica (deja de mostrarse, pero no se borra físicamente).</p>
+    </section>
+
+    <section class="seccion-card" id="glosario" data-tags="glosario definiciones paciente expediente cita consulta tratamiento paquete anexo receta institucion tema">
+        <h3><i class="fas fa-book me-2"></i>Glosario rápido</h3>
+        <table class="tabla-campos">
+            <thead><tr><th>Término</th><th>Significado</th></tr></thead>
+            <tbody>
+                <tr><td>Paciente</td><td>Persona que recibe atención en el consultorio.</td></tr>
+                <tr><td>Expediente clínico</td><td>Conjunto de información clínica y administrativa del paciente.</td></tr>
+                <tr><td>Cita</td><td>Registro de una fecha/hora para atención; puede tener tratamiento y estado.</td></tr>
+                <tr><td>Consulta</td><td>Atención médica registrada, con diagnóstico, receta y próxima cita.</td></tr>
+                <tr><td>Tratamiento</td><td>Servicio o procedimiento del catálogo del consultorio.</td></tr>
+                <tr><td>Paquete</td><td>Conjunto de tratamientos/sesiones adquirido por el paciente.</td></tr>
+                <tr><td>Anexo</td><td>Archivo (PDF o imagen) asociado a un paciente o a una consulta.</td></tr>
+                <tr><td>Receta</td><td>Documento imprimible con las indicaciones/medicamento de una consulta.</td></tr>
+                <tr><td>Institución</td><td>Datos del consultorio, logo y médico que aparecen en la receta.</td></tr>
+                <tr><td>Tema</td><td>Apariencia clara u oscura de la aplicación, guardada en cookie.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <p class="text-center text-muted mt-4">
+        ¿No encuentras lo que buscas? Consulta con el administrador del consultorio o escribe a
+        <strong>contacto@desipr.com.mx</strong> o <strong>bartolocastro@gmail.com</strong>, o llama al
+        <strong>782 253 0107</strong>.
+    </p>
+</div>
+
+<a class="volver-arriba" href="#" id="btnArriba" title="Volver arriba"><i class="fas fa-arrow-up"></i></a>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var $cards = $('.seccion-card');
+            var $msg = $('#resultadoMsg');
+
+            function normalizar(texto) {
+                return texto.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9\s]/g, ' ');
+            }
+
+            function filtrar() {
+                var q = normalizar($('#buscadorAyuda').val());
+                if (!q) {
+                    $cards.show();
+                    $msg.text('');
+                    return;
+                }
+
+                var palabras = q.split(/\s+/).filter(function (w) { return w.length > 0; });
+                var visibles = 0;
+
+                $cards.each(function () {
+                    var texto = normalizar($(this).attr('data-tags') + ' ' + $(this).text());
+                    var ok = palabras.every(function (p) { return texto.indexOf(p) !== -1; });
+                    $(this).toggle(ok);
+                    if (ok) { visibles++; }
+                });
+
+                if (visibles === 0) {
+                    $msg.html('No encontré secciones con "<strong>' + $('#buscadorAyuda').val() + '</strong>". Prueba con: paciente, cita, consulta, receta, anexo, paquete, logo, institución, fiscal, tema, usuario.');
+                } else {
+                    $msg.text(visibles + ' sección(es) encontrada(s).');
+                }
+            }
+
+            $('#buscadorAyuda').on('input', filtrar);
+
+            $('.chip[data-ir]').on('click', function (e) {
+                e.preventDefault();
+                var destino = $(this).attr('data-ir');
+                $('html, body').animate({ scrollTop: $(destino).offset().top - 90 }, 400);
+                $(destino).css('box-shadow', '0 0 0 3px #0099CC');
+                setTimeout(function () { $(destino).css('box-shadow', ''); }, 2500);
+            });
+
+            $('#btnArriba').on('click', function (e) {
+                e.preventDefault();
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            });
+
+            if (window.location.hash) {
+                try {
+                    var $dest = $(window.location.hash);
+                    if ($dest.length) {
+                        setTimeout(function () {
+                            $('html, body').animate({ scrollTop: $dest.offset().top - 90 }, 400);
+                            $dest.css('box-shadow', '0 0 0 3px #0099CC');
+                            setTimeout(function () { $dest.css('box-shadow', ''); }, 2500);
+                        }, 300);
+                    }
+                } catch (err) { }
+            }
+        });
+    </script>
+}

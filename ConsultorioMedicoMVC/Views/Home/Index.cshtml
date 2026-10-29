@@ -7,3 +7,54 @@
     <div class="card-title"><i class="fas fa-hospital-alt"></i> Bienvenido</div>
     <p>Has iniciado sesión correctamente en el Consultorio Médico.</p>
 </div>
+
+<div class="kpi-mes" id="kpiMes">Resumen del mes en curso</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-user-plus"></i></div>
+            <div>
+                <div class="kpi-value" id="kpiPacientes">&mdash;</div>
+                <div class="kpi-label">Pacientes nuevos del mes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-stethoscope"></i></div>
+            <div>
+                <div class="kpi-value" id="kpiConsultas">&mdash;</div>
+                <div class="kpi-label">Consultas del mes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fas fa-pills"></i></div>
+            <div>
+                <div class="kpi-value" id="kpiTratamientos">&mdash;</div>
+                <div class="kpi-label">Tratamientos del mes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $.get('@Url.Action("Indicadores", "Dashboard")', function (response) {
+                var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                if (r && r.IsSuccess && r.Response) {
+                    $('#kpiPacientes').text(r.Response.PacientesNuevosMes);
+                    $('#kpiConsultas').text(r.Response.ConsultasMes);
+                    $('#kpiTratamientos').text(r.Response.TratamientosMes);
+
+                    if (r.Response.Mes) {
+                        $('#kpiMes').text('Resumen de ' + r.Response.Mes);
+                    }
+                }
+            });
+        });
+    </script>
+}

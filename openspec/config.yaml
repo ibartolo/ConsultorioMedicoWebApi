@@ -21,6 +21,19 @@ context: |
   Cita (FullCalendar), Consulta, Tratamiento, Paquete, Usuario, Anexo, Historial (parcial).
   Testing: no hay runner (sin xUnit); verificación = MSBuild + aspnet_compiler.
 
+  Alcance actual (2026-10): módulos Paciente, Cita, Consulta, Tratamiento, Paquete, Usuario,
+  Anexo, Historial/Expediente, Receta, Datos Institución, Datos Fiscales, Configuración,
+  Dashboard, Manual y documentos legales. Instituciones y datos fiscales son registro único.
+  Anexos: PDF/PNG/JPG/JPEG; PDF <=5MB, imágenes <=2MB; archivos en WebApi Attachment/.
+  Anexo tiene PacienteID obligatorio y ConsultaID opcional (no CitaID/PaqueteID).
+  Receta por consulta en modal con impresión aislada; membrete institucional + logo + médico.
+  Cookies: tema (claro/oscuro) y recordarUsuario, 1 año, HttpOnly.
+  Dashboard: KPIs del mes (pacientes nuevos, consultas, tratamientos=citas con tratamiento).
+  Calendarios Citas/Consultas: intervalos 30 min, 08:00-20:00.
+  Menú: Catálogos agrupa Tratamientos/Paquetes; Historial/Anexos/Reportes ocultos del menú.
+  DataTables usa idioma local Content/datatables-es-ES.json.
+  BD actual de pruebas: db_9c7990_consultoriodesitst (SQL8010); producción DB_9C7990_Consultorio.
+
 strict_tdd: false
 
 rules:

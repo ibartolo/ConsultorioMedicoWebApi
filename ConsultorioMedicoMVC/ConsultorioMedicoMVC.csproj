@@ -84,6 +84,7 @@
     <Compile Include="Controllers\AnexoController.cs" />
     <Compile Include="Controllers\DatosInstitucionController.cs" />
     <Compile Include="Controllers\DatosFiscalesController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\ConfiguracionController.cs" />
     <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="DAL\HttpClientConnection.Anexo.cs" />
     <Compile Include="DAL\HttpClientConnection.DatosInstitucion.cs" />
     <Compile Include="DAL\HttpClientConnection.DatosFiscales.cs" />
+    <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
     <Compile Include="DAL\HttpClientConnection.Historial.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -116,6 +118,7 @@
     <Compile Include="Services\AnexoService.cs" />
     <Compile Include="Services\DatosInstitucionService.cs" />
     <Compile Include="Services\DatosFiscalesService.cs" />
+    <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\HistorialService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -130,10 +133,14 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_AnexosModal.cshtml" />
     <Content Include="Views\Shared\_LayoutReceta.cshtml" />
+    <Content Include="Views\Shared\_LayoutPublic.cshtml" />
     <Content Include="Views\Shared\_RecetaModal.cshtml" />
     <Content Include="Scripts\anexos.js" />
     <Content Include="Views\Home\Autentication.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\Manual.cshtml" />
+    <Content Include="Views\Home\Terminos.cshtml" />
+    <Content Include="Views\Home\Privacidad.cshtml" />
     <Content Include="Views\Paciente\Index.cshtml" />
     <Content Include="Views\Paciente\Nuevo.cshtml" />
     <Content Include="Views\Paciente\_Formulario.cshtml" />

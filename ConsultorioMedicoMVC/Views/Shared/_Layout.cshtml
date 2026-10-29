@@ -7,6 +7,11 @@
     var tema = Request.Cookies["tema"] != null ? Request.Cookies["tema"].Value : "claro";
     if (tema != "claro" && tema != "oscuro") { tema = "claro"; }
     var bsTheme = tema == "oscuro" ? "dark" : "light";
+
+    var controllerActual = ViewContext.RouteData.Values["controller"] as string ?? "";
+    var actionActual = ViewContext.RouteData.Values["action"] as string ?? "";
+    var esDashboard = controllerActual == "Home" && actionActual == "Index";
+    var catalogosAbierto = controllerActual == "Tratamiento" || controllerActual == "Paquete";
 }
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="@bsTheme">
@@ -29,8 +34,8 @@
             <p>Sistema de Administración de Consultorio</p>
         </div>
         <ul class="components">
-            <li class="active">
-                <a href="@Url.Action("Index", "Home")">
+            <li class="@(esDashboard ? "active" : "")">
+                <a href="@Url.Action("Index", "Home")" class="@(esDashboard ? "active" : "")">
                     <i class="fas fa-tachometer-alt"></i>
                     <span class="menu-text">Dashboard</span>
                 </a>
@@ -53,17 +58,25 @@
                     <span class="menu-text">Consultas</span>
                 </a>
             </li>
-            <li>
-                <a href="@Url.Action("Index", "Paquete")">
-                    <i class="fas fa-box"></i>
-                    <span class="menu-text">Paquetes</span>
+            <li class="has-arrow @(catalogosAbierto ? "active" : "")">
+                <a href="#">
+                    <i class="fas fa-tags"></i>
+                    <span class="menu-text">Catálogos</span>
                 </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "Tratamiento")">
-                    <i class="fas fa-pills"></i>
-                    <span class="menu-text">Tratamientos</span>
-                </a>
+                <ul>
+                    <li>
+                        <a href="@Url.Action("Index", "Tratamiento")" class="@(controllerActual == "Tratamiento" ? "active" : "")">
+                            <i class="fas fa-pills"></i>
+                            <span class="menu-text">Tratamientos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index", "Paquete")" class="@(controllerActual == "Paquete" ? "active" : "")">
+                            <i class="fas fa-box"></i>
+                            <span class="menu-text">Paquetes</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li>
                 <a href="@Url.Action("Index", "Usuario")">
@@ -81,24 +94,6 @@
                 <a href="@Url.Action("Index", "DatosFiscales")">
                     <i class="fas fa-file-invoice"></i>
                     <span class="menu-text">Datos Fiscales</span>
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "Anexo")">
-                    <i class="fas fa-paperclip"></i>
-                    <span class="menu-text">Anexos</span>
-                </a>
-            </li>
-            <li>
-                <a href="@Url.Action("Index", "Historial")">
-                    <i class="fas fa-history"></i>
-                    <span class="menu-text">Historial</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-chart-bar"></i>
-                    <span class="menu-text">Reportes</span>
                 </a>
             </li>
         </ul>
@@ -128,6 +123,10 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2" style="color: var(--primary);"></i> Perfil</a></li>
                         <li><a class="dropdown-item" href="@Url.Action("Index", "Configuracion")"><i class="fas fa-cog me-2" style="color: var(--primary);"></i> Configuración</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Manual", "Home")"><i class="fas fa-book me-2" style="color: var(--primary);"></i> Manual de usuario</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Terminos", "Home")" target="_blank"><i class="fas fa-file-contract me-2" style="color: var(--primary);"></i> Términos y Condiciones</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Privacidad", "Home")" target="_blank"><i class="fas fa-shield-alt me-2" style="color: var(--primary);"></i> Aviso de Privacidad</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="confirmarCierre()"><i class="fas fa-sign-out-alt me-2" style="color: var(--danger);"></i> Cerrar Sesión</a></li>
                     </ul>
@@ -138,6 +137,18 @@
         <div class="page-content">
             @RenderBody()
         </div>
+
+        <footer class="app-footer">
+            <div class="app-footer-inner">
+                <span>&copy; @DateTime.Now.Year Consultorio Médico. Todos los derechos reservados.</span>
+                <span class="app-footer-sep">&middot;</span>
+                <a href="@Url.Action("Manual", "Home")">Manual</a>
+                <a href="@Url.Action("Terminos", "Home")" target="_blank">Términos</a>
+                <a href="@Url.Action("Privacidad", "Home")" target="_blank">Privacidad</a>
+                <span class="app-footer-sep">&middot;</span>
+                <span>By <a href="https://desipr.com.mx" target="_blank" rel="noopener noreferrer">DESI</a></span>
+            </div>
+        </footer>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -152,6 +163,11 @@
             $('#sidebarCollapse').on('click', function() {
                 $('#sidebar').toggleClass('active');
                 $('#mainContent').toggleClass('active');
+            });
+
+            $('.components li.has-arrow > a').on('click', function (e) {
+                e.preventDefault();
+                $(this).parent().toggleClass('active');
             });
 
             window.confirmarCierre = function() {

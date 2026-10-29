@@ -44,6 +44,22 @@ Al hacer click en una fila de paquetes, el sistema SHALL recargar un segundo gri
 - WHEN el usuario lo selecciona
 - THEN el grid derecho queda vacío sin error
 
+### Requirement: Selección automática del primer paquete
+
+Al cargar la pestaña Paquetes, si el paciente tiene paquetes, el sistema SHALL seleccionar automáticamente el primer paquete y cargar sus citas-tratamientos en el grid derecho. El click en otra fila SHALL cambiar la selección y recargar el grid.
+
+#### Scenario: Primer paquete seleccionado al cargar
+
+- GIVEN un paciente con paquetes
+- WHEN se abre la pestaña Paquetes
+- THEN el primer paquete queda seleccionado y el grid derecho muestra sus citas-tratamientos
+
+#### Scenario: Cambio de paquete
+
+- GIVEN la pestaña Paquetes con un paquete seleccionado
+- WHEN el usuario hace click en otra fila de paquetes
+- THEN la selección cambia y el grid derecho se recarga con las citas de ese paquete
+
 ### Requirement: Endpoint GET PaquetesPorPaciente
 
 El sistema SHALL exponer `GET api/Historial/PaquetesPorPaciente/{pacienteId}` de solo lectura que retorne `ModelResponse<List<PacientePaqueteLecturaDTO>>` (HTTP 200, mensajes en español, camelCase). Sus datos MUST derivarse del SP nuevo `sp_nh_GetPaquetesPorPaciente`.

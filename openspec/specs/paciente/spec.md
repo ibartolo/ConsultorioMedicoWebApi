@@ -283,3 +283,45 @@ El listado `GetAllPacienteByEstatus`, la validación `PacienteValidator` (MVC y 
 - GIVEN la migración al modal
 - WHEN se carga el listado y se validan datos
 - THEN el listado muestra pacientes activos y la validación rechaza datos inválidos
+
+### Requirement: Acciones del listado de Pacientes
+
+El listado de Pacientes SHALL mostrar por fila las acciones **Expediente clínico**, **Anexos**, **Editar** y **Eliminar**. "Expediente clínico" MUST navegar a `/Historial/Expediente/{id}`; "Anexos" MUST abrir el modal de anexos del paciente; "Editar" MUST abrir el modal de edición; "Eliminar" MUST aplicar baja lógica.
+
+#### Scenario: Acciones disponibles en la fila
+
+- GIVEN un paciente listado
+- WHEN se inspecciona su fila
+- THEN se muestran las acciones Expediente, Anexos, Editar y Eliminar
+
+### Requirement: Anexos del paciente
+
+El sistema SHALL permitir subir anexos desde el modal **Anexos** del paciente. Cada anexo MUST pertenecer a un paciente (`PacienteID`) y MAY asociarse opcionalmente a una consulta (`ConsultaID`). Los formatos permitidos SHALL ser PDF, PNG, JPG y JPEG; el PDF MUST tener un máximo de 5 MB y las imágenes un máximo de 2 MB. El nombre original MUST conservarse en `Anexo.Nombre` (máximo 150 caracteres) y la ruta parcial MUST guardarse en `Anexo.Ruta` con el patrón `/Attachment/{pacienteId}/[{consultaId}/]{guid}.{ext}`. El archivo físico SHALL almacenarse en la WebApi bajo `Attachment/`.
+
+#### Scenario: Subida de un PDF válido
+
+- GIVEN un paciente y un PDF de hasta 5 MB
+- WHEN el usuario lo sube desde el modal Anexos
+- THEN se registra el anexo con el nombre original y la ruta parcial, y el archivo queda en `Attachment/`
+
+#### Scenario: Archivo rechazado
+
+- GIVEN un archivo con formato no permitido o que excede el tamaño máximo
+- WHEN el usuario intenta subirlo
+- THEN el sistema muestra un error y no registra el anexo
+
+#### Scenario: Comentarios largos
+
+- GIVEN un anexo con comentarios de hasta 1500 caracteres
+- WHEN el usuario guarda
+- THEN el comentario se conserva completo
+
+### Requirement: Descarga de anexos
+
+El listado de anexos SHALL permitir descargar cada archivo mediante un endpoint autenticado. La descarga MUST conservar el nombre original del archivo.
+
+#### Scenario: Descarga de un anexo
+
+- GIVEN un anexo registrado
+- WHEN el usuario pulsa el botón de descarga
+- THEN el navegador descarga el archivo con su nombre original

@@ -134,17 +134,26 @@
             position: relative;
         }
 
-        .has-arrow::after {
+        .components li.has-arrow > a {
+            position: relative;
+            padding-right: 42px;
+        }
+
+        .components li.has-arrow > a::after {
             content: '\f107';
             font-family: 'Font Awesome 6 Free';
             font-weight: 900;
             position: absolute;
             right: 20px;
-            transition: all 0.3s;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.75);
         }
 
-        .active.has-arrow::after {
-            transform: rotate(180deg);
+        .components li.has-arrow.active > a::after {
+            transform: translateY(-50%) rotate(180deg);
         }
 
         /* ========================================= */
@@ -154,6 +163,8 @@
             margin-left: var(--sidebar-width);
             transition: all 0.3s;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .main-content.active {
@@ -222,6 +233,7 @@
         /* ========================================= */
         .page-content {
             padding: 25px;
+            flex: 1;
         }
 
         .page-title {
@@ -609,4 +621,120 @@
         html[data-bs-theme="dark"] .btn-outline-primary:hover {
             background: #0099CC;
             color: #fff;
+        }
+
+        /* ========================================= */
+        /* FOOTER */
+        /* ========================================= */
+        .app-footer {
+            padding: 14px 25px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            color: #858796;
+            font-size: 0.78rem;
+            text-align: center;
+        }
+
+        .app-footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px 10px;
+        }
+
+        .app-footer a {
+            color: #0099CC;
+            text-decoration: none;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .app-footer-sep {
+            color: #c5c8d4;
+        }
+
+        html[data-bs-theme="dark"] .app-footer {
+            border-top-color: #343a40;
+            color: #adb5bd;
+        }
+
+        html[data-bs-theme="dark"] .app-footer a {
+            color: #66DDFF;
+        }
+
+        html[data-bs-theme="dark"] .app-footer-sep {
+            color: #495057;
+        }
+
+        @media (max-width: 768px) {
+            .app-footer {
+                padding: 12px 15px 18px;
+            }
+        }
+
+        /* ========================================= */
+        /* INDICADORES DEL DASHBOARD */
+        /* ========================================= */
+        .kpi-mes {
+            margin: 0 0 12px;
+            color: #858796;
+            font-size: 0.82rem;
+        }
+
+        .kpi-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #fff;
+            border: 1px solid #e3e6f0;
+            border-radius: 12px;
+            padding: 16px 18px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .kpi-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #e6f9ff;
+            color: #0099CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex: 0 0 auto;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e2a4a;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        html[data-bs-theme="dark"] .kpi-card {
+            background: #1e1e1e;
+            border-color: #343a40;
+        }
+
+        html[data-bs-theme="dark"] .kpi-icon {
+            background: #0b3b4a;
+            color: #66DDFF;
+        }
+
+        html[data-bs-theme="dark"] .kpi-value {
+            color: #e9ecef;
+        }
+
+        html[data-bs-theme="dark"] .kpi-label,
+        html[data-bs-theme="dark"] .kpi-mes {
+            color: #adb5bd;
         }

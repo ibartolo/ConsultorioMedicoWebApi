@@ -44,6 +44,26 @@ namespace ConsultorioMedicoMVC.Controllers
             return View();
         }
 
+        // GET: Home/Manual (solo usuarios autenticados)
+        public ActionResult Manual()
+        {
+            if (!SessionHelper.ExisteSession())
+                return RedirectToAction("Autentication");
+
+            return View();
+        }
+
+        // GET: Home/Terminos y Home/Privacidad (públicos)
+        public ActionResult Terminos()
+        {
+            return View();
+        }
+
+        public ActionResult Privacidad()
+        {
+            return View();
+        }
+
         // POST: Home/CambiarTema (público: usable desde login y configuración)
         [HttpPost]
         public string CambiarTema(string tema)

@@ -186,3 +186,45 @@ Ambos deben terminar con **exit 0**.
 - JSON: WebApi serializa camelCase; MVC serializa PascalCase. Newtonsoft deserializa case-insensitive → el flujo funciona.
 - `Id` = `int` (la BD usa `int IDENTITY`, no `long`).
 - Auditoría BD: `CreatedBY`/`CreatedDT`/`UpdatedBY`/`UpdatedDT` (en esta BD `CreatedDT`/`UpdatedDT` son `nvarchar(25)`, no datetime — los SPs no las tocan).
+
+---
+
+## 11. Alcance actual y cambios recientes (2026-10)
+
+### Módulos
+- Paciente, Cita, Consulta, Tratamiento, Paquete, Usuario, Anexo, Historial/Expediente, Receta, Datos Institución, Datos Fiscales, Configuración, Dashboard.
+- Menú: **Catálogos** agrupa Tratamientos/Paquetes. **Historial**, **Anexos** y **Reportes** están ocultos del menú (las pantallas siguen existiendo por URL directa).
+
+### Anexos
+- `dbo.Anexo`: `PacienteID` obligatorio, `ConsultaID` opcional. No hay `CitaID` ni `PaqueteID`.
+- Formatos: PDF/PNG/JPG/JPEG. PDF <=5 MB; imágenes <=2 MB.
+- Archivo físico: WebApi `Attachment/{pacienteId}/[{consultaId}/]{guid}.{ext}`.
+- `Nombre` = nombre original (150); `Ruta` = ruta parcial `/Attachment/...`; `Comentarios` máx. 1500.
+- Subida desde Pacientes (modal Anexos) y Expediente → Consultas (clip). Descarga por proxy MVC.
+
+### Receta
+- Una por consulta; `DescripcionReceta` es texto libre.
+- Se abre en modal (`Consulta/RecetaParcial`); `Consulta/Receta/{id}` queda como respaldo.
+- Membrete desde `DatosInstitucion`: logo, nombre, dirección, teléfonos, correo y médico (nombre, cédula, especialidad).
+- Impresión aislada en ventana con solo la receta; tamaño carta.
+
+### Configuración / cookies
+- `tema` (claro/oscuro) y `recordarUsuario` (solo usuario), 1 año, HttpOnly.
+- La cookie `tema` se crea en login y se renueva al cambiarla; `Home.CambiarTema` es acción pública.
+- `AuthenticationFilter` tiene allow-list `PublicActions`; el manual es privado y términos/privacidad son públicos.
+
+### Dashboard
+- KPIs del mes: pacientes nuevos (`FechaAlta`/`CreatedDT`), consultas (`Consulta.FechaConsulta`), tratamientos (citas con `TratamientoID`).
+- Endpoint: `api/Dashboard/Indicadores` → MVC `/Dashboard/Indicadores`.
+- Consulta inline de solo lectura en `DbWrapper.Dashboard.cs`.
+
+### Calendarios
+- Citas y Consultas: `slotDuration`/`slotLabelInterval` 30 min, `slotMinTime` 08:00, `slotMaxTime` 20:00, `scrollTime` 08:00, `allDaySlot: false`.
+- Aplica a vistas semana/día; la vista mensual sigue mensual.
+
+### DataTables
+- Idioma local en `Content/datatables-es-ES.json` (evita CORS del CDN).
+
+### Documentos
+- Manual `/Home/Manual` (autenticado), Términos `/Home/Terminos` y Privacidad `/Home/Privacidad` (públicos), con layout `_LayoutPublic`.
+- Footer autenticado: ©, Manual, Términos, Privacidad, By DESI.

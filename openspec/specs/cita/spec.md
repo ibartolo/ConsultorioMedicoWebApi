@@ -105,6 +105,22 @@ El sistema SHALL exponer la acción MVC Data Access `EliminarCita(long id)` (POS
 - WHEN el usuario cancela
 - THEN no se hace POST y el modal permanece abierto
 
+### Requirement: Intervalo y horario del calendario
+
+El calendario de Citas SHALL mostrar intervalos y etiquetas cada **30 minutos** y SHALL limitar el horario visible de **08:00 a 20:00**. La vista de semana/día SHALL iniciar en las 08:00 y MUST ocultar la fila de "todo el día". La selección y el arrastre SHOULD ajustarse a bloques de 30 minutos.
+
+#### Scenario: Calendario de semana con intervalo de 30 minutos
+
+- GIVEN el calendario de Citas en vista de semana
+- WHEN se renderiza
+- THEN cada celda y etiqueta representa 30 minutos y el rango visible es 08:00–20:00
+
+#### Scenario: Vista mensual
+
+- GIVEN la vista mensual de Citas
+- WHEN el usuario la selecciona
+- THEN se mantiene la vista mensual; el rango horario aplica a las vistas de semana/día
+
 ## Notas (bugfix / operación — fuera de esta capability)
 
 1. **Fix calendario de Consultas**: `Views/Consulta/Index.cshtml` (línea 119) corrige `initialView: 'timeGridWeek` → `initialView: 'timeGridWeek',` (coma final). Bugfix de sintaxis JS; no es requisito de esta capability.
