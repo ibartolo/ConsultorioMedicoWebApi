@@ -38,8 +38,8 @@ namespace ConsultorioMedicoMVC.Services
             return await _httpClient.GuardarOActualizarConsulta(consulta);
         }
 
-        public async Task<ModelResponse<RecetaDTO>> ObtenerRecetaPorConsulta(long consultaId)
-            => await _httpClient.ObtenerRecetaPorConsulta(consultaId);
+        public async Task<ModelResponse<RecetaDTO>> ObtenerRecetaPorConsulta(long consultaId, int institucionId)
+            => await _httpClient.ObtenerRecetaPorConsulta(consultaId, institucionId);
 
         public async Task<ModelResponse<List<ConsultaDTO>>> ConsultarConsultasPorPaciente(long pacienteId)
             => await _httpClient.ObtenerConsultasPorPaciente(pacienteId);

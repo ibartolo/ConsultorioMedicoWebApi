@@ -65,11 +65,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, string usuario)
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerRecetaPorConsulta(consultaId, usuario);
+                return _dbWrapper.ObtenerRecetaPorConsulta(consultaId, institucionId, usuario);
             }
             catch (Exception ex)
             {

@@ -47,7 +47,10 @@
     </div>
 </div>
 
+@Html.Partial("_AnexosModal")
+
 @section scripts {
+    <script src="@Url.Content("~/Scripts/anexos.js")"></script>
     <script>
         var consultarUrl = '@Url.Action("ConsultarPacientePorId", "Paciente")';
         var guardarUrl = '@Url.Action("GuardarOActualizarPaciente", "Paciente")';
@@ -91,7 +94,7 @@
             });
 
             tablaPacientes = $('#pacientesTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 10,
                 responsive: true,
                 columns: [
@@ -114,6 +117,7 @@
                         orderable: false,
                         render: function (data) {
                             return '<a href="' + expedienteUrl + '/' + data + '" class="btn btn-sm btn-info me-1" title="Expediente Clínico"><i class="fas fa-folder-open"></i></a>' +
+                                   '<button type="button" class="btn btn-sm btn-secondary btn-anexos-paciente me-1" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i> Anexos</button>' +
                                    '<button type="button" class="btn btn-sm btn-warning btn-editar-paciente me-1" data-id="' + data + '" title="Editar"><i class="fas fa-edit"></i></button>' +
                                    '<button type="button" class="btn btn-sm btn-danger btn-eliminar-paciente" data-id="' + data + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                         }
@@ -126,6 +130,12 @@
                         return result.IsSuccess ? result.Response : [];
                     }
                 }
+            });
+
+            $('#pacientesTable').on('click', '.btn-anexos-paciente', function () {
+                var id = $(this).data('id');
+                var dto = tablaPacientes.row($(this).closest('tr')).data();
+                abrirModalAnexos(id, dto ? dto.NombreCompleto : '', null);
             });
 
             $('#pacientesTable').on('click', '.btn-editar-paciente', function () {

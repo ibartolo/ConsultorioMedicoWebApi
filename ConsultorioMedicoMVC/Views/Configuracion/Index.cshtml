@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Configuración";
+    var tema = ViewBag.Tema as string ?? "claro";
+}
+<h2 class="page-title"><i class="fas fa-cog me-2" style="color: var(--primary);"></i>Configuración</h2>
+
+<div class="card-custom mb-3">
+    <div class="card-title"><i class="fas fa-palette"></i> Apariencia</div>
+    <p class="text-muted">Selecciona el tema de la aplicación. La preferencia se guarda por un año en este navegador.</p>
+    <p class="mb-3">Tema actual según el servidor: <strong id="temaActualTexto">@(tema == "oscuro" ? "Oscuro" : "Claro")</strong></p>
+    <div class="btn-group" role="group" aria-label="Tema">
+        <button type="button" class="btn @(tema == "claro" ? "btn-primary" : "btn-outline-primary") btn-tema" data-tema="claro">
+            <i class="fas fa-sun me-1"></i> Claro
+        </button>
+        <button type="button" class="btn @(tema == "oscuro" ? "btn-primary" : "btn-outline-primary") btn-tema" data-tema="oscuro">
+            <i class="fas fa-moon me-1"></i> Oscuro
+        </button>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-link"></i> Accesos rápidos</div>
+    <a href="@Url.Action("Index", "DatosInstitucion")" class="btn btn-outline-primary me-2">
+        <i class="fas fa-hospital me-1"></i> Datos de la Institución
+    </a>
+    <a href="@Url.Action("Index", "DatosFiscales")" class="btn btn-outline-primary">
+        <i class="fas fa-file-invoice me-1"></i> Datos Fiscales
+    </a>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var temaUrl = '@Url.Action("CambiarTema", "Home")';
+
+            $('.btn-tema').on('click', function () {
+                var tema = $(this).data('tema');
+
+                $.post(temaUrl, { tema: tema }, function () {
+                    document.documentElement.setAttribute('data-bs-theme', tema === 'oscuro' ? 'dark' : 'light');
+                    $('#temaActualTexto').text(tema === 'oscuro' ? 'Oscuro' : 'Claro');
+
+                    $('.btn-tema').removeClass('btn-primary').addClass('btn-outline-primary');
+                    $('.btn-tema[data-tema="' + tema + '"]').removeClass('btn-outline-primary').addClass('btn-primary');
+
+                    Swal.fire({
+                        title: 'Tema actualizado',
+                        text: 'La preferencia se guardó por un año.',
+                        icon: 'success',
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                });
+            });
+        });
+    </script>
+}

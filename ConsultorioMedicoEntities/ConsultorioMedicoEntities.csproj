@@ -55,6 +55,10 @@
     <Compile Include="Catalogos\PacientePaqueteLecturaDTO.cs" />
     <Compile Include="Catalogos\CitaPaqueteLecturaDTO.cs" />
     <Compile Include="Catalogos\Anexo.cs" />
+    <Compile Include="Catalogos\DatosInstitucion.cs" />
+    <Compile Include="Catalogos\DatosInstitucionValidator.cs" />
+    <Compile Include="Catalogos\DatosFiscales.cs" />
+    <Compile Include="Catalogos\DatosFiscalesValidator.cs" />
     <Compile Include="Autenticacion\Usuario.cs" />
     <Compile Include="Autenticacion\UsuarioDTO.cs" />
     <Compile Include="Autenticacion\UsuarioValidator.cs" />

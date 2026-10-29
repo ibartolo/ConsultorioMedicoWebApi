@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "Datos Fiscales";
+    int institucionId = 1;
+    if (ViewBag.InstitucionId != null) { institucionId = (int)ViewBag.InstitucionId; }
+}
+<h2 class="page-title"><i class="fas fa-file-invoice me-2" style="color: var(--primary);"></i>Datos Fiscales</h2>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-file-invoice"></i> Información Fiscal</div>
+    <form id="fiscalForm" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="FiscalId" value="0" />
+        <input type="hidden" name="DatosInstitucionID" id="FiscalDatosInstitucionID" value="@institucionId" />
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Razón Social <span class="required">*</span></label>
+                <input type="text" name="RazonSocial" id="RazonSocial" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">RFC <span class="required">*</span></label>
+                <input type="text" name="RFC" id="RFC" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Teléfono 1</label>
+                <input type="text" name="Telefono1" id="FiscalTelefono1" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Teléfono 2</label>
+                <input type="text" name="Telefono2" id="FiscalTelefono2" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" name="Email" id="FiscalEmail" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Calle</label>
+                <input type="text" name="Calle" id="FiscalCalle" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">No. Interior</label>
+                <input type="text" name="NoInterior" id="FiscalNoInterior" class="form-control" maxlength="10" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">No. Exterior</label>
+                <input type="text" name="NoExterior" id="FiscalNoExterior" class="form-control" maxlength="10" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Colonia</label>
+                <input type="text" name="Colonia" id="FiscalColonia" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Delegación</label>
+                <input type="text" name="Deleacion" id="FiscalDeleacion" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Municipio</label>
+                <input type="text" name="Municipio" id="FiscalMunicipio" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <input type="text" name="Estado" id="FiscalEstado" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">CP</label>
+                <input type="number" name="CP" id="FiscalCP" class="form-control" min="0" max="99999" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">País</label>
+                <input type="text" name="Pais" id="FiscalPais" class="form-control" maxlength="50" />
+            </div>
+        </div>
+        <div class="text-end mt-4">
+            <button type="button" class="btn btn-primary" onclick="guardarFiscal()">
+                <i class="fas fa-save me-1"></i> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var fiscalConsultarUrl = '@Url.Action("Consultar", "DatosFiscales")';
+        var fiscalGuardarUrl = '@Url.Action("Guardar", "DatosFiscales")';
+
+        $(document).ready(function () {
+            cargarFiscal();
+        });
+
+        function parseRespuesta(r) {
+            return (typeof r === 'string') ? JSON.parse(r) : r;
+        }
+
+        function valorNumero(valor) {
+            return (valor === null || valor === undefined) ? '' : valor;
+        }
+
+        function limpiarFiscal() {
+            $('#fiscalForm')[0].reset();
+            $('#FiscalId').val(0);
+            $('#FiscalDatosInstitucionID').val('@institucionId');
+        }
+
+        function cargarFiscal() {
+            $.get(fiscalConsultarUrl, function (response) {
+                var r = parseRespuesta(response);
+                if (r && r.IsSuccess && r.Response) {
+                    poblarFiscal(r.Response);
+                } else {
+                    limpiarFiscal();
+                }
+            }).fail(function () {
+                limpiarFiscal();
+                Swal.fire({ title: 'Error', text: 'Error de conexión al cargar los datos fiscales.', icon: 'error', confirmButtonColor: '#0099CC' });
+            });
+        }
+
+        function poblarFiscal(d) {
+            $('#FiscalId').val(d.Id || 0);
+            $('#RazonSocial').val(d.RazonSocial || '');
+            $('#RFC').val(d.RFC || '');
+            $('#FiscalTelefono1').val(d.Telefono1 || '');
+            $('#FiscalTelefono2').val(d.Telefono2 || '');
+            $('#FiscalEmail').val(d.Email || '');
+            $('#FiscalCalle').val(d.Calle || '');
+            $('#FiscalNoInterior').val(d.NoInterior || '');
+            $('#FiscalNoExterior').val(d.NoExterior || '');
+            $('#FiscalColonia').val(d.Colonia || '');
+            $('#FiscalDeleacion').val(d.Deleacion || '');
+            $('#FiscalMunicipio').val(d.Municipio || '');
+            $('#FiscalEstado').val(d.Estado || '');
+            $('#FiscalCP').val(valorNumero(d.CP));
+            $('#FiscalPais').val(d.Pais || '');
+            $('#FiscalDatosInstitucionID').val(valorNumero(d.DatosInstitucionID) || '@institucionId');
+        }
+
+        function validarFiscal() {
+            var razon = $.trim($('#RazonSocial').val());
+            if (!razon) {
+                Swal.fire({ title: 'Dato requerido', text: 'La razón social es requerida.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            if (razon.length > 100) {
+                Swal.fire({ title: 'Longitud excedida', text: 'La razón social no puede exceder 100 caracteres.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            var rfc = $.trim($('#RFC').val());
+            if (!rfc) {
+                Swal.fire({ title: 'Dato requerido', text: 'El RFC es requerido.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            if (rfc.length > 100) {
+                Swal.fire({ title: 'Longitud excedida', text: 'El RFC no puede exceder 100 caracteres.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            var email = $.trim($('#FiscalEmail').val());
+            if (email && email.indexOf('@@') < 0) {
+                Swal.fire({ title: 'Correo no válido', text: 'Ingrese un correo electrónico válido.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            var cp = $('#FiscalCP').val();
+            if (cp !== '' && (parseInt(cp, 10) < 0 || parseInt(cp, 10) > 99999)) {
+                Swal.fire({ title: 'CP no válido', text: 'El código postal debe estar entre 0 y 99999.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            return true;
+        }
+
+        function guardarFiscal() {
+            if (!validarFiscal()) return;
+
+            Swal.fire({
+                title: '¿Guardar los datos fiscales?',
+                showCancelButton: true,
+                confirmButtonColor: '#0099CC',
+                cancelButtonColor: '#6C757D',
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+
+                $.ajax({
+                    url: fiscalGuardarUrl,
+                    type: 'POST',
+                    data: $('#fiscalForm').serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = parseRespuesta(response);
+                        if (r && r.IsSuccess) {
+                            Swal.fire({ title: '¡Datos fiscales guardados!', text: r.Message || 'Los datos fiscales se guardaron correctamente.', icon: 'success', timer: 1500, showConfirmButton: false });
+                            if (r.Response && r.Response.Id) $('#FiscalId').val(r.Response.Id);
+                        } else {
+                            Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible guardar los datos fiscales.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                });
+            });
+        }
+    </script>
+}

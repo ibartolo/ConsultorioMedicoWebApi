@@ -100,7 +100,7 @@
             <div class="card-title"><i class="fas fa-stethoscope"></i> Consultas</div>
             <div class="table-container">
                 <table id="consultasTable" class="table table-hover table-striped" style="width:100%">
-                    <thead><tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Descripción</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -261,7 +261,11 @@
     </div>
 </div>
 
+@Html.Partial("_AnexosModal")
+@Html.Partial("_RecetaModal")
+
 @section scripts {
+    <script src="@Url.Content("~/Scripts/anexos.js")"></script>
     <script>
         var tratamientosTable, consultasTable, paquetesTable, citasPaqueteTable;
         var pacientePaqueteIdActual = 0;
@@ -284,12 +288,20 @@
                  + ' ' + pad2(h12) + ':' + pad2(d.getMinutes()) + ' ' + ampm;
         }
 
+        function seleccionarPaquete(pacientePaqueteId) {
+            if (!pacientePaqueteId) return;
+            pacientePaqueteIdActual = pacientePaqueteId;
+            if (citasPaqueteTable) {
+                citasPaqueteTable.ajax.reload();
+            }
+        }
+
         $(document).ready(function () {
             var pacienteId = @Model.Id;
             var recetaUrl = '@Url.Action("Receta", "Consulta")';
 
             tratamientosTable = $('#tratamientosTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 searching: false,
                 lengthChange: false,
@@ -307,7 +319,7 @@
             });
 
             consultasTable = $('#consultasTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 searching: false,
                 lengthChange: false,
@@ -315,7 +327,14 @@
                     { data: 'Id', visible: false },
                     { data: 'FechaConsulta', render: function (data) { return formatFechaHoraAmPm(data); } },
                     { data: 'TipoConsultaNombre' },
-                    { data: 'Descripcion' }
+                    { data: 'Descripcion' },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data) {
+                            return '<button type="button" class="btn btn-sm btn-secondary btn-anexos-consulta" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i></button>';
+                        }
+                    }
                 ],
                 ajax: {
                     url: '@Url.Action("ConsultarConsultasPorPaciente", "Historial")',
@@ -326,11 +345,21 @@
 
             consultasTable.on('dblclick', 'tbody tr', function () {
                 var data = consultasTable.row(this).data();
-                window.open(recetaUrl + '/' + data.Id, '_blank');
+                abrirModalReceta(data.Id);
+            });
+
+            consultasTable.on('click', '.btn-anexos-consulta', function (e) {
+                e.stopPropagation();
+                var id = $(this).data('id');
+                abrirModalAnexos(pacienteId, '', id);
+            });
+
+            consultasTable.on('dblclick', '.btn-anexos-consulta', function (e) {
+                e.stopPropagation();
             });
 
             paquetesTable = $('#paquetesTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 searching: false,
                 lengthChange: false,
@@ -342,11 +371,18 @@
                     url: '@Url.Action("ConsultarPaquetesPorPaciente", "Historial")',
                     data: function (d) { d.pacienteId = pacienteId; return d; },
                     dataSrc: function (json) { var r = (typeof json === 'string') ? JSON.parse(json) : json; return r.IsSuccess ? r.Response : []; }
+                },
+                initComplete: function () {
+                    var api = this.api();
+                    if (api.rows().count() > 0) {
+                        seleccionarPaquete(api.row(0).data().Id);
+                        $(api.row(0).node()).addClass('table-active');
+                    }
                 }
             });
 
             citasPaqueteTable = $('#citasPaqueteTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 searching: false,
                 lengthChange: false,
@@ -365,8 +401,9 @@
 
             paquetesTable.on('click', 'tbody tr', function () {
                 var data = paquetesTable.row(this).data();
-                pacientePaqueteIdActual = data.Id;
-                citasPaqueteTable.ajax.reload();
+                $('#paquetesTable tbody tr').removeClass('table-active');
+                $(this).addClass('table-active');
+                seleccionarPaquete(data.Id);
             });
 
             $('#citaFormExpediente').validate({

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using ConsultorioMedicoEntities.Autenticacion;
 using ConsultorioMedicoEntities.Seguridad;
@@ -22,12 +23,47 @@ namespace ConsultorioMedicoMVC.Controllers
         // GET: Home/Autentication (login, allow-list)
         public ActionResult Autentication()
         {
+            var tema = Request.Cookies["tema"] != null ? Request.Cookies["tema"].Value : null;
+            if (tema != "claro" && tema != "oscuro")
+            {
+                tema = "claro";
+                Response.Cookies.Set(new HttpCookie("tema", tema)
+                {
+                    Expires = DateTime.Now.AddYears(1),
+                    Path = "/",
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Lax
+                });
+            }
+
+            ViewBag.Tema = tema;
+            ViewBag.UsuarioRecordado = Request.Cookies["recordarUsuario"] != null
+                ? Request.Cookies["recordarUsuario"].Value
+                : string.Empty;
+
             return View();
+        }
+
+        // POST: Home/CambiarTema (público: usable desde login y configuración)
+        [HttpPost]
+        public string CambiarTema(string tema)
+        {
+            if (tema != "oscuro") tema = "claro";
+
+            Response.Cookies.Set(new HttpCookie("tema", tema)
+            {
+                Expires = DateTime.Now.AddYears(1),
+                Path = "/",
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax
+            });
+
+            return JsonConvert.SerializeObject(new { IsSuccess = true, Tema = tema, Message = "Tema actualizado." });
         }
 
         // POST: Home/LogIn (doble encode: devuelve JSON como string)
         [HttpPost]
-        public async Task<string> LogIn(string user, string pass)
+        public async Task<string> LogIn(string user, string pass, bool recordar = false)
         {
             var mr = new ModelResponse();
             try
@@ -59,6 +95,27 @@ namespace ConsultorioMedicoMVC.Controllers
                     UserAvatar = GenerarAvatarIniciales(user)
                 };
                 SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
+
+                if (recordar)
+                {
+                    Response.Cookies.Set(new HttpCookie("recordarUsuario", user)
+                    {
+                        Expires = DateTime.Now.AddYears(1),
+                        Path = "/",
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax
+                    });
+                }
+                else
+                {
+                    Response.Cookies.Set(new HttpCookie("recordarUsuario", "")
+                    {
+                        Expires = DateTime.Now.AddDays(-1),
+                        Path = "/",
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax
+                    });
+                }
 
                 mr.IsSuccess = true;
                 mr.Message = "Ok";

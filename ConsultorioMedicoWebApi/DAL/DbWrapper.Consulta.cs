@@ -141,24 +141,47 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene la receta de una consulta. Reutiliza el SP existente GetRecetaByConsulta.</summary>
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, string usuario)
+        /// <summary>Obtiene la receta de una consulta con datos de institución y médico. SP: sp_nh_GetRecetaByConsulta.</summary>
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId, string usuario)
         {
             var mr = new ModelResponse<RecetaDTO>();
             try
             {
-                var receta = GetObject("GetRecetaByConsulta",
+                var receta = GetObject("sp_nh_GetRecetaByConsulta",
                     new Func<IDataReader, RecetaDTO>(r => new RecetaDTO
                     {
                         Paciente = r["Paciente"] as string,
+                        PacienteEdad = Convert.IsDBNull(r["Edad"]) ? (int?)null : Convert.ToInt32(r["Edad"]),
+                        PacienteSexo = r["Sexo"] as string,
                         FechaConsulta = Convert.IsDBNull(r["FechaConsulta"]) ? (DateTime?)null : Convert.ToDateTime(r["FechaConsulta"]),
                         Consulta = r["Consulta"] as string,
                         Medicamento = r["Medicamento"] as string,
                         TipoConsulta = r["TipoConsulta"] as string,
-                        ProximaConsulta = Convert.IsDBNull(r["ProximaConsulta"]) ? (DateTime?)null : Convert.ToDateTime(r["ProximaConsulta"])
+                        ProximaConsulta = Convert.IsDBNull(r["ProximaConsulta"]) ? (DateTime?)null : Convert.ToDateTime(r["ProximaConsulta"]),
+                        InstitucionNombre = r["InstitucionNombre"] as string,
+                        InstitucionCalle = r["InstitucionCalle"] as string,
+                        InstitucionNoInterior = r["InstitucionNoInterior"] as string,
+                        InstitucionNoExterior = r["InstitucionNoExterior"] as string,
+                        InstitucionColonia = r["InstitucionColonia"] as string,
+                        InstitucionDeleacion = r["InstitucionDeleacion"] as string,
+                        InstitucionMunicipio = r["InstitucionMunicipio"] as string,
+                        InstitucionEstado = r["InstitucionEstado"] as string,
+                        InstitucionCP = Convert.IsDBNull(r["InstitucionCP"]) ? (int?)null : Convert.ToInt32(r["InstitucionCP"]),
+                        InstitucionPais = r["InstitucionPais"] as string,
+                        InstitucionTelefono1 = r["InstitucionTelefono1"] as string,
+                        InstitucionTelefono2 = r["InstitucionTelefono2"] as string,
+                        InstitucionEmail = r["InstitucionEmail"] as string,
+                        LogoRuta = r["LogoRuta"] as string,
+                        MedicoNombre = r["MedicoNombre"] as string,
+                        MedicoCedula = r["MedicoCedula"] as string,
+                        MedicoEspecialidad = r["MedicoEspecialidad"] as string
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@consultaID", consultaId) });
+                    new[]
+                    {
+                        new SqlParameter("@consultaID", consultaId),
+                        new SqlParameter("@institucionId", institucionId)
+                    });
 
                 if (receta == null)
                 {

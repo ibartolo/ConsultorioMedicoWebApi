@@ -11,19 +11,6 @@ namespace ConsultorioMedicoWebApi.DAL
 {
     public partial class DbWrapper
     {
-        private Anexo LlenarAnexoLista(IDataReader r)
-        {
-            return new Anexo
-            {
-                Id = Convert.ToInt32(r["Id"]),
-                Estatus = Convert.ToBoolean(r["Estatus"]),
-                Fecha = Convert.IsDBNull(r["Fecha"]) ? (DateTime?)null : Convert.ToDateTime(r["Fecha"]),
-                Comentarios = r["Comentarios"] as string,
-                Nombre = r["Nombre"] as string,
-                Ruta = r["Ruta"] as string
-            };
-        }
-
         private Anexo LlenarAnexo(IDataReader r)
         {
             return new Anexo
@@ -39,14 +26,22 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista anexos por paciente. Reutiliza el SP existente GetAllAnexoByPacienteID.</summary>
+        /// <summary>
+        /// Lista los anexos activos de un paciente incluyendo ConsultaID (para filtrar en la vista).
+        /// Se usa SQL inline para no depender de un SP nuevo ni modificar la BD.
+        /// </summary>
         public ModelResponse<List<Anexo>> ObtenerAnexosPorPaciente(long pacienteId, string usuario)
         {
             var mr = new ModelResponse<List<Anexo>>();
             try
             {
-                var anexos = GetObjects("GetAllAnexoByPacienteID", LlenarAnexoLista, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@IdPaciente", pacienteId) });
+                var anexos = GetObjects(
+                    "SELECT Id, Estatus, Fecha, Comentarios, PacienteID, Nombre, Ruta, ConsultaID " +
+                    "FROM dbo.Anexo WHERE PacienteID = @PacienteId AND Estatus = 1 ORDER BY Fecha DESC, Id DESC",
+                    LlenarAnexo,
+                    CommandType.Text,
+                    new[] { new SqlParameter("@PacienteId", pacienteId) });
+
                 mr.IsSuccess = true;
                 mr.Response = anexos.ToList();
                 mr.Message = "Anexos obtenidos correctamente.";
@@ -58,6 +53,21 @@ namespace ConsultorioMedicoWebApi.DAL
                 mr.Message = "Ocurrió un error al obtener los anexos.";
             }
             return mr;
+        }
+
+        /// <summary>Valida que una consulta pertenezca al paciente (integridad del anexo).</summary>
+        public bool ConsultaPerteneceAPaciente(long consultaId, long pacienteId)
+        {
+            var total = ExecuteScalar(
+                "SELECT COUNT(*) FROM dbo.Consulta WHERE Id = @ConsultaId AND PacienteID = @PacienteId",
+                CommandType.Text,
+                new[]
+                {
+                    new SqlParameter("@ConsultaId", consultaId),
+                    new SqlParameter("@PacienteId", pacienteId)
+                });
+
+            return total != null && Convert.ToInt32(total) > 0;
         }
 
         /// <summary>Obtiene un anexo por Id. SP nuevo: sp_nh_GetAnexoById.</summary>

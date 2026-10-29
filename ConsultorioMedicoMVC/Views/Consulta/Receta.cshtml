@@ -1,49 +1,6 @@
 ﻿@model ConsultorioMedicoEntities.Catalogos.RecetaDTO
 @{
+    Layout = "~/Views/Shared/_LayoutReceta.cshtml";
     ViewBag.Title = "Receta Médica";
 }
-<h2 class="page-title"><i class="fas fa-prescription me-2" style="color: var(--primary);"></i>Receta Médica</h2>
-
-<div class="card-custom">
-    <div class="card-title"><i class="fas fa-user-md"></i> Consultorio Médico</div>
-
-    <div class="row g-3">
-        <div class="col-md-6">
-            <label class="form-label">Paciente</label>
-            <p class="form-control-plaintext fw-bold">@Model.Paciente</p>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Fecha</label>
-            <p class="form-control-plaintext">@(Model.FechaConsulta.HasValue ? Model.FechaConsulta.Value.ToString("dd/MM/yyyy HH:mm") : "")</p>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Tipo de Consulta</label>
-            <p class="form-control-plaintext">@Model.TipoConsulta</p>
-        </div>
-    </div>
-
-    <div class="row g-3 mt-2">
-        <div class="col-md-12">
-            <label class="form-label">Medicamento / Tratamiento</label>
-            <div class="p-3 border rounded bg-light" style="min-height:120px; white-space:pre-wrap;">@Model.Medicamento</div>
-        </div>
-    </div>
-
-    <div class="row g-3 mt-2">
-        <div class="col-md-8">
-            <label class="form-label">Consulta</label>
-            <p class="form-control-plaintext">@Model.Consulta</p>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Próxima Consulta</label>
-            <p class="form-control-plaintext">@(Model.ProximaConsulta.HasValue ? Model.ProximaConsulta.Value.ToString("dd/MM/yyyy") : "")</p>
-        </div>
-    </div>
-
-    <div class="row g-3 mt-3 d-print-none">
-        <div class="col-12">
-            <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print me-1"></i> Imprimir</button>
-            <a href="@Url.Action("Index", "Consulta")" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Volver</a>
-        </div>
-    </div>
-</div>
+@Html.Partial("_RecetaContenido", Model)

@@ -12,6 +12,12 @@ namespace ConsultorioMedicoWebApi.Services
 {
     public class AnexoService
     {
+        private const string CarpetaAnexos = "Attachment";
+        private const long MaxPdfBytes = 5L * 1024 * 1024;
+        private const long MaxImagenBytes = 2L * 1024 * 1024;
+
+        private static readonly string[] ExtensionesPermitidas = { ".pdf", ".png", ".jpg", ".jpeg" };
+
         private readonly DbWrapper _dbWrapper;
 
         public AnexoService()
@@ -46,11 +52,13 @@ namespace ConsultorioMedicoWebApi.Services
         }
 
         /// <summary>
-        /// Guarda un archivo anexo: lo escribe a disco y registra la fila en BD.
+        /// Guarda un archivo anexo en Attachment/{pacienteId}/[{consultaId}/] y registra la fila en BD.
+        /// Reglas: PDF hasta 5 MB; PNG/JPG/JPEG hasta 2 MB. El archivo físico se nombra con GUID.
         /// </summary>
         public ModelResponse<Anexo> GuardarAnexo(long pacienteId, long? consultaId, string comentarios, HttpFileCollection files, string usuario)
         {
             var mr = new ModelResponse<Anexo>();
+            string rutaAbsoluta = null;
             try
             {
                 if (pacienteId <= 0)
@@ -63,11 +71,35 @@ namespace ConsultorioMedicoWebApi.Services
                 if (file == null || file.ContentLength == 0)
                     return new ModelResponse<Anexo> { IsSuccess = false, Message = "El archivo está vacío." };
 
-                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                var nombreFisico = Guid.NewGuid().ToString("N") + extension;
-                var rutaRelativa = "Anexos/" + pacienteId + "/" + nombreFisico;
+                var nombreOriginal = Path.GetFileName(file.FileName);
+                if (string.IsNullOrWhiteSpace(nombreOriginal))
+                    return new ModelResponse<Anexo> { IsSuccess = false, Message = "El nombre del archivo no es válido." };
 
-                var rutaAbsoluta = HostingEnvironment.MapPath("~/" + rutaRelativa);
+                if (nombreOriginal.Length > 150)
+                    return new ModelResponse<Anexo> { IsSuccess = false, Message = "El nombre del archivo no puede exceder 150 caracteres." };
+
+                var extension = Path.GetExtension(nombreOriginal).ToLowerInvariant();
+                if (Array.IndexOf(ExtensionesPermitidas, extension) < 0)
+                    return new ModelResponse<Anexo> { IsSuccess = false, Message = "Solo se permiten archivos PDF, PNG, JPG o JPEG." };
+
+                var maxBytes = extension == ".pdf" ? MaxPdfBytes : MaxImagenBytes;
+                if (file.ContentLength > maxBytes)
+                {
+                    var limite = extension == ".pdf" ? "5 MB" : "2 MB";
+                    return new ModelResponse<Anexo> { IsSuccess = false, Message = "El archivo excede el tamaño máximo permitido (" + limite + ")." };
+                }
+
+                var consultaValida = consultaId.HasValue && consultaId.Value > 0;
+                if (consultaValida && !_dbWrapper.ConsultaPerteneceAPaciente(consultaId.Value, pacienteId))
+                    return new ModelResponse<Anexo> { IsSuccess = false, Message = "La consulta seleccionada no pertenece al paciente." };
+
+                var nombreFisico = Guid.NewGuid().ToString() + extension;
+                var rutaRelativa = "/" + CarpetaAnexos + "/" + pacienteId;
+                if (consultaValida)
+                    rutaRelativa += "/" + consultaId.Value;
+                rutaRelativa += "/" + nombreFisico;
+
+                rutaAbsoluta = HostingEnvironment.MapPath("~" + rutaRelativa);
                 if (string.IsNullOrEmpty(rutaAbsoluta))
                     return new ModelResponse<Anexo> { IsSuccess = false, Message = "No se pudo resolver la ruta de almacenamiento." };
 
@@ -81,11 +113,11 @@ namespace ConsultorioMedicoWebApi.Services
                 {
                     Estatus = true,
                     Fecha = DateTime.Now,
-                    Comentarios = comentarios,
+                    Comentarios = Truncar(comentarios, 1500),
                     PacienteID = (int)pacienteId,
-                    Nombre = file.FileName,
+                    Nombre = nombreOriginal,
                     Ruta = rutaRelativa,
-                    ConsultaID = (int?)consultaId
+                    ConsultaID = consultaValida ? (int?)consultaId.Value : null
                 };
 
                 var nuevoId = _dbWrapper.GuardarAnexo(anexo, usuario);
@@ -102,6 +134,10 @@ namespace ConsultorioMedicoWebApi.Services
             }
             catch (Exception ex)
             {
+                if (!string.IsNullOrEmpty(rutaAbsoluta) && File.Exists(rutaAbsoluta))
+                {
+                    try { File.Delete(rutaAbsoluta); } catch { }
+                }
                 Log.Error(ex, "Error en GuardarAnexo");
                 mr.IsSuccess = false;
                 mr.Message = "Ocurrió un error al guardar el anexo.";
@@ -109,11 +145,25 @@ namespace ConsultorioMedicoWebApi.Services
             return mr;
         }
 
+        private static string Truncar(string valor, int maximo)
+        {
+            if (string.IsNullOrEmpty(valor)) return valor;
+            return valor.Length <= maximo ? valor : valor.Substring(0, maximo);
+        }
+
         /// <summary>Devuelve los bytes del archivo en disco para descarga.</summary>
         public byte[] ObtenerBytesAnexo(Anexo anexo)
         {
             if (anexo == null || string.IsNullOrWhiteSpace(anexo.Ruta)) return null;
-            var rutaAbsoluta = HostingEnvironment.MapPath("~/" + anexo.Ruta);
+
+            string rutaAbsoluta;
+            if (anexo.Ruta.StartsWith("/"))
+                rutaAbsoluta = HostingEnvironment.MapPath("~" + anexo.Ruta);
+            else if (Path.IsPathRooted(anexo.Ruta))
+                rutaAbsoluta = anexo.Ruta; // rutas antiguas del WinForms (ej. M:\P\...)
+            else
+                rutaAbsoluta = HostingEnvironment.MapPath("~/" + anexo.Ruta);
+
             if (string.IsNullOrEmpty(rutaAbsoluta) || !File.Exists(rutaAbsoluta)) return null;
             return File.ReadAllBytes(rutaAbsoluta);
         }

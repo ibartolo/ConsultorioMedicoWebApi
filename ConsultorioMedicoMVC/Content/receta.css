@@ -1,0 +1,125 @@
+﻿.receta {
+    max-width: 800px;
+    margin: 20px auto 40px;
+    background: #fff;
+    padding: 42px 48px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    color: #1a1a1a;
+}
+
+.receta-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 18px;
+}
+
+.receta-logo img {
+    max-width: 180px;
+    max-height: 95px;
+    object-fit: contain;
+}
+
+.receta-institucion {
+    text-align: right;
+    flex: 1;
+}
+
+.receta-institucion h1 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    letter-spacing: 0.3px;
+}
+
+.receta-institucion p {
+    margin: 2px 0;
+    font-size: 12px;
+    color: #444;
+}
+
+.receta-titulo {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin: 26px 0 22px;
+}
+
+.receta-datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 28px;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.receta-datos .dato strong {
+    display: inline-block;
+    min-width: 90px;
+    color: #333;
+}
+
+.receta-datos .dato {
+    border-bottom: 1px dotted #bbb;
+    padding-bottom: 4px;
+}
+
+.receta-datos .dato-full {
+    grid-column: 1 / -1;
+}
+
+.receta-seccion-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    margin: 18px 0 8px;
+}
+
+.receta-medicamento {
+    min-height: 220px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.receta-firma {
+    margin-top: 70px;
+    margin-left: auto;
+    width: 300px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.receta-firma .linea {
+    border-top: 1px solid #1a1a1a;
+    padding-top: 8px;
+}
+
+.receta-firma .nombre {
+    font-weight: 700;
+}
+
+.receta-firma .detalle {
+    color: #444;
+    font-size: 12px;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .receta {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+}

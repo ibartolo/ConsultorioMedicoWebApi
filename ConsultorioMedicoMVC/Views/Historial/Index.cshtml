@@ -52,7 +52,7 @@
     <script>
         $(document).ready(function () {
             var citasTable = $('#citasTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 responsive: true,
                 columns: [
@@ -69,7 +69,7 @@
             });
 
             var consultasTable = $('#consultasTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 responsive: true,
                 columns: [
@@ -86,7 +86,7 @@
             });
 
             var anexosTable = $('#anexosTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 5,
                 responsive: true,
                 columns: [

@@ -27,11 +27,12 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Comentarios</label>
-                <input type="text" name="comentarios" class="form-control" placeholder="Comentarios del anexo">
+                <input type="text" name="comentarios" class="form-control" maxlength="1500" placeholder="Comentarios del anexo">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Archivo <span class="required">*</span></label>
-                <input type="file" name="archivo" class="form-control" required>
+                <input type="file" name="archivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
+                <small class="text-muted">PDF máx. 5 MB · Imágenes (PNG/JPG) máx. 2 MB</small>
             </div>
         </div>
         <div class="text-end mt-3">
@@ -74,7 +75,7 @@
     <script>
         $(document).ready(function () {
             var tabla = $('#anexosTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
                 pageLength: 10,
                 responsive: true,
                 columns: [

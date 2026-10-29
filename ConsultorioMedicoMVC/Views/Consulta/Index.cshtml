@@ -95,6 +95,8 @@
     </div>
 </div>
 
+@Html.Partial("_RecetaModal")
+
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script>
@@ -104,6 +106,16 @@
         var calendar;
 
         $(document).ready(function () {
+            $('#btnReceta').on('click', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                if (!id) return;
+
+                $('#modalConsulta').one('hidden.bs.modal', function () {
+                    abrirModalReceta(id);
+                }).modal('hide');
+            });
+
             $('#consultaForm').validate({
                 rules: { PacienteID: { required: true }, FechaConsulta: { required: true } },
                 messages: { PacienteID: { required: "Seleccione el paciente." }, FechaConsulta: { required: "La fecha de la consulta es requerida." } },
@@ -163,7 +175,7 @@
             $('#Comentarios').val(c ? (c.Comentarios || '') : '');
 
             if (c && c.Id > 0) {
-                $('#btnReceta').attr('href', recetaUrl + '/' + c.Id).show();
+                $('#btnReceta').attr('href', recetaUrl + '/' + c.Id).attr('data-id', c.Id).show();
             } else {
                 $('#btnReceta').hide();
             }

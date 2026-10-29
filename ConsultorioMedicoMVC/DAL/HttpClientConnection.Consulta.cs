@@ -17,8 +17,8 @@ namespace ConsultorioMedicoMVC.DAL
         public async Task<ModelResponse<Consulta>> GuardarOActualizarConsulta(Consulta consulta)
             => await RequestAsync<Consulta>("api/Consulta/Guardar", HttpMethod.Post, consulta, token.Token.access_token);
 
-        public async Task<ModelResponse<RecetaDTO>> ObtenerRecetaPorConsulta(long consultaId)
-            => await RequestAsync<RecetaDTO>("api/Consulta/Receta/" + consultaId, HttpMethod.Get, null, token.Token.access_token);
+        public async Task<ModelResponse<RecetaDTO>> ObtenerRecetaPorConsulta(long consultaId, int institucionId)
+            => await RequestAsync<RecetaDTO>("api/Consulta/Receta/" + consultaId + "?institucionId=" + institucionId, HttpMethod.Get, null, token.Token.access_token);
 
         public async Task<ModelResponse<List<ConsultaDTO>>> ObtenerConsultasPorPaciente(long pacienteId)
             => await RequestAsync<List<ConsultaDTO>>("api/Consulta/PorPaciente/" + pacienteId, HttpMethod.Get, null, token.Token.access_token);

@@ -1,0 +1,290 @@
+﻿@{
+    ViewBag.Title = "Datos de la Institución";
+    int institucionId = 1;
+    if (ViewBag.InstitucionId != null) { institucionId = (int)ViewBag.InstitucionId; }
+}
+<h2 class="page-title"><i class="fas fa-hospital me-2" style="color: var(--primary);"></i>Datos de la Institución</h2>
+
+<div class="card-custom mb-3">
+    <div class="card-title"><i class="fas fa-image"></i> Logo de la Institución</div>
+    <div class="row g-3 align-items-center">
+        <div class="col-md-3 text-center">
+            <img id="logoPreview" alt="Logo" style="max-width: 100%; max-height: 140px; display: none;" />
+            <div id="logoVacio" class="text-muted py-4">
+                <i class="fas fa-image fa-3x mb-2"></i><br />
+                Sin logo
+            </div>
+        </div>
+        <div class="col-md-9">
+            <input type="file" id="logoArchivo" class="form-control" accept=".png,.jpg,.jpeg" />
+            <small class="text-muted">PNG/JPG, máximo 2 MB.</small>
+            <div class="mt-2">
+                <button type="button" class="btn btn-primary btn-sm" onclick="subirLogo()">
+                    <i class="fas fa-upload me-1"></i> Subir logo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-building"></i> Información de la Institución</div>
+    <form id="institucionForm" autocomplete="off" novalidate>
+        <input type="hidden" name="Id" id="Id" value="@institucionId" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nombre <span class="required">*</span></label>
+                <input type="text" name="Nombre" id="Nombre" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">No. Trabajadores</label>
+                <input type="number" name="NoTrabajadores" id="NoTrabajadores" class="form-control" min="0" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">CP</label>
+                <input type="number" name="CP" id="CP" class="form-control" min="0" max="99999" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Teléfono 1</label>
+                <input type="text" name="Telefono1" id="Telefono1" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Teléfono 2</label>
+                <input type="text" name="Telefono2" id="Telefono2" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-12">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" name="Email" id="Email" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Calle</label>
+                <input type="text" name="Calle" id="Calle" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">No. Interior</label>
+                <input type="text" name="NoInterior" id="NoInterior" class="form-control" maxlength="10" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">No. Exterior</label>
+                <input type="text" name="NoExterior" id="NoExterior" class="form-control" maxlength="10" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Colonia</label>
+                <input type="text" name="Colonia" id="Colonia" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Delegación</label>
+                <input type="text" name="Deleacion" id="Deleacion" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Municipio</label>
+                <input type="text" name="Municipio" id="Municipio" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                <input type="text" name="Estado" id="Estado" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">País</label>
+                <input type="text" name="Pais" id="Pais" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Nombre del médico</label>
+                <input type="text" name="MedicoNombre" id="MedicoNombre" class="form-control" maxlength="100" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cédula profesional</label>
+                <input type="text" name="MedicoCedula" id="MedicoCedula" class="form-control" maxlength="50" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Especialidad</label>
+                <input type="text" name="MedicoEspecialidad" id="MedicoEspecialidad" class="form-control" maxlength="100" />
+            </div>
+        </div>
+        <div class="text-end mt-4">
+            <button type="button" class="btn btn-primary" onclick="guardarInstitucion()">
+                <i class="fas fa-save me-1"></i> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        var institucionId = @institucionId;
+        var consultarInstitucionUrl = '@Url.Action("Consultar", "DatosInstitucion")';
+        var guardarInstitucionUrl = '@Url.Action("Guardar", "DatosInstitucion")';
+
+        $(document).ready(function () {
+            cargarInstitucion();
+        });
+
+        function parseRespuesta(r) {
+            return (typeof r === 'string') ? JSON.parse(r) : r;
+        }
+
+        function cargarInstitucion() {
+            $.get(consultarInstitucionUrl, { id: institucionId }, function (response) {
+                var r = parseRespuesta(response);
+                if (r && r.IsSuccess && r.Response) {
+                    poblarInstitucion(r.Response);
+                } else {
+                    Swal.fire({ title: 'Aviso', text: (r && r.Message) || 'No se encontraron datos de la institución.', icon: 'info', confirmButtonColor: '#0099CC' });
+                }
+            }).fail(function () {
+                Swal.fire({ title: 'Error', text: 'Error de conexión al cargar la institución.', icon: 'error', confirmButtonColor: '#0099CC' });
+            });
+        }
+
+        function valorNumero(valor) {
+            return (valor === null || valor === undefined) ? '' : valor;
+        }
+
+        function poblarInstitucion(d) {
+            $('#Id').val(d.Id || institucionId);
+            $('#Nombre').val(d.Nombre || '');
+            $('#NoTrabajadores').val(valorNumero(d.NoTrabajadores));
+            $('#Telefono1').val(d.Telefono1 || '');
+            $('#Telefono2').val(d.Telefono2 || '');
+            $('#Email').val(d.Email || '');
+            $('#Calle').val(d.Calle || '');
+            $('#NoInterior').val(d.NoInterior || '');
+            $('#NoExterior').val(d.NoExterior || '');
+            $('#Colonia').val(d.Colonia || '');
+            $('#Deleacion').val(d.Deleacion || '');
+            $('#Municipio').val(d.Municipio || '');
+            $('#Estado').val(d.Estado || '');
+            $('#CP').val(valorNumero(d.CP));
+            $('#Pais').val(d.Pais || '');
+            $('#MedicoNombre').val(d.MedicoNombre || '');
+            $('#MedicoCedula').val(d.MedicoCedula || '');
+            $('#MedicoEspecialidad').val(d.MedicoEspecialidad || '');
+            institucionId = d.Id || institucionId;
+            actualizarLogoPreview(d.LogoRuta);
+        }
+
+        function actualizarLogoPreview(ruta) {
+            $('#logoPreview').off('error').on('error', function () {
+                $(this).hide();
+                $('#logoVacio').show();
+            });
+
+            if (ruta) {
+                $('#logoPreview')
+                    .attr('src', '@Url.Action("Logo", "DatosInstitucion")?id=' + institucionId + '&v=' + Date.now())
+                    .show();
+                $('#logoVacio').hide();
+            } else {
+                $('#logoPreview').hide().attr('src', '');
+                $('#logoVacio').show();
+            }
+        }
+
+        function subirLogo() {
+            var input = $('#logoArchivo')[0];
+            var file = input && input.files ? input.files[0] : null;
+            if (!file) {
+                Swal.fire({ title: 'Archivo requerido', text: 'Seleccione un logo para subir.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+
+            var nombre = file.name || '';
+            var punto = nombre.lastIndexOf('.');
+            var ext = punto >= 0 ? nombre.substring(punto).toLowerCase() : '';
+            if (['.png', '.jpg', '.jpeg'].indexOf(ext) < 0) {
+                Swal.fire({ title: 'Archivo no válido', text: 'Solo se permiten logos PNG, JPG o JPEG.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire({ title: 'Archivo no válido', text: 'El logo excede el tamaño máximo de 2 MB.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('id', institucionId);
+            formData.append('logo', file);
+
+            $.ajax({
+                url: '@Url.Action("SubirLogo", "DatosInstitucion")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (response) {
+                    var r = parseRespuesta(response);
+                    if (r && r.IsSuccess) {
+                        $('#logoArchivo').val('');
+                        actualizarLogoPreview(r.Response ? r.Response.LogoRuta : null);
+                        Swal.fire({ title: '¡Logo actualizado!', text: r.Message || 'El logo se guardó correctamente.', icon: 'success', timer: 1500, showConfirmButton: false });
+                    } else {
+                        Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible guardar el logo.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión al subir el logo.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+
+        function validarInstitucion() {
+            var nombre = $.trim($('#Nombre').val());
+            if (!nombre) {
+                Swal.fire({ title: 'Dato requerido', text: 'El nombre de la institución es requerido.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            if (nombre.length > 100) {
+                Swal.fire({ title: 'Longitud excedida', text: 'El nombre no puede exceder 100 caracteres.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            var email = $.trim($('#Email').val());
+            if (email && email.indexOf('@@') < 0) {
+                Swal.fire({ title: 'Correo no válido', text: 'Ingrese un correo electrónico válido.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            var cp = $('#CP').val();
+            if (cp !== '' && (parseInt(cp, 10) < 0 || parseInt(cp, 10) > 99999)) {
+                Swal.fire({ title: 'CP no válido', text: 'El código postal debe estar entre 0 y 99999.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return false;
+            }
+            return true;
+        }
+
+        function guardarInstitucion() {
+            if (!validarInstitucion()) return;
+
+            Swal.fire({
+                title: '¿Guardar los datos de la institución?',
+                showCancelButton: true,
+                confirmButtonColor: '#0099CC',
+                cancelButtonColor: '#6C757D',
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+
+                $.ajax({
+                    url: guardarInstitucionUrl,
+                    type: 'POST',
+                    data: $('#institucionForm').serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = parseRespuesta(response);
+                        if (r && r.IsSuccess) {
+                            Swal.fire({ title: '¡Datos guardados!', text: r.Message || 'La institución se guardó correctamente.', icon: 'success', timer: 1500, showConfirmButton: false });
+                            if (r.Response && r.Response.Id) {
+                                institucionId = r.Response.Id;
+                                $('#Id').val(r.Response.Id);
+                            }
+                        } else {
+                            Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible guardar la institución.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                });
+            });
+        }
+    </script>
+}

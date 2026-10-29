@@ -30,8 +30,8 @@ namespace ConsultorioMedicoWebApi.Controllers
             => _consultaService.GuardarOActualizarConsulta(consulta, User.Identity.Name);
 
         [HttpGet, Route("Receta/{consultaId:long}")]
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId)
-            => _consultaService.ObtenerRecetaPorConsulta(consultaId, User.Identity.Name);
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId = 1)
+            => _consultaService.ObtenerRecetaPorConsulta(consultaId, institucionId, User.Identity.Name);
 
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId)

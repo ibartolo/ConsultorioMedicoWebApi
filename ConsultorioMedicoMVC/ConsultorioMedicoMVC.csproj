@@ -82,6 +82,9 @@
     <Compile Include="Controllers\PaqueteController.cs" />
     <Compile Include="Controllers\UsuarioController.cs" />
     <Compile Include="Controllers\AnexoController.cs" />
+    <Compile Include="Controllers\DatosInstitucionController.cs" />
+    <Compile Include="Controllers\DatosFiscalesController.cs" />
+    <Compile Include="Controllers\ConfiguracionController.cs" />
     <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
@@ -94,6 +97,8 @@
     <Compile Include="DAL\HttpClientConnection.Paquete.cs" />
     <Compile Include="DAL\HttpClientConnection.Usuario.cs" />
     <Compile Include="DAL\HttpClientConnection.Anexo.cs" />
+    <Compile Include="DAL\HttpClientConnection.DatosInstitucion.cs" />
+    <Compile Include="DAL\HttpClientConnection.DatosFiscales.cs" />
     <Compile Include="DAL\HttpClientConnection.Historial.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -109,6 +114,8 @@
     <Compile Include="Services\PaqueteService.cs" />
     <Compile Include="Services\UsuarioService.cs" />
     <Compile Include="Services\AnexoService.cs" />
+    <Compile Include="Services\DatosInstitucionService.cs" />
+    <Compile Include="Services\DatosFiscalesService.cs" />
     <Compile Include="Services\HistorialService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -116,9 +123,15 @@
     <Content Include="Web.config" />
     <Content Include="Content\login.css" />
     <Content Include="Content\site.css" />
+    <Content Include="Content\receta.css" />
+    <Content Include="Content\datatables-es-ES.json" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_AnexosModal.cshtml" />
+    <Content Include="Views\Shared\_LayoutReceta.cshtml" />
+    <Content Include="Views\Shared\_RecetaModal.cshtml" />
+    <Content Include="Scripts\anexos.js" />
     <Content Include="Views\Home\Autentication.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Paciente\Index.cshtml" />
@@ -129,6 +142,7 @@
     <Content Include="Views\Consulta\Index.cshtml" />
     <Content Include="Views\Consulta\Nuevo.cshtml" />
     <Content Include="Views\Consulta\Receta.cshtml" />
+    <Content Include="Views\Consulta\_RecetaContenido.cshtml" />
     <Content Include="Views\Tratamiento\Index.cshtml" />
     <Content Include="Views\Tratamiento\Nuevo.cshtml" />
     <Content Include="Views\Paquete\Index.cshtml" />
@@ -136,6 +150,9 @@
     <Content Include="Views\Usuario\Index.cshtml" />
     <Content Include="Views\Usuario\Nuevo.cshtml" />
     <Content Include="Views\Anexo\Index.cshtml" />
+    <Content Include="Views\DatosInstitucion\Index.cshtml" />
+    <Content Include="Views\DatosFiscales\Index.cshtml" />
+    <Content Include="Views\Configuracion\Index.cshtml" />
     <Content Include="Views\Historial\Index.cshtml" />
     <Content Include="Views\Historial\Expediente.cshtml" />
   </ItemGroup>

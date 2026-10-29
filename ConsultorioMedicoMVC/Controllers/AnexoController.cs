@@ -28,11 +28,19 @@ namespace ConsultorioMedicoMVC.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Guardar(HttpPostedFileBase archivo, long pacienteId, string comentarios)
+        public async Task<ActionResult> Guardar(HttpPostedFileBase archivo, long pacienteId, long? consultaId, string comentarios)
         {
-            var response = await _anexoService.GuardarAnexo(pacienteId, null, comentarios, archivo);
+            var response = await _anexoService.GuardarAnexo(pacienteId, consultaId, comentarios, archivo);
             TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
             return RedirectToAction("Index");
+        }
+
+        /// <summary>Subida AJAX desde el modal de anexos (paciente y opcionalmente consulta).</summary>
+        [HttpPost]
+        public async Task<string> SubirAnexo(HttpPostedFileBase archivo, long pacienteId, long? consultaId, string comentarios)
+        {
+            var response = await _anexoService.GuardarAnexo(pacienteId, consultaId, comentarios, archivo);
+            return JsonConvert.SerializeObject(response);
         }
 
         public async Task<ActionResult> Descargar(long id)

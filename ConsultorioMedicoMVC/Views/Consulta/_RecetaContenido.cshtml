@@ -1,0 +1,75 @@
+﻿@model ConsultorioMedicoEntities.Catalogos.RecetaDTO
+@using System.Linq
+@{
+    int institucionId = 1;
+    if (ViewBag.InstitucionId != null) { institucionId = (int)ViewBag.InstitucionId; }
+
+    var direccionPartes = new System.Collections.Generic.List<string>();
+    if (!string.IsNullOrWhiteSpace(Model.InstitucionCalle))
+    {
+        var calle = Model.InstitucionCalle;
+        if (!string.IsNullOrWhiteSpace(Model.InstitucionNoExterior)) { calle += " " + Model.InstitucionNoExterior; }
+        if (!string.IsNullOrWhiteSpace(Model.InstitucionNoInterior)) { calle += " Int. " + Model.InstitucionNoInterior; }
+        direccionPartes.Add(calle);
+    }
+    if (!string.IsNullOrWhiteSpace(Model.InstitucionColonia)) { direccionPartes.Add("Col. " + Model.InstitucionColonia); }
+    if (!string.IsNullOrWhiteSpace(Model.InstitucionMunicipio)) { direccionPartes.Add(Model.InstitucionMunicipio); }
+    if (!string.IsNullOrWhiteSpace(Model.InstitucionEstado)) { direccionPartes.Add(Model.InstitucionEstado); }
+    if (Model.InstitucionCP.HasValue) { direccionPartes.Add("CP " + Model.InstitucionCP.Value); }
+    if (!string.IsNullOrWhiteSpace(Model.InstitucionPais)) { direccionPartes.Add(Model.InstitucionPais); }
+
+    var direccion = string.Join(", ", direccionPartes);
+    var telefonos = string.Join(" / ", new[] { Model.InstitucionTelefono1, Model.InstitucionTelefono2 }
+        .Where(t => !string.IsNullOrWhiteSpace(t)));
+
+    var fecha = Model.FechaConsulta.HasValue ? Model.FechaConsulta.Value.ToString("dd/MM/yyyy HH:mm") : "";
+    var proxima = Model.ProximaConsulta.HasValue ? Model.ProximaConsulta.Value.ToString("dd/MM/yyyy") : "";
+}
+<div class="receta">
+    <div class="receta-header">
+        <div class="receta-logo">
+            @if (!string.IsNullOrWhiteSpace(Model.LogoRuta))
+            {
+                <img src="@Url.Action("Logo", "DatosInstitucion", new { id = institucionId })" alt="Logo" />
+            }
+        </div>
+        <div class="receta-institucion">
+            <h1>@(Model.InstitucionNombre ?? "Consultorio Médico")</h1>
+            @if (!string.IsNullOrWhiteSpace(direccion)) { <p>@direccion</p> }
+            @if (!string.IsNullOrWhiteSpace(telefonos)) { <p>Tel. @telefonos</p> }
+            @if (!string.IsNullOrWhiteSpace(Model.InstitucionEmail)) { <p>@Model.InstitucionEmail</p> }
+        </div>
+    </div>
+
+    <div class="receta-titulo">RECETA MÉDICA</div>
+
+    <div class="receta-datos">
+        <div class="dato dato-full"><strong>Paciente:</strong> @Model.Paciente</div>
+        <div class="dato"><strong>Edad:</strong> @(Model.PacienteEdad.HasValue ? Model.PacienteEdad.Value + " años" : "")</div>
+        <div class="dato"><strong>Sexo:</strong> @Model.PacienteSexo</div>
+        <div class="dato"><strong>Fecha:</strong> @fecha</div>
+        <div class="dato"><strong>Tipo:</strong> @Model.TipoConsulta</div>
+        <div class="dato dato-full"><strong>Diagnóstico:</strong> @Model.Consulta</div>
+        @if (!string.IsNullOrWhiteSpace(proxima))
+        {
+            <div class="dato"><strong>Próxima cita:</strong> @proxima</div>
+        }
+    </div>
+
+    <div class="receta-seccion-titulo">Indicaciones / Medicamento</div>
+    <div class="receta-medicamento">@Model.Medicamento</div>
+
+    <div class="receta-firma">
+        <div class="linea">
+            <div class="nombre">@Model.MedicoNombre</div>
+            @if (!string.IsNullOrWhiteSpace(Model.MedicoCedula))
+            {
+                <div class="detalle">Cédula profesional: @Model.MedicoCedula</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.MedicoEspecialidad))
+            {
+                <div class="detalle">@Model.MedicoEspecialidad</div>
+            }
+        </div>
+    </div>
+</div>

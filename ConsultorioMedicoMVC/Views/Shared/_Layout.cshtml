@@ -3,9 +3,13 @@
     var sessionUser = SessionHelper.GetSessionUser();
     var userName = (sessionUser != null && sessionUser.UserName != null) ? sessionUser.UserName : "";
     var avatar = userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : "?";
+
+    var tema = Request.Cookies["tema"] != null ? Request.Cookies["tema"].Value : "claro";
+    if (tema != "claro" && tema != "oscuro") { tema = "claro"; }
+    var bsTheme = tema == "oscuro" ? "dark" : "light";
 }
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="@bsTheme">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +19,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="@Url.Content("~/Content/site.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/site.css")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/site.css")).Ticks" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/receta.css")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/receta.css")).Ticks" rel="stylesheet" />
 </head>
 <body>
     <nav class="sidebar" id="sidebar">
@@ -67,6 +72,18 @@
                 </a>
             </li>
             <li>
+                <a href="@Url.Action("Index", "DatosInstitucion")">
+                    <i class="fas fa-hospital"></i>
+                    <span class="menu-text">Datos Institución</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "DatosFiscales")">
+                    <i class="fas fa-file-invoice"></i>
+                    <span class="menu-text">Datos Fiscales</span>
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("Index", "Anexo")">
                     <i class="fas fa-paperclip"></i>
                     <span class="menu-text">Anexos</span>
@@ -110,7 +127,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2" style="color: var(--primary);"></i> Perfil</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2" style="color: var(--primary);"></i> Configuración</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Configuracion")"><i class="fas fa-cog me-2" style="color: var(--primary);"></i> Configuración</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="confirmarCierre()"><i class="fas fa-sign-out-alt me-2" style="color: var(--danger);"></i> Cerrar Sesión</a></li>
                     </ul>

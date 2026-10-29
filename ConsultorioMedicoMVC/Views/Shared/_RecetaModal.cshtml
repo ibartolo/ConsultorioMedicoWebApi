@@ -1,0 +1,80 @@
+﻿<!-- Modal Receta -->
+<div class="modal fade" id="modalReceta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header no-print">
+                <h5 class="modal-title"><i class="fas fa-prescription me-2"></i>Receta Médica</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="recetaContenido">
+                <div class="text-center text-muted py-5">Cargando receta...</div>
+            </div>
+            <div class="modal-footer no-print">
+                <button type="button" class="btn btn-primary" onclick="imprimirReceta()">
+                    <i class="fas fa-print me-1"></i> Imprimir
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #modalReceta .modal-body {
+        background: #fff;
+    }
+
+    #modalReceta .receta {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+</style>
+
+<script>
+    function abrirModalReceta(id) {
+        if (!id) return;
+
+        $('#recetaContenido').html('<div class="text-center text-muted py-5">Cargando receta...</div>');
+        $('#modalReceta').modal('show');
+
+        $.get('@Url.Action("RecetaParcial", "Consulta")', { id: id }, function (html) {
+            $('#recetaContenido').html(html);
+        }).fail(function () {
+            $('#recetaContenido').html('<div class="alert alert-danger m-3">No fue posible cargar la receta.</div>');
+        });
+    }
+
+    function imprimirReceta() {
+        var contenido = document.getElementById('recetaContenido').innerHTML;
+        if (!contenido || contenido.indexOf('class="receta"') < 0) return;
+
+        var baseUrl = '@(Request.Url.GetLeftPart(UriPartial.Authority) + Url.Content("~/"))';
+        var cssUrl = '@Url.Content("~/Content/receta.css")';
+        var ventana = window.open('', '_blank', 'width=900,height=700');
+
+        if (!ventana) {
+            Swal.fire({
+                title: 'Imprimir',
+                text: 'Permite las ventanas emergentes para imprimir la receta.',
+                icon: 'warning',
+                confirmButtonColor: '#0099CC'
+            });
+            return;
+        }
+
+        ventana.document.write('<html><head><title>Receta Médica</title>');
+        ventana.document.write('<base href="' + baseUrl + '">');
+        ventana.document.write('<link rel="stylesheet" href="' + cssUrl + '">');
+        ventana.document.write('<style>html,body{margin:0;padding:0;background:#fff;font-family:"Segoe UI",Arial,sans-serif;color:#1a1a1a}.receta{max-width:none;margin:0;padding:0;box-shadow:none}@@page{size:letter;margin:1.5cm}</style>');
+        ventana.document.write('</head><body>' + contenido + '</body></html>');
+        ventana.document.close();
+        ventana.focus();
+
+        setTimeout(function () {
+            ventana.print();
+            ventana.close();
+        }, 800);
+    }
+</script>

@@ -61,10 +61,31 @@ namespace ConsultorioMedicoMVC.Controllers
         // GET: Consulta/Receta/{id} (receta imprimible)
         public async Task<ActionResult> Receta(long id)
         {
-            var receta = await _consultaService.ObtenerRecetaPorConsulta(id);
+            var institucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
+                ? (int)tokenCookie.EmpresaID
+                : 1;
+
+            var receta = await _consultaService.ObtenerRecetaPorConsulta(id, institucionId);
             if (receta == null || !receta.IsSuccess || receta.Response == null)
                 return RedirectToAction("Index");
+
+            ViewBag.InstitucionId = institucionId;
             return View(receta.Response);
+        }
+
+        // GET: Consulta/RecetaParcial/{id} (contenido para el modal)
+        public async Task<ActionResult> RecetaParcial(long id)
+        {
+            var institucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
+                ? (int)tokenCookie.EmpresaID
+                : 1;
+
+            var receta = await _consultaService.ObtenerRecetaPorConsulta(id, institucionId);
+            if (receta == null || !receta.IsSuccess || receta.Response == null)
+                return new HttpNotFoundResult();
+
+            ViewBag.InstitucionId = institucionId;
+            return PartialView("_RecetaContenido", receta.Response);
         }
         #endregion
 

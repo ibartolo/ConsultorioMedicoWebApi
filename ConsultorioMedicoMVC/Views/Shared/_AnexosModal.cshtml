@@ -1,0 +1,84 @@
+﻿@{
+    var urlListar = Url.Action("ConsultarAnexos", "Anexo");
+    var urlSubir = Url.Action("SubirAnexo", "Anexo");
+    var urlDescargar = Url.Action("Descargar", "Anexo");
+    var urlConsultas = Url.Action("ConsultarConsultasPorPaciente", "Historial");
+}
+
+<div class="modal fade" id="modalAnexos" tabindex="-1" aria-hidden="true"
+     data-url-listar="@urlListar"
+     data-url-subir="@urlSubir"
+     data-url-descargar="@urlDescargar"
+     data-url-consultas="@urlConsultas">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-paperclip me-2"></i>Anexos
+                    <span id="anexosPacienteNombre" class="text-muted fs-6"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="anexoPacienteId" value="0" />
+                <input type="hidden" id="anexoConsultaId" value="" />
+
+                <div class="card-custom mb-3">
+                    <div class="card-title"><i class="fas fa-upload"></i> Subir anexo</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Asociar a</label>
+                            <select id="anexoConsultaSelect" class="form-select">
+                                <option value="">Paciente (sin consulta)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Archivo <span class="required">*</span></label>
+                            <input type="file" id="anexoArchivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg" />
+                            <small class="text-muted">PDF máx. 5 MB · Imágenes (PNG/JPG) máx. 2 MB</small>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-12">
+                            <label class="form-label">Comentarios</label>
+                            <textarea id="anexoComentarios" class="form-control" rows="3" maxlength="1500"
+                                      placeholder="Comentarios del anexo" style="resize: vertical; min-height: 90px;"></textarea>
+                            <small class="text-muted"><span id="anexoComentariosContador">0</span>/1500 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-primary" id="btnSubirAnexo">
+                            <i class="fas fa-upload me-1"></i> Subir anexo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                        <span><i class="fas fa-paperclip"></i> Anexos del paciente</span>
+                        <select id="anexoFiltroConsulta" class="form-select form-select-sm" style="max-width: 340px;">
+                            <option value="">Todos los anexos</option>
+                        </select>
+                    </div>
+                    <div class="table-container">
+                        <table id="anexosModalTable" class="table table-hover table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Fecha</th>
+                                    <th>Comentarios</th>
+                                    <th>Consulta</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
