@@ -50,7 +50,7 @@
 @Html.Partial("_AnexosModal")
 
 @section scripts {
-    <script src="@Url.Content("~/Scripts/anexos.js")"></script>
+    <script src="@Url.Content("~/Scripts/anexos.js")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Scripts/anexos.js")).Ticks"></script>
     <script>
         var consultarUrl = '@Url.Action("ConsultarPacientePorId", "Paciente")';
         var guardarUrl = '@Url.Action("GuardarOActualizarPaciente", "Paciente")';
@@ -83,7 +83,6 @@
                         telefono10: "El teléfono debe tener exactamente 10 dígitos."
                     },
                     Email: {
-                        required: "El correo es requerido.",
                         email: "Ingrese un formato de correo válido."
                     }
                 },

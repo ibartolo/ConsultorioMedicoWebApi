@@ -2,6 +2,7 @@
     var urlListar = Url.Action("ConsultarAnexos", "Anexo");
     var urlSubir = Url.Action("SubirAnexo", "Anexo");
     var urlDescargar = Url.Action("Descargar", "Anexo");
+    var urlEliminar = Url.Action("Eliminar", "Anexo");
     var urlConsultas = Url.Action("ConsultarConsultasPorPaciente", "Historial");
 }
 
@@ -9,6 +10,7 @@
      data-url-listar="@urlListar"
      data-url-subir="@urlSubir"
      data-url-descargar="@urlDescargar"
+     data-url-eliminar="@urlEliminar"
      data-url-consultas="@urlConsultas">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">

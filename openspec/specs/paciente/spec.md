@@ -325,3 +325,13 @@ El listado de anexos SHALL permitir descargar cada archivo mediante un endpoint 
 - GIVEN un anexo registrado
 - WHEN el usuario pulsa el botón de descarga
 - THEN el navegador descarga el archivo con su nombre original
+
+### Requirement: Eliminación de anexos
+
+El modal de anexos SHALL permitir eliminar un anexo con confirmación previa. Al confirmar, el sistema MUST eliminar el registro de `dbo.Anexo` y el archivo físico correspondiente en `Attachment/`. La acción MUST ser irreversible.
+
+#### Scenario: Eliminación de un anexo
+
+- GIVEN un anexo registrado
+- WHEN el usuario pulsa el botón de eliminar y confirma
+- THEN el anexo desaparece del listado, se borra la fila de la base de datos y se elimina el archivo físico

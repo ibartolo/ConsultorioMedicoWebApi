@@ -151,6 +151,63 @@ namespace ConsultorioMedicoWebApi.Services
             return valor.Length <= maximo ? valor : valor.Substring(0, maximo);
         }
 
+        /// <summary>Elimina el anexo de la base y su archivo físico.</summary>
+        public ModelResponse<bool> EliminarAnexo(long id, string usuario)
+        {
+            var mr = new ModelResponse<bool>();
+            try
+            {
+                var anexoResponse = _dbWrapper.ObtenerAnexoPorId(id, usuario);
+                if (anexoResponse == null || !anexoResponse.IsSuccess || anexoResponse.Response == null)
+                    return new ModelResponse<bool> { IsSuccess = false, Message = "Anexo no encontrado." };
+
+                var anexo = anexoResponse.Response;
+                if (!_dbWrapper.EliminarAnexo(id, usuario))
+                    return new ModelResponse<bool> { IsSuccess = false, Message = "No fue posible eliminar el anexo de la base de datos." };
+
+                var archivoEliminado = EliminarArchivoAnexo(anexo.Ruta);
+
+                mr.IsSuccess = true;
+                mr.Response = true;
+                mr.Message = archivoEliminado
+                    ? "Anexo eliminado correctamente."
+                    : "Anexo eliminado de la base de datos, pero no se pudo borrar el archivo físico.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al eliminar anexo {Id}", id);
+                mr.IsSuccess = false;
+                mr.Message = "Ocurrió un error al eliminar el anexo.";
+            }
+            return mr;
+        }
+
+        private bool EliminarArchivoAnexo(string ruta)
+        {
+            if (string.IsNullOrWhiteSpace(ruta)) return true;
+
+            string rutaAbsoluta;
+            if (ruta.StartsWith("/"))
+                rutaAbsoluta = HostingEnvironment.MapPath("~" + ruta);
+            else if (Path.IsPathRooted(ruta))
+                rutaAbsoluta = ruta;
+            else
+                rutaAbsoluta = HostingEnvironment.MapPath("~/" + ruta);
+
+            if (string.IsNullOrEmpty(rutaAbsoluta) || !File.Exists(rutaAbsoluta)) return true;
+
+            try
+            {
+                File.Delete(rutaAbsoluta);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "No se pudo borrar el archivo del anexo {Ruta}", ruta);
+                return false;
+            }
+        }
+
         /// <summary>Devuelve los bytes del archivo en disco para descarga.</summary>
         public byte[] ObtenerBytesAnexo(Anexo anexo)
         {

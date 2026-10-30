@@ -55,5 +55,8 @@ namespace ConsultorioMedicoMVC.Services
 
         public async Task<byte[]> DescargarBytes(long id)
             => await _httpClient.DescargarAnexo(id);
+
+        public async Task<ModelResponse<bool>> EliminarAnexo(long id)
+            => await _httpClient.EliminarAnexo(id);
     }
 }

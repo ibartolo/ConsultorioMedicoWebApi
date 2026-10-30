@@ -40,6 +40,10 @@ namespace ConsultorioMedicoWebApi.Controllers
             return _anexoService.GuardarAnexo(pacienteId, consultaId, comentarios, HttpContext.Current.Request.Files, usuario);
         }
 
+        [HttpPost, Route("Eliminar/{id:long}")]
+        public ModelResponse<bool> EliminarAnexo(long id)
+            => _anexoService.EliminarAnexo(id, User.Identity.Name);
+
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<Anexo>> PorPaciente(long pacienteId)
             => _anexoService.ObtenerAnexosPorPaciente(pacienteId, User.Identity.Name);

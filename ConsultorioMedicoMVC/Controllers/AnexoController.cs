@@ -54,6 +54,13 @@ namespace ConsultorioMedicoMVC.Controllers
             return File(bytes, ObtenerContentType(nombre), nombre);
         }
 
+        [HttpPost]
+        public async Task<string> Eliminar(long id)
+        {
+            var response = await _anexoService.EliminarAnexo(id);
+            return JsonConvert.SerializeObject(response);
+        }
+
         private string ObtenerContentType(string nombre)
         {
             var ext = System.IO.Path.GetExtension(nombre).TrimStart('.').ToLowerInvariant();

@@ -2,10 +2,11 @@
     ViewBag.Title = "Consultas";
 }
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+<link href="@Url.Content("~/Content/fullcalendar-responsive.css")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/fullcalendar-responsive.css")).Ticks" rel="stylesheet" />
 <h2 class="page-title"><i class="fas fa-stethoscope me-2" style="color: var(--primary);"></i>Consultas</h2>
 
 <div class="card-custom">
-    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="card-title calendar-card-title">
         <span><i class="fas fa-stethoscope"></i> Calendario de Consultas</span>
         <button type="button" class="btn btn-primary btn-sm" onclick="nuevaConsulta()"><i class="fas fa-plus me-1"></i> Nueva Consulta</button>
     </div>

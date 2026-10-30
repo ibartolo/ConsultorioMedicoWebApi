@@ -38,6 +38,16 @@ La vista `Views/Historial/Expediente.cshtml` SHALL mostrar 4 pestañas Bootstrap
 - WHEN el usuario selecciona la pestaña "Paquetes"
 - THEN la pestaña es visible y muestra dos grids de solo lectura (paquetes y citas-tratamientos)
 
+### Requirement: Expediente responsive en móvil
+
+El header del expediente MUST adaptarse en pantallas móviles: los botones de acción MUST envolverse en varias líneas y MUST NOT encimarse. Las pestañas MUST permanecer funcionales y SHOULD permitir desplazamiento horizontal cuando no caben.
+
+#### Scenario: Header y pestañas en móvil
+
+- GIVEN el expediente abierto en una pantalla móvil
+- WHEN se renderiza
+- THEN los botones de acción se acomodan sin encimarse y las pestañas se pueden usar y desplazar horizontalmente
+
 ### Requirement: Panel de información del paciente
 
 El sistema SHALL mostrar un panel con los datos del paciente obtenidos de `api/Paciente/{id}`. El nombre completo SHALL componerse en el lado MVC a partir de `Nombre`, `ApellidoPaterno` y `ApellidoMaterno` (el endpoint no devuelve `NombreCompleto`).

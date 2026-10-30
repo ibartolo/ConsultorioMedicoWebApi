@@ -124,5 +124,24 @@ namespace ConsultorioMedicoWebApi.DAL
                 return 0;
             }
         }
+
+        /// <summary>Elimina el registro del anexo. El archivo físico lo borra el servicio.</summary>
+        public bool EliminarAnexo(long id, string usuario)
+        {
+            try
+            {
+                var filas = ExecuteNonQuery(
+                    "DELETE FROM dbo.Anexo WHERE Id = @Id",
+                    CommandType.Text,
+                    new[] { new SqlParameter("@Id", id) });
+
+                return filas > 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al eliminar anexo {Id} para {Usuario}", id, usuario);
+                return false;
+            }
+        }
     }
 }

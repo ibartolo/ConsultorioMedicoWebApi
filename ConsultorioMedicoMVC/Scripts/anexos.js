@@ -131,7 +131,8 @@
             var fecha = formatFechaHoraAmPm(a.Fecha);
             var comentarios = escapar(a.Comentarios || '');
             var consulta = etiquetaConsulta(a.ConsultaID);
-            var acciones = '<button type="button" class="btn btn-sm btn-primary anexo-descargar" data-id="' + a.Id + '" title="Descargar"><i class="fas fa-download"></i></button>';
+            var acciones = '<button type="button" class="btn btn-sm btn-primary anexo-descargar" data-id="' + a.Id + '" title="Descargar"><i class="fas fa-download"></i></button>' +
+                           '<button type="button" class="btn btn-sm btn-danger anexo-eliminar ms-1" data-id="' + a.Id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
             $tbody.append(
                 '<tr>' +
                 '<td><i class="fas fa-file me-1"></i>' + nombre + '</td>' +
@@ -226,6 +227,47 @@
         });
     }
 
+    function eliminarAnexo(id) {
+        if (!id) return;
+
+        Swal.fire({
+            title: '¿Eliminar este anexo?',
+            text: 'Se eliminará de la base de datos y del almacenamiento físico. Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#DC3545',
+            cancelButtonColor: '#6C757D',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: urls.eliminar,
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json',
+                success: function (response) {
+                    var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (r && r.IsSuccess) {
+                        var advertencia = r.Message && r.Message.indexOf('no se pudo borrar') >= 0;
+                        if (advertencia) {
+                            Swal.fire({ title: 'Anexo eliminado con advertencia', text: r.Message, icon: 'warning', confirmButtonColor: '#0099CC' });
+                        } else {
+                            Swal.fire({ title: '¡Anexo eliminado!', text: r.Message || 'El anexo se eliminó correctamente.', icon: 'success', timer: 1500, showConfirmButton: false });
+                        }
+                        cargarAnexos($('#anexoPacienteId').val());
+                    } else {
+                        Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible eliminar el anexo.', icon: 'error', confirmButtonColor: '#DC3545' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión al eliminar el anexo.', icon: 'error', confirmButtonColor: '#DC3545' });
+                }
+            });
+        });
+    }
+
     function descargarAnexo(id) {
         if (!id) return;
         window.open(urls.descargar + '/' + id, '_blank');
@@ -257,6 +299,7 @@
         urls.listar = $modal.data('url-listar');
         urls.subir = $modal.data('url-subir');
         urls.descargar = $modal.data('url-descargar');
+        urls.eliminar = $modal.data('url-eliminar');
         urls.consultas = $modal.data('url-consultas');
 
         $('#btnSubirAnexo').on('click', subirAnexo);
@@ -268,6 +311,10 @@
 
         $('#anexosModalTable').on('click', '.anexo-descargar', function () {
             descargarAnexo($(this).data('id'));
+        });
+
+        $('#anexosModalTable').on('click', '.anexo-eliminar', function () {
+            eliminarAnexo($(this).data('id'));
         });
 
         $('#anexoArchivo').on('change', function () {

@@ -19,5 +19,8 @@ namespace ConsultorioMedicoMVC.DAL
 
         public async Task<byte[]> DescargarAnexo(long id)
             => await DescargarBytesAsync("api/Anexo/Descargar/" + id, token.Token.access_token);
+
+        public async Task<ModelResponse<bool>> EliminarAnexo(long id)
+            => await RequestAsync<bool>("api/Anexo/Eliminar/" + id, HttpMethod.Post, null, token.Token.access_token);
     }
 }

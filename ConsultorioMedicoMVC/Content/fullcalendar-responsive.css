@@ -1,0 +1,81 @@
+/* =========================================================
+   FullCalendar - ajustes responsive
+   ========================================================= */
+.calendar-card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .fc .fc-toolbar.fc-header-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .fc .fc-toolbar-chunk {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 100%;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(2) {
+        order: -1;
+    }
+
+    .fc .fc-toolbar-title {
+        width: 100%;
+        text-align: center;
+        font-size: 1.1rem;
+        line-height: 1.2;
+    }
+
+    .fc .fc-button {
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        line-height: 1.2;
+        border-radius: 6px;
+    }
+
+    .fc .fc-button-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 3px;
+    }
+
+    .fc .fc-button-group > .fc-button {
+        border-radius: 6px !important;
+        margin: 0;
+    }
+
+    .fc .fc-view-harness {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .calendar-card-title {
+        flex-wrap: wrap;
+    }
+
+    .calendar-card-title .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .fc .fc-toolbar-title {
+        font-size: 1rem;
+    }
+
+    .fc .fc-button {
+        padding: 3px 6px;
+        font-size: 0.68rem;
+    }
+}
