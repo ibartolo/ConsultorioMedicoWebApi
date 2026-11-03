@@ -34,6 +34,21 @@ context: |
   DataTables usa idioma local Content/datatables-es-ES.json.
   BD actual de pruebas: db_9c7990_consultoriodesitst (SQL8010); producción DB_9C7990_Consultorio.
 
+  Ramas/entornos (2026-10):
+  - develop y main (Consultorio público): BD db_9c7990_consultoriodesitst (SQL8010) con
+    db_9c7990_consultoriodesitst_admin; MVC https://consultorio.desipr.com.mx/,
+    API https://consultorioapi.desipr.com.mx/.
+    main público usa la BD de pruebas por instrucción actual; al liberar con SaaS cambiar a producción.
+  - develop-dermatologia y main-dermatologia (Dermatología): BD DB_9C7990_Consultorio (SQL5009)
+    con DB_9C7990_Consultorio_admin; MVC https://dermatologia.desipr.com.mx/,
+    API https://dermatologiaapi.desipr.com.mx/.
+  - BaseUriWebApi en MVC: localhost activo; URL del subdominio comentada. Al publicar se
+    descomenta la URL y se comenta localhost.
+  - La API no cambia AllowInsecureHttp/debug. sConSql tiene prioridad sobre cCon.
+  - SaaS por consultorio pendiente (filtrar datos por institución).
+  - Repo público: las ramas de Dermatología contienen la cadena de producción; migrar a
+    sConSql en el hosting cuando sea posible.
+
 strict_tdd: false
 
 rules:
