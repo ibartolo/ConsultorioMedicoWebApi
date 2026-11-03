@@ -228,3 +228,22 @@ Ambos deben terminar con **exit 0**.
 ### Documentos
 - Manual `/Home/Manual` (autenticado), Términos `/Home/Terminos` y Privacidad `/Home/Privacidad` (públicos), con layout `_LayoutPublic`.
 - Footer autenticado: ©, Manual, Términos, Privacidad, By DESI.
+
+---
+
+## 12. Ramas y entornos (2026-10)
+
+| Rama | Producto | BD | API |
+|---|---|---|---|
+| `develop` | Consultorio público - dev | `db_9c7990_consultoriodesitst` (sql8010) | localhost |
+| `main` | Consultorio público - prod | `db_9c7990_consultoriodesitst` (sql8010) | localhost; `https://consultorioapi.desipr.com.mx/` comentada |
+| `develop-dermatologia` | Dermatología - dev | `DB_9C7990_Consultorio` (SQL5009) | localhost; `https://dermatologiaapi.desipr.com.mx/` comentada |
+| `main-dermatologia` | Dermatología - prod | `DB_9C7990_Consultorio` (SQL5009) | localhost; `https://dermatologiaapi.desipr.com.mx/` comentada |
+
+- **Dermatología (dev y prod)** comparte la BD de producción `DB_9C7990_Consultorio` con usuario `DB_9C7990_Consultorio_admin`.
+- **Consultorio público (develop y main)** usa la BD de pruebas `db_9c7990_consultoriodesitst` con usuario `db_9c7990_consultoriodesitst_admin` por instrucción actual. Al liberar el producto con datos reales y SaaS, cambiar a producción.
+- **MVC `BaseUriWebApi`**: `http://localhost:64681/` activo para Visual Studio; la URL del subdominio queda comentada. Al publicar: comentar localhost y descomentar la URL.
+- **URLs MVC:** `https://consultorio.desipr.com.mx/` y `https://dermatologia.desipr.com.mx/` (se configuran en el hosting/IIS, no en Web.config).
+- **API:** no cambiar `AllowInsecureHttp` ni `debug` sin autorización; solo se ajusta `cCon`. `sConSql` tiene prioridad sobre `cCon`.
+- **SaaS por consultorio:** pendiente; el filtrado de datos por institución se planea después.
+- **Seguridad:** el repo es público y las ramas de Dermatología contienen la cadena de producción; cuando sea posible, mover la cadena a `sConSql` en el hosting.
