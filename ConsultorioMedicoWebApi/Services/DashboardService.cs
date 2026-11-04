@@ -15,11 +15,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<DashboardDTO> ObtenerIndicadores(string usuario)
+        public ModelResponse<DashboardDTO> ObtenerIndicadores(string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerIndicadoresDashboard(usuario);
+                return _dbWrapper.ObtenerIndicadoresDashboard(usuario, empresaId);
             }
             catch (Exception ex)
             {

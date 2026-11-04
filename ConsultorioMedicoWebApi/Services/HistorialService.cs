@@ -16,14 +16,14 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<TratamientoHistoricoDTO>> ObtenerTratamientosPorPaciente(long pacienteId, string usuario)
+        public ModelResponse<List<TratamientoHistoricoDTO>> ObtenerTratamientosPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             try
             {
                 if (pacienteId <= 0)
                     return new ModelResponse<List<TratamientoHistoricoDTO>> { IsSuccess = false, Message = "El identificador del paciente es inválido." };
 
-                return _dbWrapper.ObtenerTratamientosPorPaciente(pacienteId, usuario);
+                return _dbWrapper.ObtenerTratamientosPorPaciente(pacienteId, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -32,14 +32,14 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<List<PacientePaqueteLecturaDTO>> ObtenerPaquetesPorPaciente(int pacienteId, string usuario)
+        public ModelResponse<List<PacientePaqueteLecturaDTO>> ObtenerPaquetesPorPaciente(int pacienteId, string usuario, int empresaId)
         {
             try
             {
                 if (pacienteId <= 0)
                     return new ModelResponse<List<PacientePaqueteLecturaDTO>> { IsSuccess = false, Message = "El identificador del paciente es inválido." };
 
-                return _dbWrapper.ObtenerPaquetesPorPaciente(pacienteId, usuario);
+                return _dbWrapper.ObtenerPaquetesPorPaciente(pacienteId, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -48,14 +48,14 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<List<CitaPaqueteLecturaDTO>> ObtenerCitasPorPacientePaquete(int pacientePaqueteId, string usuario)
+        public ModelResponse<List<CitaPaqueteLecturaDTO>> ObtenerCitasPorPacientePaquete(int pacientePaqueteId, string usuario, int empresaId)
         {
             try
             {
                 if (pacientePaqueteId <= 0)
                     return new ModelResponse<List<CitaPaqueteLecturaDTO>> { IsSuccess = false, Message = "El identificador del paquete es inválido." };
 
-                return _dbWrapper.ObtenerCitasPorPacientePaquete(pacientePaqueteId, usuario);
+                return _dbWrapper.ObtenerCitasPorPacientePaquete(pacientePaqueteId, usuario, empresaId);
             }
             catch (Exception ex)
             {

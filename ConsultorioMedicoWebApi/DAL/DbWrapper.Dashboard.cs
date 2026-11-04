@@ -12,9 +12,9 @@ namespace ConsultorioMedicoWebApi.DAL
     {
         /// <summary>
         /// Indicadores del mes en curso: pacientes nuevos, consultas y citas con tratamiento.
-        /// Consulta inline de solo lectura (sin cambios en la BD).
+        /// Consulta inline de solo lectura (sin cambios en la BD). Filtra por tenant.
         /// </summary>
-        public ModelResponse<DashboardDTO> ObtenerIndicadoresDashboard(string usuario)
+        public ModelResponse<DashboardDTO> ObtenerIndicadoresDashboard(string usuario, int empresaId)
         {
             var mr = new ModelResponse<DashboardDTO>();
             try
@@ -26,14 +26,17 @@ namespace ConsultorioMedicoWebApi.DAL
 SELECT
     (SELECT COUNT(*) FROM dbo.Paciente
       WHERE Estatus = 1
+        AND ConsultorioID = @ConsultorioID
         AND ISNULL(FechaAlta, CreatedDT) >= @Inicio
         AND ISNULL(FechaAlta, CreatedDT) < @Fin) AS PacientesNuevosMes,
     (SELECT COUNT(*) FROM dbo.Consulta
       WHERE Estatus = 1
+        AND ConsultorioID = @ConsultorioID
         AND FechaConsulta >= @Inicio
         AND FechaConsulta < @Fin) AS ConsultasMes,
     (SELECT COUNT(*) FROM dbo.Cita
       WHERE Estatus = 1
+        AND ConsultorioID = @ConsultorioID
         AND TratamientoID IS NOT NULL
         AND FechaCita >= @Inicio
         AND FechaCita < @Fin) AS TratamientosMes";
@@ -50,7 +53,8 @@ SELECT
                     new[]
                     {
                         new SqlParameter("@Inicio", SqlDbType.DateTime) { Value = inicio },
-                        new SqlParameter("@Fin", SqlDbType.DateTime) { Value = fin }
+                        new SqlParameter("@Fin", SqlDbType.DateTime) { Value = fin },
+                        new SqlParameter("@ConsultorioID", empresaId)
                     });
 
                 if (indicadores == null)

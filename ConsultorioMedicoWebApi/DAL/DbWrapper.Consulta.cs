@@ -49,13 +49,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista consultas activas. SP nuevo: sp_nh_GetAllConsultas.</summary>
-        public ModelResponse<List<ConsultaDTO>> ObtenerConsultas(string usuario)
+        /// <summary>Lista consultas activas. SP nuevo: sp_nh_GetAllConsultas. Filtra por tenant.</summary>
+        public ModelResponse<List<ConsultaDTO>> ObtenerConsultas(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<ConsultaDTO>>();
             try
             {
-                var consultas = GetObjects("sp_nh_GetAllConsultas", LlenarConsultaDTO, CommandType.StoredProcedure);
+                var consultas = GetObjects("sp_nh_GetAllConsultas", LlenarConsultaDTO, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = consultas.ToList();
                 mr.Message = "Consultas obtenidas correctamente.";
@@ -69,14 +70,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene una consulta por Id. SP nuevo: sp_nh_GetConsultaById.</summary>
-        public ModelResponse<Consulta> ObtenerConsultaPorId(long id, string usuario)
+        /// <summary>Obtiene una consulta por Id. SP nuevo: sp_nh_GetConsultaById. Filtra por tenant.</summary>
+        public ModelResponse<Consulta> ObtenerConsultaPorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Consulta>();
             try
             {
                 var consulta = GetObject("sp_nh_GetConsultaById", LlenarConsulta, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (consulta == null)
                 {
@@ -98,8 +99,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza una consulta (upsert). SP nuevo: sp_nh_SaveConsulta. Devuelve el Id.</summary>
-        public ModelResponse<Consulta> GuardarOActualizarConsulta(Consulta c, string usuario)
+        /// <summary>Guarda o actualiza una consulta (upsert). SP nuevo: sp_nh_SaveConsulta. Devuelve el Id. El tenant se fija por claim.</summary>
+        public ModelResponse<Consulta> GuardarOActualizarConsulta(Consulta c, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Consulta>();
             try
@@ -116,11 +117,12 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@TipoConsultaID", (object)c.TipoConsultaID ?? DBNull.Value),
                     new SqlParameter("@DescripcionReceta", (object)c.DescripcionReceta ?? DBNull.Value),
                     new SqlParameter("@Comentarios", (object)c.Comentarios ?? DBNull.Value),
-                    new SqlParameter("@FechaProximaConsulta", (object)c.FechaProximaConsulta ?? DBNull.Value)
+                    new SqlParameter("@FechaProximaConsulta", (object)c.FechaProximaConsulta ?? DBNull.Value),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveConsulta", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar la consulta.";
@@ -141,8 +143,9 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene la receta de una consulta con datos de institución y médico. SP: sp_nh_GetRecetaByConsulta.</summary>
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId, string usuario)
+        /// <summary>Obtiene la receta de una consulta con datos de institución y médico. SP: sp_nh_GetRecetaByConsulta.
+        /// El @institucionId SIEMPRE se fija desde el claim (nunca del cliente); el SP valida que la consulta pertenezca al tenant.</summary>
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int empresaId, string usuario)
         {
             var mr = new ModelResponse<RecetaDTO>();
             try
@@ -180,7 +183,7 @@ namespace ConsultorioMedicoWebApi.DAL
                     new[]
                     {
                         new SqlParameter("@consultaID", consultaId),
-                        new SqlParameter("@institucionId", institucionId)
+                        new SqlParameter("@institucionId", empresaId)
                     });
 
                 if (receta == null)
@@ -203,8 +206,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Lista consultas por paciente. Reutiliza el SP existente GetAllConsultaByPacienteID.</summary>
-        public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId, string usuario)
+        /// <summary>Lista consultas por paciente. Reutiliza el SP existente GetAllConsultaByPacienteID. Filtra por tenant.</summary>
+        public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<ConsultaDTO>>();
             try
@@ -224,7 +227,11 @@ namespace ConsultorioMedicoWebApi.DAL
                         DescripcionReceta = r["DescripcionReceta"] as string
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@IdPaciente", pacienteId) });
+                    new[]
+                    {
+                        new SqlParameter("@IdPaciente", pacienteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = consultas.ToList();

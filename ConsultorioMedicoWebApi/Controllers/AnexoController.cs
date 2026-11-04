@@ -37,25 +37,25 @@ namespace ConsultorioMedicoWebApi.Controllers
 
             var comentarios = HttpContext.Current.Request.Form["comentarios"];
 
-            return _anexoService.GuardarAnexo(pacienteId, consultaId, comentarios, HttpContext.Current.Request.Files, usuario);
+            return _anexoService.GuardarAnexo(pacienteId, consultaId, comentarios, HttpContext.Current.Request.Files, usuario, EmpresaId);
         }
 
         [HttpPost, Route("Eliminar/{id:long}")]
         public ModelResponse<bool> EliminarAnexo(long id)
-            => _anexoService.EliminarAnexo(id, User.Identity.Name);
+            => _anexoService.EliminarAnexo(id, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<Anexo>> PorPaciente(long pacienteId)
-            => _anexoService.ObtenerAnexosPorPaciente(pacienteId, User.Identity.Name);
+            => _anexoService.ObtenerAnexosPorPaciente(pacienteId, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("{id:long}")]
         public ModelResponse<Anexo> ObtenerAnexoPorId(long id)
-            => _anexoService.ObtenerAnexoPorId(id, User.Identity.Name);
+            => _anexoService.ObtenerAnexoPorId(id, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("Descargar/{id:long}")]
         public HttpResponseMessage Descargar(long id)
         {
-            var anexo = _anexoService.ObtenerAnexoPorId(id, User.Identity.Name);
+            var anexo = _anexoService.ObtenerAnexoPorId(id, User.Identity.Name, EmpresaId);
             if (anexo == null || !anexo.IsSuccess || anexo.Response == null)
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Anexo no encontrado.");
 

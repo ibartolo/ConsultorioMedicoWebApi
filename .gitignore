@@ -431,3 +431,4 @@ FodyWeavers.xsd
 # Anexos subidos (datos de pacientes: no versionar)
 ConsultorioMedicoWebApi/Attachment/*
 !ConsultorioMedicoWebApi/Attachment/.gitkeep
+!ConsultorioMedicoWebApi/Attachment/Web.config

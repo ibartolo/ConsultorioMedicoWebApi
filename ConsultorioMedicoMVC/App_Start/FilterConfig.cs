@@ -19,7 +19,8 @@ namespace ConsultorioMedicoMVC.App_Start
         private static readonly HashSet<string> PublicActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "Home.Autentication", "Home.LogIn", "Home.LogOut",
-            "Home.CambiarTema", "Home.Terminos", "Home.Privacidad"
+            "Home.CambiarTema", "Home.Terminos", "Home.Privacidad",
+            "Registro.Index", "Registro.Guardar"
         };
 
         public void OnAuthorization(AuthorizationContext ctx)

@@ -1,0 +1,207 @@
+﻿@{
+    ViewBag.Title = "Registro de Consultorio";
+    Layout = "~/Views/Shared/_LayoutPublic.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+    .registro-card { max-width: 860px; margin: 0 auto; }
+    .registro-card .form-label { font-weight: 600; font-size: .9rem; }
+    .registro-card .required { color: #e74a3b; }
+    .registro-card .section-title {
+        font-size: 1rem; font-weight: 700; color: var(--primary-dark);
+        border-left: 4px solid var(--primary); padding-left: 10px; margin: 1.4rem 0 .6rem;
+    }
+</style>
+
+<div class="doc-card registro-card">
+    <h1>Registro de Consultorio</h1>
+    <p class="doc-meta">Cree su cuenta y comience a administrar su consultorio. Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+
+    <form id="frmRegistro" autocomplete="off" novalidate>
+        <div class="section-title">Datos del consultorio</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="NombreComercial">Nombre comercial <span class="required">*</span></label>
+                <input type="text" class="form-control" name="NombreComercial" id="NombreComercial" maxlength="100" placeholder="Nombre del consultorio">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="RazonSocial">Razón social <span class="required">*</span></label>
+                <input type="text" class="form-control" name="RazonSocial" id="RazonSocial" maxlength="100" placeholder="Razón social">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="RFC">RFC <span class="required">*</span></label>
+                <input type="text" class="form-control text-uppercase" name="RFC" id="RFC" maxlength="13" placeholder="Ej. XAXX010101000">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Responsable">Responsable (médico) <span class="required">*</span></label>
+                <input type="text" class="form-control" name="Responsable" id="Responsable" maxlength="100" placeholder="Nombre del responsable">
+            </div>
+        </div>
+
+        <div class="section-title">Domicilio</div>
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label" for="Calle">Calle <span class="required">*</span></label>
+                <input type="text" class="form-control" name="Calle" id="Calle" maxlength="50" placeholder="Calle">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="NoExterior">No. exterior</label>
+                <input type="text" class="form-control" name="NoExterior" id="NoExterior" maxlength="10">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="NoInterior">No. interior</label>
+                <input type="text" class="form-control" name="NoInterior" id="NoInterior" maxlength="10">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Colonia">Colonia</label>
+                <input type="text" class="form-control" name="Colonia" id="Colonia" maxlength="50" placeholder="Colonia">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Municipio">Ciudad</label>
+                <input type="text" class="form-control" name="Municipio" id="Municipio" maxlength="50" placeholder="Ciudad / municipio">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Estado">Estado</label>
+                <input type="text" class="form-control" name="Estado" id="Estado" maxlength="50" placeholder="Estado">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="CP">Código postal</label>
+                <input type="text" class="form-control" name="CP" id="CP" maxlength="5" placeholder="00000">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="Telefono">Teléfono</label>
+                <input type="text" class="form-control" name="Telefono" id="Telefono" maxlength="10" placeholder="10 dígitos">
+            </div>
+        </div>
+
+        <div class="section-title">Contacto y acceso</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="CorreoContacto">Correo de contacto <span class="required">*</span></label>
+                <input type="email" class="form-control" name="CorreoContacto" id="CorreoContacto" maxlength="100" placeholder="correo@dominio.com">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="Password">Contraseña <span class="required">*</span></label>
+                <input type="password" class="form-control" name="Password" id="Password" autocomplete="new-password" placeholder="Contraseña">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="Confirmacion">Confirmación <span class="required">*</span></label>
+                <input type="password" class="form-control" name="Confirmacion" id="Confirmacion" autocomplete="new-password" placeholder="Repita la contraseña">
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 text-end">
+                <a href="@Url.Action("Autentication", "Home")" class="btn btn-secondary"><i class="fas fa-times me-1"></i> Cancelar</a>
+                <input type="button" value="Registrar consultorio" class="btn btn-primary" onclick="guardarRegistro()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    var guardarUrl = '@Url.Action("Guardar", "Registro")';
+    var loginUrl = '@Url.Action("Autentication", "Home")';
+
+    $.validator.addMethod("rfc", function (value, element) {
+        if (!value) return true;
+        var v = value.trim().toUpperCase();
+        return /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(v);
+    }, "Ingrese un RFC válido.");
+
+    $.validator.addMethod("cp5", function (value, element) {
+        if (!value) return true;
+        return /^\d{5}$/.test(value.trim());
+    }, "El código postal debe tener 5 dígitos.");
+
+    $.validator.addMethod("telefono10", function (value, element) {
+        return this.optional(element) || /^\d{10}$/.test(value.trim());
+    }, "El teléfono debe tener exactamente 10 dígitos.");
+
+    $(document).ready(function () {
+        $('#frmRegistro').validate({
+            rules: {
+                NombreComercial: { required: true },
+                RazonSocial: { required: true },
+                RFC: { required: true, rfc: true },
+                Responsable: { required: true },
+                Calle: { required: true },
+                CorreoContacto: { required: true, email: true },
+                Password: { required: true, minlength: 6 },
+                Confirmacion: { required: true, equalTo: '#Password' },
+                CP: { cp5: true },
+                Telefono: { telefono10: true }
+            },
+            messages: {
+                NombreComercial: { required: "El nombre comercial es requerido." },
+                RazonSocial: { required: "La razón social es requerida." },
+                RFC: { required: "El RFC es requerido." },
+                Responsable: { required: "El nombre del responsable es requerido." },
+                Calle: { required: "La calle es requerida." },
+                CorreoContacto: { required: "El correo de contacto es requerido.", email: "Ingrese un formato de correo válido." },
+                Password: { required: "La contraseña es requerida.", minlength: "La contraseña debe tener al menos 6 caracteres." },
+                Confirmacion: { required: "La confirmación es requerida.", equalTo: "Las contraseñas no coinciden." }
+            },
+            errorElement: 'div',
+            errorClass: 'invalid-feedback',
+            highlight: function (element) { $(element).addClass('is-invalid'); },
+            unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+        });
+
+        // Forzar mayúsculas en el RFC mientras se escribe.
+        $('#RFC').on('input', function () {
+            var v = this.value.toUpperCase();
+            if (v !== this.value) { this.value = v; }
+        });
+    });
+
+    function guardarRegistro() {
+        if (!$('#frmRegistro').valid()) {
+            return;
+        }
+
+        $.ajax({
+            url: guardarUrl,
+            type: 'POST',
+            data: $('#frmRegistro').serialize(),
+            dataType: 'json',
+            success: function (response) {
+                var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                if (result.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Registro exitoso!',
+                        text: result.Message || 'El consultorio se registró correctamente. Inicie sesión para continuar.',
+                        icon: 'success',
+                        confirmButtonText: 'Iniciar sesión',
+                        confirmButtonColor: '#0099CC'
+                    }).then(function () {
+                        window.location.href = loginUrl;
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'No fue posible registrarse',
+                        text: result.Message || 'Corrija los datos e intente nuevamente.',
+                        icon: 'error',
+                        confirmButtonColor: '#0099CC'
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error de conexión. Intente nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#0099CC'
+                });
+            }
+        });
+    }
+</script>

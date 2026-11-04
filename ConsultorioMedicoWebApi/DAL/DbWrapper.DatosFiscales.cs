@@ -35,13 +35,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista todos los registros fiscales. SP nuevo: sp_nh_GetDatosFiscales.</summary>
-        public ModelResponse<List<DatosFiscales>> ObtenerDatosFiscales(string usuario)
+        /// <summary>Lista los registros fiscales del tenant. SP nuevo: sp_nh_GetDatosFiscales. Filtra por @ConsultorioID.</summary>
+        public ModelResponse<List<DatosFiscales>> ObtenerDatosFiscales(int empresaId, string usuario)
         {
             var mr = new ModelResponse<List<DatosFiscales>>();
             try
             {
-                var datos = GetObjects("sp_nh_GetDatosFiscales", LlenarDatosFiscal, CommandType.StoredProcedure);
+                var datos = GetObjects("sp_nh_GetDatosFiscales", LlenarDatosFiscal, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = datos.ToList();
                 mr.Message = "Datos fiscales obtenidos correctamente.";
@@ -55,13 +56,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene el único registro fiscal (si existe). Reutiliza sp_nh_GetDatosFiscales.</summary>
-        public ModelResponse<DatosFiscales> ObtenerDatosFiscalUnico(string usuario)
+        /// <summary>Obtiene la fila fiscal 1:1 del tenant actual (sin "Unico" global). Devuelve IsSuccess=false si no existe.</summary>
+        public ModelResponse<DatosFiscales> ObtenerDatosFiscalActual(int empresaId, string usuario)
         {
             var mr = new ModelResponse<DatosFiscales>();
             try
             {
-                var dato = GetObjects("sp_nh_GetDatosFiscales", LlenarDatosFiscal, CommandType.StoredProcedure).FirstOrDefault();
+                var dato = GetObjects("sp_nh_GetDatosFiscales", LlenarDatosFiscal, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) }).FirstOrDefault();
                 if (dato == null)
                 {
                     mr.IsSuccess = false;
@@ -75,21 +77,21 @@ namespace ConsultorioMedicoWebApi.DAL
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al obtener el dato fiscal único para {Usuario}", usuario);
+                Log.Error(ex, "Error al obtener el dato fiscal actual para {Usuario}", usuario);
                 mr.IsSuccess = false;
                 mr.Message = "Ocurrió un error al obtener el dato fiscal.";
             }
             return mr;
         }
 
-        /// <summary>Obtiene un registro fiscal por Id. SP nuevo: sp_nh_GetDatosFiscalById.</summary>
-        public ModelResponse<DatosFiscales> ObtenerDatosFiscalPorId(int id, string usuario)
+        /// <summary>Obtiene un registro fiscal por Id. SP nuevo: sp_nh_GetDatosFiscalById. Filtra por @ConsultorioID.</summary>
+        public ModelResponse<DatosFiscales> ObtenerDatosFiscalPorId(int id, int empresaId, string usuario)
         {
             var mr = new ModelResponse<DatosFiscales>();
             try
             {
                 var dato = GetObject("sp_nh_GetDatosFiscalById", LlenarDatosFiscal, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (dato == null)
                 {
@@ -111,8 +113,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza un registro fiscal. SP nuevo: sp_nh_SaveDatosFiscal.</summary>
-        public ModelResponse<DatosFiscales> GuardarDatosFiscal(DatosFiscales d, string usuario)
+        /// <summary>Guarda o actualiza un registro fiscal. SP nuevo: sp_nh_SaveDatosFiscal. El tenant (@ConsultorioID) se fija por claim.</summary>
+        public ModelResponse<DatosFiscales> GuardarDatosFiscal(DatosFiscales d, int empresaId, string usuario)
         {
             var mr = new ModelResponse<DatosFiscales>();
             try
@@ -134,11 +136,11 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@Estado", (object)d.Estado ?? DBNull.Value),
                     new SqlParameter("@CP", (object)d.CP ?? DBNull.Value),
                     new SqlParameter("@Pais", (object)d.Pais ?? DBNull.Value),
-                    new SqlParameter("@DatosInstitucionID", (object)d.DatosInstitucionID ?? DBNull.Value)
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveDatosFiscal", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt32(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar el dato fiscal.";
@@ -159,16 +161,16 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Elimina un registro fiscal. SP nuevo: sp_nh_DeleteDatosFiscal.</summary>
-        public ModelResponse<bool> EliminarDatosFiscal(int id, string usuario)
+        /// <summary>Elimina un registro fiscal. SP nuevo: sp_nh_DeleteDatosFiscal. Acotado al tenant (@ConsultorioID).</summary>
+        public ModelResponse<bool> EliminarDatosFiscal(int id, int empresaId, string usuario)
         {
             var mr = new ModelResponse<bool>();
             try
             {
                 var filas = ExecuteScalar("sp_nh_DeleteDatosFiscal", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
-                if (filas == null || Convert.ToInt32(filas) == 0)
+                if (filas == null || filas == DBNull.Value || Convert.ToInt32(filas) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "Dato fiscal no encontrado.";

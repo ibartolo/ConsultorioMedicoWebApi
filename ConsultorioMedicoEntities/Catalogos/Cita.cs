@@ -8,6 +8,7 @@ namespace ConsultorioMedicoEntities.Catalogos
     public class Cita
     {
         public int Id { get; set; }
+        public int ConsultorioID { get; set; }
         public bool Estatus { get; set; }
         public DateTime? FechaCita { get; set; }
         public int PacienteID { get; set; }

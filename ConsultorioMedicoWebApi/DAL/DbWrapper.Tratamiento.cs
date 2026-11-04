@@ -23,13 +23,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista tratamientos activos. Reutiliza el SP existente GetAllTratamiento.</summary>
-        public ModelResponse<List<Tratamiento>> ObtenerTratamientos(string usuario)
+        /// <summary>Lista tratamientos activos. Reutiliza el SP existente GetAllTratamiento. Filtra por tenant.</summary>
+        public ModelResponse<List<Tratamiento>> ObtenerTratamientos(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<Tratamiento>>();
             try
             {
-                var tratamientos = GetObjects("GetAllTratamiento", LlenarTratamiento, CommandType.StoredProcedure);
+                var tratamientos = GetObjects("GetAllTratamiento", LlenarTratamiento, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = tratamientos.ToList();
                 mr.Message = "Tratamientos obtenidos correctamente.";
@@ -43,14 +44,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene un tratamiento por Id. SP nuevo: sp_nh_GetTratamientoById.</summary>
-        public ModelResponse<Tratamiento> ObtenerTratamientoPorId(long id, string usuario)
+        /// <summary>Obtiene un tratamiento por Id. SP nuevo: sp_nh_GetTratamientoById. Filtra por tenant.</summary>
+        public ModelResponse<Tratamiento> ObtenerTratamientoPorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Tratamiento>();
             try
             {
                 var tratamiento = GetObject("sp_nh_GetTratamientoById", LlenarTratamiento, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (tratamiento == null)
                 {
@@ -72,8 +73,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza un tratamiento (upsert). SP nuevo: sp_nh_SaveTratamiento. Devuelve el Id.</summary>
-        public ModelResponse<Tratamiento> GuardarOActualizarTratamiento(Tratamiento t, string usuario)
+        /// <summary>Guarda o actualiza un tratamiento (upsert). SP nuevo: sp_nh_SaveTratamiento. Devuelve el Id. El tenant se fija por claim.</summary>
+        public ModelResponse<Tratamiento> GuardarOActualizarTratamiento(Tratamiento t, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Tratamiento>();
             try
@@ -84,11 +85,12 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@Nombre", (object)t.Nombre ?? DBNull.Value),
                     new SqlParameter("@Duracion", (object)t.Duracion ?? DBNull.Value),
                     new SqlParameter("@Descripcion", (object)t.Descripcion ?? DBNull.Value),
-                    new SqlParameter("@Estatus", t.Estatus)
+                    new SqlParameter("@Estatus", t.Estatus),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveTratamiento", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar el tratamiento.";

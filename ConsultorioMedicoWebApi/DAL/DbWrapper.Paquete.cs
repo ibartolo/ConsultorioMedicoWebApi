@@ -24,13 +24,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista paquetes activos. Reutiliza el SP existente GetAllPaqueteDT.</summary>
-        public ModelResponse<List<Paquete>> ObtenerPaquetes(string usuario)
+        /// <summary>Lista paquetes activos. Reutiliza el SP existente GetAllPaqueteDT. Filtra por tenant.</summary>
+        public ModelResponse<List<Paquete>> ObtenerPaquetes(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<Paquete>>();
             try
             {
-                var paquetes = GetObjects("GetAllPaqueteDT", LlenarPaquete, CommandType.StoredProcedure);
+                var paquetes = GetObjects("GetAllPaqueteDT", LlenarPaquete, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = paquetes.ToList();
                 mr.Message = "Paquetes obtenidos correctamente.";
@@ -44,14 +45,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene un paquete por Id. SP nuevo: sp_nh_GetPaqueteById.</summary>
-        public ModelResponse<Paquete> ObtenerPaquetePorId(long id, string usuario)
+        /// <summary>Obtiene un paquete por Id. SP nuevo: sp_nh_GetPaqueteById. Filtra por tenant.</summary>
+        public ModelResponse<Paquete> ObtenerPaquetePorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Paquete>();
             try
             {
                 var paquete = GetObject("sp_nh_GetPaqueteById", LlenarPaquete, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (paquete == null)
                 {
@@ -73,8 +74,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza un paquete (upsert). SP nuevo: sp_nh_SavePaquete. Devuelve el Id.</summary>
-        public ModelResponse<Paquete> GuardarOActualizarPaquete(Paquete p, string usuario)
+        /// <summary>Guarda o actualiza un paquete (upsert). SP nuevo: sp_nh_SavePaquete. Devuelve el Id. El tenant se fija por claim.</summary>
+        public ModelResponse<Paquete> GuardarOActualizarPaquete(Paquete p, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Paquete>();
             try
@@ -86,11 +87,12 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@Descripcion", (object)p.Descripcion ?? DBNull.Value),
                     new SqlParameter("@FechaCreacion", (object)p.FechaCreacion ?? DBNull.Value),
                     new SqlParameter("@Estatus", p.Estatus),
-                    new SqlParameter("@Costo", (object)p.Costo ?? DBNull.Value)
+                    new SqlParameter("@Costo", (object)p.Costo ?? DBNull.Value),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SavePaquete", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar el paquete.";

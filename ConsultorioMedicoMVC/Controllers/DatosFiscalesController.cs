@@ -15,11 +15,10 @@ namespace ConsultorioMedicoMVC.Controllers
             _datosFiscalesService = new DatosFiscalesService(httpClientConnection);
         }
 
+        /// <summary>Tenant resuelto desde la cookie de sesión (helper de BaseController). Sin fallback a 1.</summary>
         public ActionResult Index()
         {
-            ViewBag.InstitucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
-                ? (int)tokenCookie.EmpresaID
-                : 1;
+            ViewBag.InstitucionId = TenantEmpresaId;
             return View();
         }
 
@@ -29,9 +28,10 @@ namespace ConsultorioMedicoMVC.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        // Devuelve la fila fiscal 1:1 del tenant actual (ya no "Unico" global).
         public async Task<string> Consultar()
         {
-            var response = await _datosFiscalesService.ConsultarDatosFiscalUnico();
+            var response = await _datosFiscalesService.ConsultarDatosFiscalActual();
             return JsonConvert.SerializeObject(response);
         }
 
@@ -44,6 +44,7 @@ namespace ConsultorioMedicoMVC.Controllers
         [HttpPost]
         public async Task<string> Guardar(DatosFiscales datos)
         {
+            if (datos != null) datos.DatosInstitucionID = TenantEmpresaId;
             var response = await _datosFiscalesService.GuardarDatosFiscal(datos);
             return JsonConvert.SerializeObject(response);
         }

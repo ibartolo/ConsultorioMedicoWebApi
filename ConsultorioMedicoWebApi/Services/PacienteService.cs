@@ -16,12 +16,12 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<PacienteDTO>> ObtenerPacientes(string usuario)
+        public ModelResponse<List<PacienteDTO>> ObtenerPacientes(string usuario, int empresaId)
         {
             try
             {
-                Log.Information("PacienteService.ObtenerPacientes para {Usuario}", usuario);
-                return _dbWrapper.ObtenerPacientes(usuario);
+                Log.Information("PacienteService.ObtenerPacientes para {Usuario} (tenant {EmpresaId})", usuario, empresaId);
+                return _dbWrapper.ObtenerPacientes(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -30,11 +30,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Paciente> ObtenerPacientePorId(long id, string usuario)
+        public ModelResponse<Paciente> ObtenerPacientePorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerPacientePorId(id, usuario);
+                return _dbWrapper.ObtenerPacientePorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente paciente, string usuario)
+        public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente paciente, string usuario, int empresaId)
         {
             try
             {
@@ -59,7 +59,10 @@ namespace ConsultorioMedicoWebApi.Services
                     if (paciente.FechaAlta == null) paciente.FechaAlta = DateTime.Now;
                 }
 
-                return _dbWrapper.GuardarOActualizarPaciente(paciente, usuario);
+                // 3. El tenant SIEMPRE se asigna desde el claim (nunca del cliente).
+                paciente.ConsultorioID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarPaciente(paciente, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -68,14 +71,14 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<bool> EliminarPaciente(int id, string usuario)
+        public ModelResponse<bool> EliminarPaciente(int id, string usuario, int empresaId)
         {
             try
             {
                 if (id <= 0)
                     return new ModelResponse<bool> { IsSuccess = false, Message = "El identificador del paciente es inválido." };
 
-                return _dbWrapper.EliminarPaciente(id, usuario);
+                return _dbWrapper.EliminarPaciente(id, usuario, empresaId);
             }
             catch (Exception ex)
             {

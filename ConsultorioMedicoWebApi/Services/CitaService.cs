@@ -16,12 +16,12 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<CitaDTO>> ObtenerCitas(string usuario)
+        public ModelResponse<List<CitaDTO>> ObtenerCitas(string usuario, int empresaId)
         {
             try
             {
-                Log.Information("CitaService.ObtenerCitas para {Usuario}", usuario);
-                return _dbWrapper.ObtenerCitas(usuario);
+                Log.Information("CitaService.ObtenerCitas para {Usuario} (tenant {EmpresaId})", usuario, empresaId);
+                return _dbWrapper.ObtenerCitas(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -30,11 +30,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Cita> ObtenerCitaPorId(long id, string usuario)
+        public ModelResponse<Cita> ObtenerCitaPorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerCitaPorId(id, usuario);
+                return _dbWrapper.ObtenerCitaPorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Cita> GuardarOActualizarCita(Cita cita, string usuario)
+        public ModelResponse<Cita> GuardarOActualizarCita(Cita cita, string usuario, int empresaId)
         {
             try
             {
@@ -56,7 +56,10 @@ namespace ConsultorioMedicoWebApi.Services
                 if (cita.Id == 0)
                     cita.Estatus = true;
 
-                return _dbWrapper.GuardarOActualizarCita(cita, usuario);
+                // 3. El tenant SIEMPRE se asigna desde el claim (nunca del cliente).
+                cita.ConsultorioID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarCita(cita, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -65,14 +68,14 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<bool> EliminarCita(int id, string usuario)
+        public ModelResponse<bool> EliminarCita(int id, string usuario, int empresaId)
         {
             try
             {
                 if (id <= 0)
                     return new ModelResponse<bool> { IsSuccess = false, Message = "El identificador de la cita es inválido." };
 
-                return _dbWrapper.EliminarCita(id, usuario);
+                return _dbWrapper.EliminarCita(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -81,11 +84,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario)
+        public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerCitasPorPaciente(pacienteId, usuario);
+                return _dbWrapper.ObtenerCitasPorPaciente(pacienteId, usuario, empresaId);
             }
             catch (Exception ex)
             {

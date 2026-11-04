@@ -4,6 +4,10 @@
     var userName = (sessionUser != null && sessionUser.UserName != null) ? sessionUser.UserName : "";
     var avatar = userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : "?";
 
+    // Tenant (id de consultorio) desde la cookie de sesión. 0 si no hay sesión.
+    // El branding (nombre/logo) se resuelve vía AJAX (DatosInstitucion/Branding) y NO con un id del request.
+    var empresaId = (sessionUser != null && sessionUser.EmpresaID > 0) ? sessionUser.EmpresaID : 0;
+
     var tema = Request.Cookies["tema"] != null ? Request.Cookies["tema"].Value : "claro";
     if (tema != "claro" && tema != "oscuro") { tema = "claro"; }
     var bsTheme = tema == "oscuro" ? "dark" : "light";
@@ -11,7 +15,7 @@
     var controllerActual = ViewContext.RouteData.Values["controller"] as string ?? "";
     var actionActual = ViewContext.RouteData.Values["action"] as string ?? "";
     var esDashboard = controllerActual == "Home" && actionActual == "Index";
-    var catalogosAbierto = controllerActual == "Tratamiento" || controllerActual == "Paquete";
+    var catalogosAbierto = controllerActual == "Tratamiento" || controllerActual == "Paquete" || controllerActual == "TipoConsulta";
 }
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="@bsTheme">
@@ -30,7 +34,8 @@
 <body>
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>Consultorio Médico</h3>
+            <img id="sidebarLogo" class="sidebar-logo" alt="Logo" style="display: none; max-height: 48px; max-width: 100%; margin-bottom: 6px;" />
+            <h3 id="sidebarNombre">Consultorio Médico</h3>
             <p>Sistema de Administración de Consultorio</p>
         </div>
         <ul class="components">
@@ -76,6 +81,12 @@
                             <span class="menu-text">Paquetes</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="@Url.Action("Index", "TipoConsulta")" class="@(controllerActual == "TipoConsulta" ? "active" : "")">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span class="menu-text">Tipos de Consulta</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>
@@ -105,8 +116,8 @@
                 <button type="button" id="sidebarCollapse" class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <span style="color: var(--primary-dark); font-weight: 600; font-size: 1.1rem;">
-                    <i class="fas fa-hospital-alt" style="color: var(--primary);"></i> Consultorio Médico
+                <span id="navbarNombre" style="color: var(--primary-dark); font-weight: 600; font-size: 1.1rem;">
+                    <i class="fas fa-hospital-alt" style="color: var(--primary);"></i> <span id="navbarNombreTexto">Consultorio Médico</span>
                 </span>
             </div>
 
@@ -195,6 +206,29 @@
             }
         });
     </script>
+
+    @if (empresaId > 0)
+    {
+        <script>
+            // Branding del tenant: nombre y logo de DatosInstitucion desde la WebApi (claim), nunca del cliente.
+            $(document).ready(function () {
+                $.get('@Url.Action("Branding", "DatosInstitucion")', function (response) {
+                    var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                    if (!r || !r.IsSuccess || !r.Response) return;
+                    if (r.Response.Nombre) {
+                        $('#sidebarNombre').text(r.Response.Nombre);
+                        $('#navbarNombreTexto').text(r.Response.Nombre);
+                    }
+                    if (r.Response.LogoRuta) {
+                        $('#sidebarLogo')
+                            .attr('src', '@Url.Action("Logo", "DatosInstitucion")?v=' + Date.now())
+                            .show();
+                    }
+                });
+            });
+        </script>
+    }
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

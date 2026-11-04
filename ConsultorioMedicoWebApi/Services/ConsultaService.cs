@@ -16,12 +16,12 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<ConsultaDTO>> ObtenerConsultas(string usuario)
+        public ModelResponse<List<ConsultaDTO>> ObtenerConsultas(string usuario, int empresaId)
         {
             try
             {
-                Log.Information("ConsultaService.ObtenerConsultas para {Usuario}", usuario);
-                return _dbWrapper.ObtenerConsultas(usuario);
+                Log.Information("ConsultaService.ObtenerConsultas para {Usuario} (tenant {EmpresaId})", usuario, empresaId);
+                return _dbWrapper.ObtenerConsultas(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -30,11 +30,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Consulta> ObtenerConsultaPorId(long id, string usuario)
+        public ModelResponse<Consulta> ObtenerConsultaPorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerConsultaPorId(id, usuario);
+                return _dbWrapper.ObtenerConsultaPorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Consulta> GuardarOActualizarConsulta(Consulta consulta, string usuario)
+        public ModelResponse<Consulta> GuardarOActualizarConsulta(Consulta consulta, string usuario, int empresaId)
         {
             try
             {
@@ -56,7 +56,10 @@ namespace ConsultorioMedicoWebApi.Services
                 if (consulta.Id == 0)
                     consulta.Estatus = true;
 
-                return _dbWrapper.GuardarOActualizarConsulta(consulta, usuario);
+                // 3. El tenant SIEMPRE se asigna desde el claim (nunca del cliente).
+                consulta.ConsultorioID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarConsulta(consulta, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -65,11 +68,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId, string usuario)
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerRecetaPorConsulta(consultaId, institucionId, usuario);
+                return _dbWrapper.ObtenerRecetaPorConsulta(consultaId, empresaId, usuario);
             }
             catch (Exception ex)
             {
@@ -78,11 +81,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId, string usuario)
+        public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerConsultasPorPaciente(pacienteId, usuario);
+                return _dbWrapper.ObtenerConsultasPorPaciente(pacienteId, usuario, empresaId);
             }
             catch (Exception ex)
             {

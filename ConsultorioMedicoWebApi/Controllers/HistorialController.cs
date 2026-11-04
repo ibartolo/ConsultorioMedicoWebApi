@@ -19,14 +19,14 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("TratamientosPorPaciente/{pacienteId:long}")]
         public ModelResponse<List<TratamientoHistoricoDTO>> ObtenerTratamientosPorPaciente(long pacienteId)
-            => _historialService.ObtenerTratamientosPorPaciente(pacienteId, User.Identity.Name);
+            => _historialService.ObtenerTratamientosPorPaciente(pacienteId, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("PaquetesPorPaciente/{pacienteId:int}")]
         public ModelResponse<List<PacientePaqueteLecturaDTO>> ObtenerPaquetesPorPaciente(int pacienteId)
-            => _historialService.ObtenerPaquetesPorPaciente(pacienteId, User.Identity.Name);
+            => _historialService.ObtenerPaquetesPorPaciente(pacienteId, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("CitasPorPacientePaquete/{pacientePaqueteId:int}")]
         public ModelResponse<List<CitaPaqueteLecturaDTO>> ObtenerCitasPorPacientePaquete(int pacientePaqueteId)
-            => _historialService.ObtenerCitasPorPacientePaquete(pacientePaqueteId, User.Identity.Name);
+            => _historialService.ObtenerCitasPorPacientePaquete(pacientePaqueteId, User.Identity.Name, EmpresaId);
     }
 }

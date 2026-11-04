@@ -18,7 +18,15 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="Password">Contraseña <span class="required">*</span></label>
-                <input type="text" class="form-control" name="Password" id="Password" value="@Model.Password" placeholder="Contraseña (texto plano)">
+                <input type="password" class="form-control" name="Password" id="Password" placeholder="Contraseña" autocomplete="new-password">
+                @if (Model.Id > 0)
+                {
+                    <small class="text-muted">Deje vacío para conservar la contraseña actual.</small>
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="Confirmacion">Confirmar contraseña <span class="required">*</span></label>
+                <input type="password" class="form-control" name="Confirmacion" id="Confirmacion" placeholder="Repita la contraseña" autocomplete="new-password">
             </div>
         </div>
 
@@ -35,16 +43,27 @@
     <script>
         var guardarUrl = '@Url.Action("GuardarOActualizarUsuario", "Usuario")';
         var indexUrl = '@Url.Action("Index", "Usuario")';
+        // En alta (Id == 0) la contraseña es obligatoria; en edición puede quedar vacía.
+        var esNuevo = @(Model.Id == 0 ? "true" : "false");
 
         $(document).ready(function () {
             $('#usuarioForm').validate({
                 rules: {
                     UserName: { required: true },
-                    Password: { required: true }
+                    Password: { required: esNuevo, minlength: 6 },
+                    Confirmacion: { required: esNuevo, minlength: 6, equalTo: "#Password" }
                 },
                 messages: {
                     UserName: { required: "El nombre de usuario es requerido." },
-                    Password: { required: "La contraseña es requerida." }
+                    Password: {
+                        required: "La contraseña es requerida.",
+                        minlength: "La contraseña debe tener al menos 6 caracteres."
+                    },
+                    Confirmacion: {
+                        required: "Confirme la contraseña.",
+                        minlength: "La confirmación debe tener al menos 6 caracteres.",
+                        equalTo: "Las contraseñas no coinciden."
+                    }
                 },
                 errorElement: 'div',
                 errorClass: 'invalid-feedback',

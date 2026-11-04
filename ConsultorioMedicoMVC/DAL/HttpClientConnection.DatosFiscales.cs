@@ -11,8 +11,9 @@ namespace ConsultorioMedicoMVC.DAL
         public async Task<ModelResponse<List<DatosFiscales>>> ObtenerDatosFiscales()
             => await RequestAsync<List<DatosFiscales>>("api/DatosFiscales/List", HttpMethod.Get, null, token.Token.access_token);
 
-        public async Task<ModelResponse<DatosFiscales>> ObtenerDatosFiscalUnico()
-            => await RequestAsync<DatosFiscales>("api/DatosFiscales/Unico", HttpMethod.Get, null, token.Token.access_token);
+        // La WebApi resuelve la fila fiscal del tenant desde el claim (ya no "Unico" global).
+        public async Task<ModelResponse<DatosFiscales>> ObtenerDatosFiscalActual()
+            => await RequestAsync<DatosFiscales>("api/DatosFiscales/Actual", HttpMethod.Get, null, token.Token.access_token);
 
         public async Task<ModelResponse<DatosFiscales>> ObtenerDatosFiscalPorId(int id)
             => await RequestAsync<DatosFiscales>("api/DatosFiscales/" + id, HttpMethod.Get, null, token.Token.access_token);

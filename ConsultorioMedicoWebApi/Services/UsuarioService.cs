@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ConsultorioMedicoEntities.Autenticacion;
 using ConsultorioMedicoEntities.Seguridad;
 using ConsultorioMedicoWebApi.DAL;
+using ConsultorioMedicoWebApi.Helpers;
 using Serilog;
 
 namespace ConsultorioMedicoWebApi.Services
@@ -16,11 +17,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<Usuario>> ObtenerUsuarios(string usuario)
+        public ModelResponse<List<Usuario>> ObtenerUsuarios(string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerUsuarios(usuario);
+                return _dbWrapper.ObtenerUsuarios(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -29,11 +30,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Usuario> ObtenerUsuarioPorId(long id, string usuario)
+        public ModelResponse<Usuario> ObtenerUsuarioPorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerUsuarioPorId(id, usuario);
+                return _dbWrapper.ObtenerUsuarioPorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -42,7 +43,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario usuario, string usuarioSesion)
+        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario usuario, string usuarioSesion, int empresaId)
         {
             try
             {
@@ -51,9 +52,25 @@ namespace ConsultorioMedicoWebApi.Services
                     return new ModelResponse<Usuario> { IsSuccess = false, Message = error };
 
                 if (usuario.Id == 0)
+                {
                     usuario.Estatus = true;
+                    usuario.Password = Cryptography.HashPassword(usuario.Password);
+                }
+                else if (!string.IsNullOrWhiteSpace(usuario.Password))
+                {
+                    usuario.Password = Cryptography.HashPassword(usuario.Password);
+                }
+                else
+                {
+                    // Edición con contraseña vacía: se pasa NULL para que el SP
+                    // conserve el hash actual (Password = ISNULL(@Password, Password)).
+                    usuario.Password = null;
+                }
 
-                return _dbWrapper.GuardarOActualizarUsuario(usuario, usuarioSesion);
+                // El consultorio (CompaniaID) SIEMPRE se asigna desde el claim; el cliente no elige consultorio.
+                usuario.CompaniaID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarUsuario(usuario, usuarioSesion, empresaId);
             }
             catch (Exception ex)
             {

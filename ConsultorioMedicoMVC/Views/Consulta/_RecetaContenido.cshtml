@@ -1,8 +1,11 @@
 ﻿@model ConsultorioMedicoEntities.Catalogos.RecetaDTO
 @using System.Linq
 @{
-    int institucionId = 1;
+    // Tenant desde el controller (ViewBag.InstitucionId). Sin fallback a 1:
+    // si no hay tenant (0), no se muestra logo ni membrete de institución ajena.
+    int institucionId = 0;
     if (ViewBag.InstitucionId != null) { institucionId = (int)ViewBag.InstitucionId; }
+    var mostrarLogo = institucionId > 0 && !string.IsNullOrWhiteSpace(Model.LogoRuta);
 
     var direccionPartes = new System.Collections.Generic.List<string>();
     if (!string.IsNullOrWhiteSpace(Model.InstitucionCalle))
@@ -28,9 +31,9 @@
 <div class="receta">
     <div class="receta-header">
         <div class="receta-logo">
-            @if (!string.IsNullOrWhiteSpace(Model.LogoRuta))
+            @if (mostrarLogo)
             {
-                <img src="@Url.Action("Logo", "DatosInstitucion", new { id = institucionId })" alt="Logo" />
+                <img src="@Url.Action("Logo", "DatosInstitucion")" alt="Logo" />
             }
         </div>
         <div class="receta-institucion">

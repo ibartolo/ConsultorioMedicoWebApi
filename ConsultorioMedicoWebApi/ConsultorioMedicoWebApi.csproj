@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -82,6 +82,7 @@
     <Compile Include="Controllers\DatosFiscalesController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\HistorialController.cs" />
+    <Compile Include="Controllers\RegistroController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
@@ -97,6 +98,8 @@
     <Compile Include="DAL\DbWrapper.DatosFiscales.cs" />
     <Compile Include="DAL\DbWrapper.Dashboard.cs" />
     <Compile Include="DAL\DbWrapper.Historial.cs" />
+    <Compile Include="DAL\DbWrapper.Registro.cs" />
+    <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -114,11 +117,13 @@
     <Compile Include="Services\DatosFiscalesService.cs" />
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\HistorialService.cs" />
+    <Compile Include="Services\RegistroService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
     <Content Include="Attachment\.gitkeep" />
+    <Content Include="Attachment\Web.config" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>

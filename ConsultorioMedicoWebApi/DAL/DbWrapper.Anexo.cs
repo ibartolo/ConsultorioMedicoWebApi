@@ -28,19 +28,23 @@ namespace ConsultorioMedicoWebApi.DAL
 
         /// <summary>
         /// Lista los anexos activos de un paciente incluyendo ConsultaID (para filtrar en la vista).
-        /// Se usa SQL inline para no depender de un SP nuevo ni modificar la BD.
+        /// Se usa SQL inline para no depender de un SP nuevo ni modificar la BD. Filtra por tenant.
         /// </summary>
-        public ModelResponse<List<Anexo>> ObtenerAnexosPorPaciente(long pacienteId, string usuario)
+        public ModelResponse<List<Anexo>> ObtenerAnexosPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<Anexo>>();
             try
             {
                 var anexos = GetObjects(
                     "SELECT Id, Estatus, Fecha, Comentarios, PacienteID, Nombre, Ruta, ConsultaID " +
-                    "FROM dbo.Anexo WHERE PacienteID = @PacienteId AND Estatus = 1 ORDER BY Fecha DESC, Id DESC",
+                    "FROM dbo.Anexo WHERE PacienteID = @PacienteId AND Estatus = 1 AND ConsultorioID = @ConsultorioID ORDER BY Fecha DESC, Id DESC",
                     LlenarAnexo,
                     CommandType.Text,
-                    new[] { new SqlParameter("@PacienteId", pacienteId) });
+                    new[]
+                    {
+                        new SqlParameter("@PacienteId", pacienteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = anexos.ToList();
@@ -55,29 +59,30 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Valida que una consulta pertenezca al paciente (integridad del anexo).</summary>
-        public bool ConsultaPerteneceAPaciente(long consultaId, long pacienteId)
+        /// <summary>Valida que una consulta pertenezca al paciente y al tenant (integridad del anexo).</summary>
+        public bool ConsultaPerteneceAPaciente(long consultaId, long pacienteId, int empresaId)
         {
             var total = ExecuteScalar(
-                "SELECT COUNT(*) FROM dbo.Consulta WHERE Id = @ConsultaId AND PacienteID = @PacienteId",
+                "SELECT COUNT(*) FROM dbo.Consulta WHERE Id = @ConsultaId AND PacienteID = @PacienteId AND ConsultorioID = @ConsultorioID",
                 CommandType.Text,
                 new[]
                 {
                     new SqlParameter("@ConsultaId", consultaId),
-                    new SqlParameter("@PacienteId", pacienteId)
+                    new SqlParameter("@PacienteId", pacienteId),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 });
 
             return total != null && Convert.ToInt32(total) > 0;
         }
 
-        /// <summary>Obtiene un anexo por Id. SP nuevo: sp_nh_GetAnexoById.</summary>
-        public ModelResponse<Anexo> ObtenerAnexoPorId(long id, string usuario)
+        /// <summary>Obtiene un anexo por Id. SP nuevo: sp_nh_GetAnexoById. Filtra por tenant.</summary>
+        public ModelResponse<Anexo> ObtenerAnexoPorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Anexo>();
             try
             {
                 var anexo = GetObject("sp_nh_GetAnexoById", LlenarAnexo, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (anexo == null)
                 {
@@ -99,8 +104,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Inserta un anexo. SP nuevo: sp_nh_SaveAnexo. Devuelve el Id.</summary>
-        public int GuardarAnexo(Anexo a, string usuario)
+        /// <summary>Inserta un anexo. SP nuevo: sp_nh_SaveAnexo. Devuelve el Id. El tenant se fija por claim; el SP valida pertenencia y puede devolver NULL.</summary>
+        public int GuardarAnexo(Anexo a, string usuario, int empresaId)
         {
             try
             {
@@ -112,11 +117,13 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@PacienteID", a.PacienteID),
                     new SqlParameter("@Nombre", (object)a.Nombre ?? DBNull.Value),
                     new SqlParameter("@Ruta", (object)a.Ruta ?? DBNull.Value),
-                    new SqlParameter("@ConsultaID", (object)a.ConsultaID ?? DBNull.Value)
+                    new SqlParameter("@ConsultaID", (object)a.ConsultaID ?? DBNull.Value),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveAnexo", CommandType.StoredProcedure, pars);
-                return id == null ? 0 : Convert.ToInt32(id);
+                if (id == null || id == DBNull.Value) return 0;
+                return Convert.ToInt32(id);
             }
             catch (Exception ex)
             {
@@ -125,15 +132,19 @@ namespace ConsultorioMedicoWebApi.DAL
             }
         }
 
-        /// <summary>Elimina el registro del anexo. El archivo físico lo borra el servicio.</summary>
-        public bool EliminarAnexo(long id, string usuario)
+        /// <summary>Elimina el registro del anexo (acotado al tenant). El archivo físico lo borra el servicio.</summary>
+        public bool EliminarAnexo(long id, string usuario, int empresaId)
         {
             try
             {
                 var filas = ExecuteNonQuery(
-                    "DELETE FROM dbo.Anexo WHERE Id = @Id",
+                    "DELETE FROM dbo.Anexo WHERE Id = @Id AND ConsultorioID = @ConsultorioID",
                     CommandType.Text,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[]
+                    {
+                        new SqlParameter("@Id", id),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 return filas > 0;
             }

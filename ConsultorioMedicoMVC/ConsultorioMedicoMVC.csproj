@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -87,6 +87,8 @@
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\ConfiguracionController.cs" />
     <Compile Include="Controllers\HistorialController.cs" />
+    <Compile Include="Controllers\RegistroController.cs" />
+    <Compile Include="Controllers\TipoConsultaController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Autenticacion.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="DAL\HttpClientConnection.DatosFiscales.cs" />
     <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
     <Compile Include="DAL\HttpClientConnection.Historial.cs" />
+    <Compile Include="DAL\HttpClientConnection.Registro.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -120,6 +123,7 @@
     <Compile Include="Services\DatosFiscalesService.cs" />
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\HistorialService.cs" />
+    <Compile Include="Services\RegistroService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
@@ -153,6 +157,8 @@
     <Content Include="Views\Consulta\_RecetaContenido.cshtml" />
     <Content Include="Views\Tratamiento\Index.cshtml" />
     <Content Include="Views\Tratamiento\Nuevo.cshtml" />
+    <Content Include="Views\TipoConsulta\Index.cshtml" />
+    <Content Include="Views\TipoConsulta\Nuevo.cshtml" />
     <Content Include="Views\Paquete\Index.cshtml" />
     <Content Include="Views\Paquete\Nuevo.cshtml" />
     <Content Include="Views\Usuario\Index.cshtml" />
@@ -163,6 +169,7 @@
     <Content Include="Views\Configuracion\Index.cshtml" />
     <Content Include="Views\Historial\Index.cshtml" />
     <Content Include="Views\Historial\Expediente.cshtml" />
+    <Content Include="Views\Registro\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>

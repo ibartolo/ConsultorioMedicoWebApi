@@ -19,6 +19,16 @@ namespace ConsultorioMedicoMVC.Controllers
             tokenCookie = SessionHelper.GetSessionUser();
         }
 
+        /// <summary>
+        /// Tenant (id de consultorio) resuelto desde la cookie de sesión (TokenCookie.EmpresaID).
+        /// Devuelve 0 si no hay sesión. NUNCA se acepta un id del cliente; el backend (WebApi)
+        /// lo re-resuelve desde el claim OAuth, así que este valor solo se usa para UI/membretes.
+        /// </summary>
+        public int TenantEmpresaId
+        {
+            get { return (tokenCookie != null && tokenCookie.EmpresaID > 0) ? (int)tokenCookie.EmpresaID : 0; }
+        }
+
         public List<SelectListItem> MappingPropertiToDropDownList<T>(IEnumerable<T> items, string value, string title, string prefix = "")
         {
             var result = new List<SelectListItem>();

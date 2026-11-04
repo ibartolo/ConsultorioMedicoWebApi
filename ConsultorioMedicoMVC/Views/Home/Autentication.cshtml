@@ -77,7 +77,7 @@
                 </button>
 
                 <div class="login-footer">
-                    <p>¿No tienes una cuenta? <a href="#" id="registerLink">Solicitar acceso</a></p>
+                    <p>¿No tienes una cuenta? <a href="@Url.Action("Index", "Registro")">Registrar consultorio</a></p>
                 </div>
 
                 <div class="legal-links">
@@ -243,52 +243,6 @@
                         Swal.fire({
                             title: 'Correo Enviado',
                             text: 'Se han enviado instrucciones a ' + result.value,
-                            icon: 'success',
-                            confirmButtonColor: '#0099CC'
-                        });
-                    }
-                });
-            });
-
-            const registerLink = document.getElementById('registerLink');
-            registerLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Solicitar Acceso',
-                    html: `
-                        <form id="registerForm">
-                            <div class="mb-3 text-start">
-                                <label class="form-label">Nombre completo</label>
-                                <input type="text" class="form-control" placeholder="Ingrese su nombre completo" required>
-                            </div>
-                            <div class="mb-3 text-start">
-                                <label class="form-label">Correo electrónico</label>
-                                <input type="email" class="form-control" placeholder="Ingrese su correo" required>
-                            </div>
-                            <div class="mb-3 text-start">
-                                <label class="form-label">Rol / Puesto</label>
-                                <select class="form-select" required>
-                                    <option value="">Seleccione su rol</option>
-                                    <option value="medico">Médico</option>
-                                    <option value="enfermero">Enfermero/a</option>
-                                    <option value="administrativo">Personal Administrativo</option>
-                                    <option value="director">Director</option>
-                                    <option value="otro">Otro</option>
-                                </select>
-                            </div>
-                        </form>
-                    `,
-                    icon: 'question',
-                    confirmButtonText: 'Solicitar Acceso',
-                    cancelButtonText: 'Cancelar',
-                    showCancelButton: true,
-                    confirmButtonColor: '#0099CC',
-                    cancelButtonColor: '#858796'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            title: 'Solicitud Enviada',
-                            text: 'Su solicitud ha sido enviada. Recibirá una respuesta en su correo electrónico.',
                             icon: 'success',
                             confirmButtonColor: '#0099CC'
                         });

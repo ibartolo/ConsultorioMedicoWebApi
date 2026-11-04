@@ -50,13 +50,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista pacientes activos (Estatus=1). Reutiliza el SP existente GetAllPacienteByEstatus.</summary>
-        public ModelResponse<List<PacienteDTO>> ObtenerPacientes(string usuario)
+        /// <summary>Lista pacientes activos (Estatus=1). Reutiliza el SP existente GetAllPacienteByEstatus. Filtra por tenant.</summary>
+        public ModelResponse<List<PacienteDTO>> ObtenerPacientes(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<PacienteDTO>>();
             try
             {
-                var pacientes = GetObjects("GetAllPacienteByEstatus", LlenarPacienteDTO, CommandType.StoredProcedure);
+                var pacientes = GetObjects("GetAllPacienteByEstatus", LlenarPacienteDTO, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = pacientes.ToList();
                 mr.Message = "Pacientes obtenidos correctamente.";
@@ -70,14 +71,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene un paciente por Id. SP nuevo: sp_nh_GetPacienteById.</summary>
-        public ModelResponse<Paciente> ObtenerPacientePorId(long id, string usuario)
+        /// <summary>Obtiene un paciente por Id. SP nuevo: sp_nh_GetPacienteById. Filtra por tenant.</summary>
+        public ModelResponse<Paciente> ObtenerPacientePorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Paciente>();
             try
             {
                 var paciente = GetObject("sp_nh_GetPacienteById", LlenarPaciente, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (paciente == null)
                 {
@@ -99,8 +100,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza un paciente (upsert). SP nuevo: sp_nh_SavePaciente. Devuelve el Id.</summary>
-        public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente p, string usuario)
+        /// <summary>Guarda o actualiza un paciente (upsert). SP nuevo: sp_nh_SavePaciente. Devuelve el Id. El tenant se fija por claim.</summary>
+        public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente p, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Paciente>();
             try
@@ -118,11 +119,12 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@Estatus", p.Estatus),
                     new SqlParameter("@Edad", (object)p.Edad ?? DBNull.Value),
                     new SqlParameter("@Sexo", (object)p.Sexo ?? DBNull.Value),
-                    new SqlParameter("@FechaNacimiento", (object)p.FechaNacimiento ?? DBNull.Value)
+                    new SqlParameter("@FechaNacimiento", (object)p.FechaNacimiento ?? DBNull.Value),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SavePaciente", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar el paciente.";
@@ -143,14 +145,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Baja lógica de un paciente (Estatus=0). SP nuevo: sp_nh_DeletePaciente.</summary>
-        public ModelResponse<bool> EliminarPaciente(int id, string usuario)
+        /// <summary>Baja lógica de un paciente (Estatus=0). SP nuevo: sp_nh_DeletePaciente. Acotado al tenant.</summary>
+        public ModelResponse<bool> EliminarPaciente(int id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<bool>();
             try
             {
                 var filas = ExecuteNonQuery("sp_nh_DeletePaciente", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (filas <= 0)
                 {

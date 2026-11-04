@@ -46,6 +46,9 @@ namespace ConsultorioMedicoWebApi.App_Start
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
+            // Autenticación compartida: DbWrapper.AutenticarUsuario verifica PBKDF2 (o texto
+            // plano legado con rehash transparente) y rechaza usuarios inactivos. No se
+            // compara en texto plano en SQL.
             var user = new DbWrapper().AutenticarUsuario(context.UserName, context.Password);
             if (user == null)
             {
@@ -56,6 +59,7 @@ namespace ConsultorioMedicoWebApi.App_Start
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
             identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
             identity.AddClaim(new Claim("usuarioId", user.Id.ToString()));
+            // CompaniaID es NOT NULL tras la migración SaaS; se emite defensivamente solo si > 0.
             if (user.CompaniaID != null && user.CompaniaID.Value > 0)
                 identity.AddClaim(new Claim("empresaId", user.CompaniaID.Value.ToString()));
 

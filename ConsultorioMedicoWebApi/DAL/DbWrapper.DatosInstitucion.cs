@@ -94,7 +94,7 @@ namespace ConsultorioMedicoWebApi.DAL
                 };
 
                 var id = ExecuteScalar("SaveOrUpdateDatosInstitucion", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt32(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt32(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar los datos de la institución.";

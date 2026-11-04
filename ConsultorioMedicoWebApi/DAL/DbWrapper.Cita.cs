@@ -41,13 +41,14 @@ namespace ConsultorioMedicoWebApi.DAL
             };
         }
 
-        /// <summary>Lista citas activas. SP nuevo: sp_nh_GetAllCitas.</summary>
-        public ModelResponse<List<CitaDTO>> ObtenerCitas(string usuario)
+        /// <summary>Lista citas activas. SP nuevo: sp_nh_GetAllCitas. Filtra por tenant.</summary>
+        public ModelResponse<List<CitaDTO>> ObtenerCitas(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<CitaDTO>>();
             try
             {
-                var citas = GetObjects("sp_nh_GetAllCitas", LlenarCitaDTO, CommandType.StoredProcedure);
+                var citas = GetObjects("sp_nh_GetAllCitas", LlenarCitaDTO, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@ConsultorioID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = citas.ToList();
                 mr.Message = "Citas obtenidas correctamente.";
@@ -61,14 +62,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene una cita por Id. SP nuevo: sp_nh_GetCitaById.</summary>
-        public ModelResponse<Cita> ObtenerCitaPorId(long id, string usuario)
+        /// <summary>Obtiene una cita por Id. SP nuevo: sp_nh_GetCitaById. Filtra por tenant.</summary>
+        public ModelResponse<Cita> ObtenerCitaPorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Cita>();
             try
             {
                 var cita = GetObject("sp_nh_GetCitaById", LlenarCita, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (cita == null)
                 {
@@ -90,8 +91,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza una cita (upsert). SP nuevo: sp_nh_SaveCita. Devuelve el Id.</summary>
-        public ModelResponse<Cita> GuardarOActualizarCita(Cita c, string usuario)
+        /// <summary>Guarda o actualiza una cita (upsert). SP nuevo: sp_nh_SaveCita. Devuelve el Id. El tenant se fija por claim.</summary>
+        public ModelResponse<Cita> GuardarOActualizarCita(Cita c, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Cita>();
             try
@@ -104,11 +105,12 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@PacienteID", c.PacienteID),
                     new SqlParameter("@Comentarios", (object)c.Comentarios ?? DBNull.Value),
                     new SqlParameter("@TratamientoID", (object)c.TratamientoID ?? DBNull.Value),
-                    new SqlParameter("@Estado", (object)c.Estado ?? DBNull.Value)
+                    new SqlParameter("@Estado", (object)c.Estado ?? DBNull.Value),
+                    new SqlParameter("@ConsultorioID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveCita", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar la cita.";
@@ -129,14 +131,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Baja lógica de una cita (Estatus=0). SP nuevo: sp_nh_DeleteCita.</summary>
-        public ModelResponse<bool> EliminarCita(int id, string usuario)
+        /// <summary>Baja lógica de una cita (Estatus=0). SP nuevo: sp_nh_DeleteCita. Acotado al tenant.</summary>
+        public ModelResponse<bool> EliminarCita(int id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<bool>();
             try
             {
                 var filas = ExecuteNonQuery("sp_nh_DeleteCita", CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@ConsultorioID", empresaId) });
 
                 if (filas <= 0)
                 {
@@ -158,8 +160,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Lista citas por paciente. Reutiliza el SP existente GetAllCitaByPacienteID.</summary>
-        public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario)
+        /// <summary>Lista citas por paciente. Reutiliza el SP existente GetAllCitaByPacienteID. Filtra por tenant.</summary>
+        public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<CitaDTO>>();
             try
@@ -177,7 +179,11 @@ namespace ConsultorioMedicoWebApi.DAL
                         Estado = Convert.IsDBNull(r["Estado"]) ? (int?)null : Convert.ToInt32(r["Estado"])
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@IdPaciente", pacienteId) });
+                    new[]
+                    {
+                        new SqlParameter("@IdPaciente", pacienteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = citas.ToList();

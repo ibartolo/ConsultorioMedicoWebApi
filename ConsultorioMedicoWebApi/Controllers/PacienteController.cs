@@ -19,18 +19,18 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("List")]
         public ModelResponse<List<PacienteDTO>> ObtenerPacientes()
-            => _pacienteService.ObtenerPacientes(User.Identity.Name);
+            => _pacienteService.ObtenerPacientes(User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("{id:long}")]
         public ModelResponse<Paciente> ObtenerPacientePorId(long id)
-            => _pacienteService.ObtenerPacientePorId(id, User.Identity.Name);
+            => _pacienteService.ObtenerPacientePorId(id, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Guardar")]
         public ModelResponse<Paciente> GuardarOActualizarPaciente(Paciente paciente)
-            => _pacienteService.GuardarOActualizarPaciente(paciente, User.Identity.Name);
+            => _pacienteService.GuardarOActualizarPaciente(paciente, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Eliminar/{id:int}")]
         public ModelResponse<bool> EliminarPaciente(int id)
-            => _pacienteService.EliminarPaciente(id, User.Identity.Name);
+            => _pacienteService.EliminarPaciente(id, User.Identity.Name, EmpresaId);
     }
 }

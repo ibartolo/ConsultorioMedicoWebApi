@@ -21,26 +21,24 @@ namespace ConsultorioMedicoWebApi.Controllers
             _datosInstitucionService = new DatosInstitucionService();
         }
 
-        [HttpGet, Route("{id:int}")]
-        public ModelResponse<DatosInstitucion> ObtenerDatosInstitucion(int id)
-            => _datosInstitucionService.ObtenerDatosInstitucion(id, User.Identity.Name);
+        // El Id de la institución ES el tenant: se resuelve siempre del claim (EmpresaId),
+        // nunca del cliente. No se acepta id por ruta/query/body.
+        [HttpGet, Route("")]
+        public ModelResponse<DatosInstitucion> ObtenerDatosInstitucion()
+            => _datosInstitucionService.ObtenerDatosInstitucion(EmpresaId, User.Identity.Name);
 
         [HttpPost, Route("Guardar")]
         public ModelResponse<DatosInstitucion> GuardarDatosInstitucion(DatosInstitucion datos)
-            => _datosInstitucionService.GuardarDatosInstitucion(datos, User.Identity.Name);
+            => _datosInstitucionService.GuardarDatosInstitucion(datos, EmpresaId, User.Identity.Name);
 
         [HttpPost, Route("SubirLogo")]
         public ModelResponse<DatosInstitucion> SubirLogo()
-        {
-            int id;
-            int.TryParse(HttpContext.Current.Request.Form["id"], out id);
-            return _datosInstitucionService.GuardarLogo(id, HttpContext.Current.Request.Files, User.Identity.Name);
-        }
+            => _datosInstitucionService.GuardarLogo(EmpresaId, HttpContext.Current.Request.Files, User.Identity.Name);
 
-        [HttpGet, Route("Logo/{id:int}")]
-        public HttpResponseMessage ObtenerLogo(int id)
+        [HttpGet, Route("Logo")]
+        public HttpResponseMessage ObtenerLogo()
         {
-            var institucion = _datosInstitucionService.ObtenerDatosInstitucion(id, User.Identity.Name);
+            var institucion = _datosInstitucionService.ObtenerDatosInstitucion(EmpresaId, User.Identity.Name);
             if (institucion == null || !institucion.IsSuccess || institucion.Response == null)
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Institución no encontrada.");
 

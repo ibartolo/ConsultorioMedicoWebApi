@@ -13,23 +13,25 @@ namespace ConsultorioMedicoWebApi.DAL
     {
         private Usuario LlenarUsuario(IDataReader r)
         {
+            // Los SPs de lectura (sp_nh_GetAllUsuarios / sp_nh_GetUsuarioById) ya NO
+            // devuelven la columna Password (el hash solo lo consulta el login).
             return new Usuario
             {
                 Id = Convert.ToInt32(r["Id"]),
                 UserName = r["UserName"] as string,
-                Password = r["Password"] as string,
                 Estatus = Convert.ToBoolean(r["Estatus"]),
                 CompaniaID = Convert.IsDBNull(r["CompaniaID"]) ? (int?)null : Convert.ToInt32(r["CompaniaID"])
             };
         }
 
-        /// <summary>Lista usuarios. SP nuevo: sp_nh_GetAllUsuarios.</summary>
-        public ModelResponse<List<Usuario>> ObtenerUsuarios(string usuario)
+        /// <summary>Lista usuarios del consultorio. SP nuevo: sp_nh_GetAllUsuarios. Filtra por @CompaniaID (tenant).</summary>
+        public ModelResponse<List<Usuario>> ObtenerUsuarios(string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<Usuario>>();
             try
             {
-                var usuarios = GetObjects("sp_nh_GetAllUsuarios", LlenarUsuario, CommandType.StoredProcedure);
+                var usuarios = GetObjects("sp_nh_GetAllUsuarios", LlenarUsuario, CommandType.StoredProcedure,
+                    new[] { new SqlParameter("@CompaniaID", empresaId) });
                 mr.IsSuccess = true;
                 mr.Response = usuarios.ToList();
                 mr.Message = "Usuarios obtenidos correctamente.";
@@ -43,14 +45,14 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Obtiene un usuario por Id. SP nuevo: sp_nh_GetUsuarioById.</summary>
-        public ModelResponse<Usuario> ObtenerUsuarioPorId(long id, string usuario)
+        /// <summary>Obtiene un usuario por Id. SP nuevo: sp_nh_GetUsuarioById. Filtra por @CompaniaID (tenant).</summary>
+        public ModelResponse<Usuario> ObtenerUsuarioPorId(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Usuario>();
             try
             {
                 var u = GetObject("sp_nh_GetUsuarioById", LlenarUsuario, CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@Id", id) });
+                    new[] { new SqlParameter("@Id", id), new SqlParameter("@CompaniaID", empresaId) });
 
                 if (u == null)
                 {
@@ -72,8 +74,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Guarda o actualiza un usuario (upsert). SP nuevo: sp_nh_SaveUsuario. Devuelve el Id.</summary>
-        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario u, string usuario)
+        /// <summary>Guarda o actualiza un usuario (upsert). SP nuevo: sp_nh_SaveUsuario. Devuelve el Id. El tenant (@CompaniaID) se fija por claim.</summary>
+        public ModelResponse<Usuario> GuardarOActualizarUsuario(Usuario u, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Usuario>();
             try
@@ -84,11 +86,11 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@UserName", (object)u.UserName ?? DBNull.Value),
                     new SqlParameter("@Password", (object)u.Password ?? DBNull.Value),
                     new SqlParameter("@Estatus", u.Estatus),
-                    new SqlParameter("@CompaniaID", (object)u.CompaniaID ?? DBNull.Value)
+                    new SqlParameter("@CompaniaID", empresaId)
                 };
 
                 var id = ExecuteScalar("sp_nh_SaveUsuario", CommandType.StoredProcedure, pars);
-                if (id == null || Convert.ToInt64(id) == 0)
+                if (id == null || id == DBNull.Value || Convert.ToInt64(id) == 0)
                 {
                     mr.IsSuccess = false;
                     mr.Message = "No fue posible guardar el usuario.";

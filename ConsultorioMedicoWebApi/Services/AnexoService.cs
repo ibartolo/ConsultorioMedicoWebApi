@@ -25,11 +25,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<Anexo>> ObtenerAnexosPorPaciente(long pacienteId, string usuario)
+        public ModelResponse<List<Anexo>> ObtenerAnexosPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerAnexosPorPaciente(pacienteId, usuario);
+                return _dbWrapper.ObtenerAnexosPorPaciente(pacienteId, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Anexo> ObtenerAnexoPorId(long id, string usuario)
+        public ModelResponse<Anexo> ObtenerAnexoPorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerAnexoPorId(id, usuario);
+                return _dbWrapper.ObtenerAnexoPorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -52,10 +52,11 @@ namespace ConsultorioMedicoWebApi.Services
         }
 
         /// <summary>
-        /// Guarda un archivo anexo en Attachment/{pacienteId}/[{consultaId}/] y registra la fila en BD.
+        /// Guarda un archivo anexo en Attachment/{consultorioId}/{pacienteId}/[{consultaId}/] y registra la fila en BD.
         /// Reglas: PDF hasta 5 MB; PNG/JPG/JPEG hasta 2 MB. El archivo físico se nombra con GUID.
+        /// El tenant (consultorioId) proviene del claim (empresaId), nunca del cliente.
         /// </summary>
-        public ModelResponse<Anexo> GuardarAnexo(long pacienteId, long? consultaId, string comentarios, HttpFileCollection files, string usuario)
+        public ModelResponse<Anexo> GuardarAnexo(long pacienteId, long? consultaId, string comentarios, HttpFileCollection files, string usuario, int empresaId)
         {
             var mr = new ModelResponse<Anexo>();
             string rutaAbsoluta = null;
@@ -90,11 +91,12 @@ namespace ConsultorioMedicoWebApi.Services
                 }
 
                 var consultaValida = consultaId.HasValue && consultaId.Value > 0;
-                if (consultaValida && !_dbWrapper.ConsultaPerteneceAPaciente(consultaId.Value, pacienteId))
+                if (consultaValida && !_dbWrapper.ConsultaPerteneceAPaciente(consultaId.Value, pacienteId, empresaId))
                     return new ModelResponse<Anexo> { IsSuccess = false, Message = "La consulta seleccionada no pertenece al paciente." };
 
                 var nombreFisico = Guid.NewGuid().ToString() + extension;
-                var rutaRelativa = "/" + CarpetaAnexos + "/" + pacienteId;
+                // Ruta por tenant: /Attachment/{consultorioId}/{pacienteId}/[{consultaId}/]{guid}.ext
+                var rutaRelativa = "/" + CarpetaAnexos + "/" + empresaId + "/" + pacienteId;
                 if (consultaValida)
                     rutaRelativa += "/" + consultaId.Value;
                 rutaRelativa += "/" + nombreFisico;
@@ -117,10 +119,11 @@ namespace ConsultorioMedicoWebApi.Services
                     PacienteID = (int)pacienteId,
                     Nombre = nombreOriginal,
                     Ruta = rutaRelativa,
-                    ConsultaID = consultaValida ? (int?)consultaId.Value : null
+                    ConsultaID = consultaValida ? (int?)consultaId.Value : null,
+                    ConsultorioID = empresaId
                 };
 
-                var nuevoId = _dbWrapper.GuardarAnexo(anexo, usuario);
+                var nuevoId = _dbWrapper.GuardarAnexo(anexo, usuario, empresaId);
                 if (nuevoId == 0)
                 {
                     if (File.Exists(rutaAbsoluta)) File.Delete(rutaAbsoluta);
@@ -152,17 +155,17 @@ namespace ConsultorioMedicoWebApi.Services
         }
 
         /// <summary>Elimina el anexo de la base y su archivo físico.</summary>
-        public ModelResponse<bool> EliminarAnexo(long id, string usuario)
+        public ModelResponse<bool> EliminarAnexo(long id, string usuario, int empresaId)
         {
             var mr = new ModelResponse<bool>();
             try
             {
-                var anexoResponse = _dbWrapper.ObtenerAnexoPorId(id, usuario);
+                var anexoResponse = _dbWrapper.ObtenerAnexoPorId(id, usuario, empresaId);
                 if (anexoResponse == null || !anexoResponse.IsSuccess || anexoResponse.Response == null)
                     return new ModelResponse<bool> { IsSuccess = false, Message = "Anexo no encontrado." };
 
                 var anexo = anexoResponse.Response;
-                if (!_dbWrapper.EliminarAnexo(id, usuario))
+                if (!_dbWrapper.EliminarAnexo(id, usuario, empresaId))
                     return new ModelResponse<bool> { IsSuccess = false, Message = "No fue posible eliminar el anexo de la base de datos." };
 
                 var archivoEliminado = EliminarArchivoAnexo(anexo.Ruta);

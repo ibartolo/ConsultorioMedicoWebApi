@@ -18,6 +18,6 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("Indicadores")]
         public ModelResponse<DashboardDTO> ObtenerIndicadores()
-            => _dashboardService.ObtenerIndicadores(User.Identity.Name);
+            => _dashboardService.ObtenerIndicadores(User.Identity.Name, EmpresaId);
     }
 }

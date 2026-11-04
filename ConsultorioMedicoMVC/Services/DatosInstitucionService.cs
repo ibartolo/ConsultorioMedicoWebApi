@@ -18,8 +18,8 @@ namespace ConsultorioMedicoMVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ModelResponse<DatosInstitucion>> ConsultarDatosInstitucion(int id)
-            => await _httpClient.ObtenerDatosInstitucion(id);
+        public async Task<ModelResponse<DatosInstitucion>> ConsultarDatosInstitucion()
+            => await _httpClient.ObtenerDatosInstitucion();
 
         public async Task<ModelResponse<DatosInstitucion>> GuardarDatosInstitucion(DatosInstitucion datos)
         {
@@ -30,12 +30,10 @@ namespace ConsultorioMedicoMVC.Services
             return await _httpClient.GuardarDatosInstitucion(datos);
         }
 
-        public async Task<ModelResponse<DatosInstitucion>> GuardarLogo(int id, HttpPostedFileBase archivo)
+        public async Task<ModelResponse<DatosInstitucion>> GuardarLogo(HttpPostedFileBase archivo)
         {
             using (var form = new MultipartFormDataContent())
             {
-                form.Add(new StringContent(id.ToString()), "id");
-
                 if (archivo != null && archivo.ContentLength > 0)
                 {
                     byte[] bytes;
@@ -55,7 +53,7 @@ namespace ConsultorioMedicoMVC.Services
             }
         }
 
-        public async Task<byte[]> DescargarLogo(int id)
-            => await _httpClient.DescargarLogo(id);
+        public async Task<byte[]> DescargarLogo()
+            => await _httpClient.DescargarLogo();
     }
 }

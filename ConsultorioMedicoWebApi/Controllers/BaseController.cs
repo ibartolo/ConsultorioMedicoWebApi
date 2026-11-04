@@ -21,5 +21,14 @@ namespace ConsultorioMedicoWebApi.Controllers
             if (claim != null && long.TryParse(claim.Value, out empresaId)) return empresaId;
             return 0;
         }
+
+        /// <summary>
+        /// Tenant (id de consultorio) tipado como int, derivado exclusivamente del claim
+        /// `empresaId`. Devuelve 0 si el claim no existe. Nunca se toma del cliente.
+        /// </summary>
+        public int EmpresaId
+        {
+            get { return (int)ObtenerEmpresaIdDesdeClaim(); }
+        }
     }
 }

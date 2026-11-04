@@ -8,6 +8,7 @@ namespace ConsultorioMedicoEntities.Catalogos
     public class Anexo
     {
         public int Id { get; set; }
+        public int ConsultorioID { get; set; }
         public bool Estatus { get; set; }
         public DateTime? Fecha { get; set; }
         public string Comentarios { get; set; }

@@ -18,8 +18,8 @@ namespace ConsultorioMedicoMVC.Services
         public async Task<ModelResponse<List<DatosFiscales>>> ConsultarDatosFiscales()
             => await _httpClient.ObtenerDatosFiscales();
 
-        public async Task<ModelResponse<DatosFiscales>> ConsultarDatosFiscalUnico()
-            => await _httpClient.ObtenerDatosFiscalUnico();
+        public async Task<ModelResponse<DatosFiscales>> ConsultarDatosFiscalActual()
+            => await _httpClient.ObtenerDatosFiscalActual();
 
         public async Task<ModelResponse<DatosFiscales>> ConsultarDatosFiscalPorId(int id)
             => await _httpClient.ObtenerDatosFiscalPorId(id);

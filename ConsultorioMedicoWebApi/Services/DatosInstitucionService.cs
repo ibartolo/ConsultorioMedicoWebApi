@@ -11,7 +11,7 @@ namespace ConsultorioMedicoWebApi.Services
 {
     public class DatosInstitucionService
     {
-        private const string CarpetaLogo = "Attachment/institucion";
+        private const string CarpetaRaiz = "Attachment";
         private const long MaxLogoBytes = 2L * 1024 * 1024;
         private static readonly string[] ExtensionesLogo = { ".png", ".jpg", ".jpeg" };
 
@@ -22,11 +22,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<DatosInstitucion> ObtenerDatosInstitucion(int id, string usuario)
+        public ModelResponse<DatosInstitucion> ObtenerDatosInstitucion(int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerDatosInstitucion(id, usuario);
+                return _dbWrapper.ObtenerDatosInstitucion(empresaId, usuario);
             }
             catch (Exception ex)
             {
@@ -35,7 +35,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<DatosInstitucion> GuardarDatosInstitucion(DatosInstitucion datos, string usuario)
+        public ModelResponse<DatosInstitucion> GuardarDatosInstitucion(DatosInstitucion datos, int empresaId, string usuario)
         {
             try
             {
@@ -43,7 +43,9 @@ namespace ConsultorioMedicoWebApi.Services
                 if (error != null)
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = error };
 
-                if (datos.Id < 0) datos.Id = 0;
+                // La institución del tenant: el Id SIEMPRE se fija desde el claim
+                // (nunca del cliente). El tenant es la institución (DatosInstitucion.Id).
+                datos.Id = empresaId;
                 return _dbWrapper.GuardarDatosInstitucion(datos, usuario);
             }
             catch (Exception ex)
@@ -53,14 +55,14 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        /// <summary>Guarda el logo de la institución en Attachment/institucion y actualiza LogoRuta.</summary>
-        public ModelResponse<DatosInstitucion> GuardarLogo(int id, HttpFileCollection files, string usuario)
+        /// <summary>Guarda el logo de la institución en Attachment/{consultorioId}/institucion y actualiza LogoRuta.</summary>
+        public ModelResponse<DatosInstitucion> GuardarLogo(int empresaId, HttpFileCollection files, string usuario)
         {
             var mr = new ModelResponse<DatosInstitucion>();
             string rutaAbsoluta = null;
             try
             {
-                if (id <= 0)
+                if (empresaId <= 0)
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = "Institución no válida." };
 
                 if (files == null || files.Count == 0)
@@ -77,12 +79,13 @@ namespace ConsultorioMedicoWebApi.Services
                 if (file.ContentLength > MaxLogoBytes)
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = "El logo excede el tamaño máximo permitido (2 MB)." };
 
-                var actual = _dbWrapper.ObtenerDatosInstitucion(id, usuario);
+                var actual = _dbWrapper.ObtenerDatosInstitucion(empresaId, usuario);
                 if (actual == null || !actual.IsSuccess || actual.Response == null)
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = "Institución no encontrada." };
 
                 var nombreFisico = Guid.NewGuid().ToString() + extension;
-                var rutaRelativa = "/" + CarpetaLogo + "/" + nombreFisico;
+                // Ruta del logo por tenant: /Attachment/{consultorioId}/institucion/{guid}.ext
+                var rutaRelativa = "/" + CarpetaRaiz + "/" + empresaId + "/institucion/" + nombreFisico;
                 rutaAbsoluta = HostingEnvironment.MapPath("~" + rutaRelativa);
                 if (string.IsNullOrEmpty(rutaAbsoluta))
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = "No se pudo resolver la ruta del logo." };
@@ -93,13 +96,13 @@ namespace ConsultorioMedicoWebApi.Services
 
                 file.SaveAs(rutaAbsoluta);
 
-                if (!_dbWrapper.ActualizarLogoInstitucion(id, rutaRelativa))
+                if (!_dbWrapper.ActualizarLogoInstitucion(empresaId, rutaRelativa))
                 {
                     if (File.Exists(rutaAbsoluta)) File.Delete(rutaAbsoluta);
                     return new ModelResponse<DatosInstitucion> { IsSuccess = false, Message = "No fue posible guardar el logo." };
                 }
 
-                EliminarLogoAnterior(actual.Response.LogoRuta);
+                EliminarLogoAnterior(actual.Response.LogoRuta, empresaId);
                 actual.Response.LogoRuta = rutaRelativa;
 
                 mr.IsSuccess = true;
@@ -112,7 +115,7 @@ namespace ConsultorioMedicoWebApi.Services
                 {
                     try { File.Delete(rutaAbsoluta); } catch { }
                 }
-                Log.Error(ex, "Error en GuardarLogo de institución {Id}", id);
+                Log.Error(ex, "Error en GuardarLogo de institución {Id}", empresaId);
                 mr.IsSuccess = false;
                 mr.Message = "Ocurrió un error al guardar el logo.";
             }
@@ -135,9 +138,10 @@ namespace ConsultorioMedicoWebApi.Services
             return File.ReadAllBytes(rutaAbsoluta);
         }
 
-        private void EliminarLogoAnterior(string ruta)
+        private void EliminarLogoAnterior(string ruta, int empresaId)
         {
-            if (string.IsNullOrWhiteSpace(ruta) || !ruta.StartsWith("/" + CarpetaLogo + "/")) return;
+            var prefijo = "/" + CarpetaRaiz + "/" + empresaId + "/institucion/";
+            if (string.IsNullOrWhiteSpace(ruta) || !ruta.StartsWith(prefijo)) return;
             try
             {
                 var abs = HostingEnvironment.MapPath("~" + ruta);

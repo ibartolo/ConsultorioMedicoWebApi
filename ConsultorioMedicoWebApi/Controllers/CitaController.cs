@@ -19,22 +19,22 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("List")]
         public ModelResponse<List<CitaDTO>> ObtenerCitas()
-            => _citaService.ObtenerCitas(User.Identity.Name);
+            => _citaService.ObtenerCitas(User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("{id:long}")]
         public ModelResponse<Cita> ObtenerCitaPorId(long id)
-            => _citaService.ObtenerCitaPorId(id, User.Identity.Name);
+            => _citaService.ObtenerCitaPorId(id, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Guardar")]
         public ModelResponse<Cita> GuardarOActualizarCita(Cita cita)
-            => _citaService.GuardarOActualizarCita(cita, User.Identity.Name);
+            => _citaService.GuardarOActualizarCita(cita, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Eliminar/{id:int}")]
         public ModelResponse<bool> EliminarCita(int id)
-            => _citaService.EliminarCita(id, User.Identity.Name);
+            => _citaService.EliminarCita(id, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<CitaDTO>> ObtenerCitasPorPaciente(long pacienteId)
-            => _citaService.ObtenerCitasPorPaciente(pacienteId, User.Identity.Name);
+            => _citaService.ObtenerCitasPorPaciente(pacienteId, User.Identity.Name, EmpresaId);
     }
 }

@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "Tipos de Consulta";
+}
+<h2 class="page-title"><i class="fas fa-clipboard-list me-2" style="color: var(--primary);"></i>Tipos de Consulta</h2>
+
+<div class="card-custom">
+    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span><i class="fas fa-clipboard-list"></i> Lista de Tipos de Consulta</span>
+        <a href="@Url.Action("Nuevo", "TipoConsulta")" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nuevo Tipo de Consulta</a>
+    </div>
+
+    <div class="table-container">
+        <table id="tiposConsultaTable" class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Duración (min)</th>
+                    <th>Descripción</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var editUrl = '@Url.Action("Nuevo", "TipoConsulta")';
+            var listUrl = '@Url.Action("ConsultarTodosTiposConsulta", "TipoConsulta")';
+            var eliminarUrl = '@Url.Action("EliminarTipoConsulta", "TipoConsulta")';
+
+            var table = $('#tiposConsultaTable').DataTable({
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
+                pageLength: 10,
+                responsive: true,
+                columns: [
+                    { data: 'Id' },
+                    { data: 'Nombre' },
+                    { data: 'Duracion', render: function (data) { return data || ''; } },
+                    { data: 'Descripcion', render: function (data) { return data || ''; } },
+                    {
+                        data: 'Estatus',
+                        render: function (data) {
+                            return data
+                                ? '<span class="badge-status badge-active">Activo</span>'
+                                : '<span class="badge-status badge-inactive">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            var html = '<a href="' + editUrl + '/' + data + '" class="btn btn-sm btn-warning me-1" title="Editar"><i class="fas fa-edit"></i></a>';
+                            if (row.Estatus) {
+                                html += '<button type="button" class="btn btn-sm btn-danger" title="Desactivar" onclick="desactivarTipoConsulta(' + data + ', this)"><i class="fas fa-trash-alt"></i></button>';
+                            }
+                            return html;
+                        }
+                    }
+                ],
+                ajax: {
+                    url: listUrl,
+                    dataSrc: function (json) {
+                        var result = (typeof json === 'string') ? JSON.parse(json) : json;
+                        return result.IsSuccess ? result.Response : [];
+                    }
+                }
+            });
+
+            window.desactivarTipoConsulta = function (id, btn) {
+                Swal.fire({
+                    title: '¿Desactivar el tipo de consulta?',
+                    text: 'El tipo de consulta dejará de estar activo (baja lógica).',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0099CC',
+                    cancelButtonColor: '#858796',
+                    confirmButtonText: 'Sí, desactivar',
+                    cancelButtonText: 'Cancelar'
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+                    $.post(eliminarUrl, { id: id }, function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r && r.IsSuccess) {
+                            Swal.fire({ title: 'Desactivado', text: r.Message || 'El tipo de consulta se desactivó.', icon: 'success', timer: 1500, showConfirmButton: false });
+                            table.ajax.reload(null, false);
+                        } else {
+                            Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible desactivar el tipo de consulta.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    }).fail(function () {
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    });
+                });
+            };
+        });
+    </script>
+}

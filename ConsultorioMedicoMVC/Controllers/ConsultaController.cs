@@ -61,11 +61,11 @@ namespace ConsultorioMedicoMVC.Controllers
         // GET: Consulta/Receta/{id} (receta imprimible)
         public async Task<ActionResult> Receta(long id)
         {
-            var institucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
-                ? (int)tokenCookie.EmpresaID
-                : 1;
+            // El tenant del membrete se toma de la cookie (sin fallback global a 1).
+            // El backend (WebApi) resuelve la institución desde el claim y valida pertenencia.
+            var institucionId = tokenCookie != null ? (int)tokenCookie.EmpresaID : 0;
 
-            var receta = await _consultaService.ObtenerRecetaPorConsulta(id, institucionId);
+            var receta = await _consultaService.ObtenerRecetaPorConsulta(id);
             if (receta == null || !receta.IsSuccess || receta.Response == null)
                 return RedirectToAction("Index");
 
@@ -76,11 +76,9 @@ namespace ConsultorioMedicoMVC.Controllers
         // GET: Consulta/RecetaParcial/{id} (contenido para el modal)
         public async Task<ActionResult> RecetaParcial(long id)
         {
-            var institucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
-                ? (int)tokenCookie.EmpresaID
-                : 1;
+            var institucionId = tokenCookie != null ? (int)tokenCookie.EmpresaID : 0;
 
-            var receta = await _consultaService.ObtenerRecetaPorConsulta(id, institucionId);
+            var receta = await _consultaService.ObtenerRecetaPorConsulta(id);
             if (receta == null || !receta.IsSuccess || receta.Response == null)
                 return new HttpNotFoundResult();
 

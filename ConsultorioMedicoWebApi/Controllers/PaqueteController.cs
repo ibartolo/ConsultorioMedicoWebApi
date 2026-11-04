@@ -19,14 +19,14 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("List")]
         public ModelResponse<List<Paquete>> ObtenerPaquetes()
-            => _paqueteService.ObtenerPaquetes(User.Identity.Name);
+            => _paqueteService.ObtenerPaquetes(User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("{id:long}")]
         public ModelResponse<Paquete> ObtenerPaquetePorId(long id)
-            => _paqueteService.ObtenerPaquetePorId(id, User.Identity.Name);
+            => _paqueteService.ObtenerPaquetePorId(id, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Guardar")]
         public ModelResponse<Paquete> GuardarOActualizarPaquete(Paquete paquete)
-            => _paqueteService.GuardarOActualizarPaquete(paquete, User.Identity.Name);
+            => _paqueteService.GuardarOActualizarPaquete(paquete, User.Identity.Name, EmpresaId);
     }
 }

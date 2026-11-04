@@ -19,40 +19,47 @@ namespace ConsultorioMedicoMVC.Controllers
 
         public ActionResult Index()
         {
-            ViewBag.InstitucionId = (tokenCookie != null && tokenCookie.EmpresaID > 0)
-                ? (int)tokenCookie.EmpresaID
-                : 1;
+            ViewBag.InstitucionId = TenantEmpresaId;
             return View();
         }
 
-        public async Task<string> Consultar(int id)
+        // El id de la institución es el tenant: se resuelve de la cookie, nunca del cliente.
+        public async Task<string> Consultar()
         {
-            var response = await _datosInstitucionService.ConsultarDatosInstitucion(id);
+            var response = await _datosInstitucionService.ConsultarDatosInstitucion();
+            return JsonConvert.SerializeObject(response);
+        }
+
+        // AJAX: branding (nombre + logo) del tenant actual para el sidebar/navbar del layout.
+        public async Task<string> Branding()
+        {
+            var response = await _datosInstitucionService.ConsultarDatosInstitucion();
             return JsonConvert.SerializeObject(response);
         }
 
         [HttpPost]
         public async Task<string> Guardar(DatosInstitucion datos)
         {
+            if (datos != null) datos.Id = TenantEmpresaId;
             var response = await _datosInstitucionService.GuardarDatosInstitucion(datos);
             return JsonConvert.SerializeObject(response);
         }
 
         [HttpPost]
-        public async Task<string> SubirLogo(int id, HttpPostedFileBase logo)
+        public async Task<string> SubirLogo(HttpPostedFileBase logo)
         {
-            var response = await _datosInstitucionService.GuardarLogo(id, logo);
+            var response = await _datosInstitucionService.GuardarLogo(logo);
             return JsonConvert.SerializeObject(response);
         }
 
-        public async Task<ActionResult> Logo(int id)
+        public async Task<ActionResult> Logo()
         {
-            var institucion = await _datosInstitucionService.ConsultarDatosInstitucion(id);
+            var institucion = await _datosInstitucionService.ConsultarDatosInstitucion();
             if (institucion == null || !institucion.IsSuccess || institucion.Response == null ||
                 string.IsNullOrWhiteSpace(institucion.Response.LogoRuta))
                 return new HttpNotFoundResult();
 
-            var bytes = await _datosInstitucionService.DescargarLogo(id);
+            var bytes = await _datosInstitucionService.DescargarLogo();
             if (bytes == null) return new HttpNotFoundResult();
 
             return File(bytes, ObtenerContentType(institucion.Response.LogoRuta));

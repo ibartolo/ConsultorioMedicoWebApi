@@ -19,22 +19,22 @@ namespace ConsultorioMedicoWebApi.Controllers
 
         [HttpGet, Route("List")]
         public ModelResponse<List<ConsultaDTO>> ObtenerConsultas()
-            => _consultaService.ObtenerConsultas(User.Identity.Name);
+            => _consultaService.ObtenerConsultas(User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("{id:long}")]
         public ModelResponse<Consulta> ObtenerConsultaPorId(long id)
-            => _consultaService.ObtenerConsultaPorId(id, User.Identity.Name);
+            => _consultaService.ObtenerConsultaPorId(id, User.Identity.Name, EmpresaId);
 
         [HttpPost, Route("Guardar")]
         public ModelResponse<Consulta> GuardarOActualizarConsulta(Consulta consulta)
-            => _consultaService.GuardarOActualizarConsulta(consulta, User.Identity.Name);
+            => _consultaService.GuardarOActualizarConsulta(consulta, User.Identity.Name, EmpresaId);
 
         [HttpGet, Route("Receta/{consultaId:long}")]
-        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId, int institucionId = 1)
-            => _consultaService.ObtenerRecetaPorConsulta(consultaId, institucionId, User.Identity.Name);
+        public ModelResponse<RecetaDTO> ObtenerRecetaPorConsulta(long consultaId)
+            => _consultaService.ObtenerRecetaPorConsulta(consultaId, EmpresaId, User.Identity.Name);
 
         [HttpGet, Route("PorPaciente/{pacienteId:long}")]
         public ModelResponse<List<ConsultaDTO>> ObtenerConsultasPorPaciente(long pacienteId)
-            => _consultaService.ObtenerConsultasPorPaciente(pacienteId, User.Identity.Name);
+            => _consultaService.ObtenerConsultasPorPaciente(pacienteId, User.Identity.Name, EmpresaId);
     }
 }

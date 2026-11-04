@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Datos de la Institución";
-    int institucionId = 1;
+    // Tenant desde la cookie (ViewBag.InstitucionId). 0 si no hay sesión; sin fallback a 1.
+    int institucionId = 0;
     if (ViewBag.InstitucionId != null) { institucionId = (int)ViewBag.InstitucionId; }
 }
 <h2 class="page-title"><i class="fas fa-hospital me-2" style="color: var(--primary);"></i>Datos de la Institución</h2>
@@ -124,7 +125,7 @@
         }
 
         function cargarInstitucion() {
-            $.get(consultarInstitucionUrl, { id: institucionId }, function (response) {
+            $.get(consultarInstitucionUrl, function (response) {
                 var r = parseRespuesta(response);
                 if (r && r.IsSuccess && r.Response) {
                     poblarInstitucion(r.Response);
@@ -171,7 +172,7 @@
 
             if (ruta) {
                 $('#logoPreview')
-                    .attr('src', '@Url.Action("Logo", "DatosInstitucion")?id=' + institucionId + '&v=' + Date.now())
+                    .attr('src', '@Url.Action("Logo", "DatosInstitucion")?v=' + Date.now())
                     .show();
                 $('#logoVacio').hide();
             } else {

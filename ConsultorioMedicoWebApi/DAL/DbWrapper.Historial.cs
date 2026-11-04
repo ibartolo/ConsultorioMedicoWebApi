@@ -11,8 +11,8 @@ namespace ConsultorioMedicoWebApi.DAL
 {
     public partial class DbWrapper
     {
-        /// <summary>Lista el historial de tratamientos de un paciente (Cita + Consulta). SP nuevo: sp_nh_GetTratamientosPorPaciente.</summary>
-        public ModelResponse<List<TratamientoHistoricoDTO>> ObtenerTratamientosPorPaciente(long pacienteId, string usuario)
+        /// <summary>Lista el historial de tratamientos de un paciente (Cita + Consulta). SP nuevo: sp_nh_GetTratamientosPorPaciente. Filtra por tenant.</summary>
+        public ModelResponse<List<TratamientoHistoricoDTO>> ObtenerTratamientosPorPaciente(long pacienteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<TratamientoHistoricoDTO>>();
             try
@@ -27,7 +27,11 @@ namespace ConsultorioMedicoWebApi.DAL
                         Comentarios = r["Comentarios"] as string
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@IdPaciente", pacienteId) });
+                    new[]
+                    {
+                        new SqlParameter("@IdPaciente", pacienteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = tratamientos.ToList();
@@ -42,8 +46,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Lista los paquetes adquiridos por un paciente. SP nuevo: sp_nh_GetPaquetesPorPaciente.</summary>
-        public ModelResponse<List<PacientePaqueteLecturaDTO>> ObtenerPaquetesPorPaciente(int pacienteId, string usuario)
+        /// <summary>Lista los paquetes adquiridos por un paciente. SP nuevo: sp_nh_GetPaquetesPorPaciente. Filtra por tenant.</summary>
+        public ModelResponse<List<PacientePaqueteLecturaDTO>> ObtenerPaquetesPorPaciente(int pacienteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<PacientePaqueteLecturaDTO>>();
             try
@@ -57,7 +61,11 @@ namespace ConsultorioMedicoWebApi.DAL
                         PaqueteNombre = r["PaqueteNombre"] as string
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@PacienteId", pacienteId) });
+                    new[]
+                    {
+                        new SqlParameter("@PacienteId", pacienteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = paquetes.ToList();
@@ -72,8 +80,8 @@ namespace ConsultorioMedicoWebApi.DAL
             return mr;
         }
 
-        /// <summary>Lista las citas-tratamientos de un paquete del paciente. SP nuevo: sp_nh_GetCitasPorPacientePaquete.</summary>
-        public ModelResponse<List<CitaPaqueteLecturaDTO>> ObtenerCitasPorPacientePaquete(int pacientePaqueteId, string usuario)
+        /// <summary>Lista las citas-tratamientos de un paquete del paciente. SP nuevo: sp_nh_GetCitasPorPacientePaquete. Filtra por tenant.</summary>
+        public ModelResponse<List<CitaPaqueteLecturaDTO>> ObtenerCitasPorPacientePaquete(int pacientePaqueteId, string usuario, int empresaId)
         {
             var mr = new ModelResponse<List<CitaPaqueteLecturaDTO>>();
             try
@@ -89,7 +97,11 @@ namespace ConsultorioMedicoWebApi.DAL
                         PacientePaqueteID = Convert.ToInt32(r["PacientePaqueteID"])
                     }),
                     CommandType.StoredProcedure,
-                    new[] { new SqlParameter("@PacientePaqueteId", pacientePaqueteId) });
+                    new[]
+                    {
+                        new SqlParameter("@PacientePaqueteId", pacientePaqueteId),
+                        new SqlParameter("@ConsultorioID", empresaId)
+                    });
 
                 mr.IsSuccess = true;
                 mr.Response = citas.ToList();

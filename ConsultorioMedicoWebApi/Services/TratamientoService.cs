@@ -16,11 +16,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<Tratamiento>> ObtenerTratamientos(string usuario)
+        public ModelResponse<List<Tratamiento>> ObtenerTratamientos(string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerTratamientos(usuario);
+                return _dbWrapper.ObtenerTratamientos(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -29,11 +29,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Tratamiento> ObtenerTratamientoPorId(long id, string usuario)
+        public ModelResponse<Tratamiento> ObtenerTratamientoPorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerTratamientoPorId(id, usuario);
+                return _dbWrapper.ObtenerTratamientoPorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Tratamiento> GuardarOActualizarTratamiento(Tratamiento tratamiento, string usuario)
+        public ModelResponse<Tratamiento> GuardarOActualizarTratamiento(Tratamiento tratamiento, string usuario, int empresaId)
         {
             try
             {
@@ -55,7 +55,10 @@ namespace ConsultorioMedicoWebApi.Services
                 if (tratamiento.Id == 0)
                     tratamiento.Estatus = true;
 
-                return _dbWrapper.GuardarOActualizarTratamiento(tratamiento, usuario);
+                // 3. El tenant SIEMPRE se asigna desde el claim (nunca del cliente).
+                tratamiento.ConsultorioID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarTratamiento(tratamiento, usuario, empresaId);
             }
             catch (Exception ex)
             {

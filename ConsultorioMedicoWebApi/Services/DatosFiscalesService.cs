@@ -16,11 +16,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<DatosFiscales>> ObtenerDatosFiscales(string usuario)
+        public ModelResponse<List<DatosFiscales>> ObtenerDatosFiscales(int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerDatosFiscales(usuario);
+                return _dbWrapper.ObtenerDatosFiscales(empresaId, usuario);
             }
             catch (Exception ex)
             {
@@ -29,24 +29,24 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<DatosFiscales> ObtenerDatosFiscalUnico(string usuario)
+        public ModelResponse<DatosFiscales> ObtenerDatosFiscalActual(int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerDatosFiscalUnico(usuario);
+                return _dbWrapper.ObtenerDatosFiscalActual(empresaId, usuario);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en ObtenerDatosFiscalUnico");
+                Log.Error(ex, "Error en ObtenerDatosFiscalActual");
                 return new ModelResponse<DatosFiscales> { IsSuccess = false, Message = "Ocurrió un error al obtener el dato fiscal." };
             }
         }
 
-        public ModelResponse<DatosFiscales> ObtenerDatosFiscalPorId(int id, string usuario)
+        public ModelResponse<DatosFiscales> ObtenerDatosFiscalPorId(int id, int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.ObtenerDatosFiscalPorId(id, usuario);
+                return _dbWrapper.ObtenerDatosFiscalPorId(id, empresaId, usuario);
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<DatosFiscales> GuardarDatosFiscal(DatosFiscales datos, string usuario)
+        public ModelResponse<DatosFiscales> GuardarDatosFiscal(DatosFiscales datos, int empresaId, string usuario)
         {
             try
             {
@@ -64,7 +64,11 @@ namespace ConsultorioMedicoWebApi.Services
                     return new ModelResponse<DatosFiscales> { IsSuccess = false, Message = error };
 
                 if (datos.Id < 0) datos.Id = 0;
-                return _dbWrapper.GuardarDatosFiscal(datos, usuario);
+
+                // El consultorio (@ConsultorioID = DatosInstitucionID) SIEMPRE viene del claim.
+                datos.DatosInstitucionID = empresaId;
+
+                return _dbWrapper.GuardarDatosFiscal(datos, empresaId, usuario);
             }
             catch (Exception ex)
             {
@@ -73,11 +77,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<bool> EliminarDatosFiscal(int id, string usuario)
+        public ModelResponse<bool> EliminarDatosFiscal(int id, int empresaId, string usuario)
         {
             try
             {
-                return _dbWrapper.EliminarDatosFiscal(id, usuario);
+                return _dbWrapper.EliminarDatosFiscal(id, empresaId, usuario);
             }
             catch (Exception ex)
             {

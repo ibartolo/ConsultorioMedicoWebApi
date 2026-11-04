@@ -16,11 +16,11 @@ namespace ConsultorioMedicoWebApi.Services
             _dbWrapper = new DbWrapper();
         }
 
-        public ModelResponse<List<Paquete>> ObtenerPaquetes(string usuario)
+        public ModelResponse<List<Paquete>> ObtenerPaquetes(string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerPaquetes(usuario);
+                return _dbWrapper.ObtenerPaquetes(usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -29,11 +29,11 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Paquete> ObtenerPaquetePorId(long id, string usuario)
+        public ModelResponse<Paquete> ObtenerPaquetePorId(long id, string usuario, int empresaId)
         {
             try
             {
-                return _dbWrapper.ObtenerPaquetePorId(id, usuario);
+                return _dbWrapper.ObtenerPaquetePorId(id, usuario, empresaId);
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace ConsultorioMedicoWebApi.Services
             }
         }
 
-        public ModelResponse<Paquete> GuardarOActualizarPaquete(Paquete paquete, string usuario)
+        public ModelResponse<Paquete> GuardarOActualizarPaquete(Paquete paquete, string usuario, int empresaId)
         {
             try
             {
@@ -56,7 +56,10 @@ namespace ConsultorioMedicoWebApi.Services
                     paquete.FechaCreacion = DateTime.Now;
                 }
 
-                return _dbWrapper.GuardarOActualizarPaquete(paquete, usuario);
+                // El tenant SIEMPRE se asigna desde el claim (nunca del cliente).
+                paquete.ConsultorioID = empresaId;
+
+                return _dbWrapper.GuardarOActualizarPaquete(paquete, usuario, empresaId);
             }
             catch (Exception ex)
             {

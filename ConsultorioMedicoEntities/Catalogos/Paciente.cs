@@ -9,6 +9,7 @@ namespace ConsultorioMedicoEntities.Catalogos
     /// </summary>
     public class Paciente : BaseObject
     {
+        public int ConsultorioID { get; set; }
         public string Nombre { get; set; }
         public string ApellidoPaterno { get; set; }
         public string ApellidoMaterno { get; set; }
