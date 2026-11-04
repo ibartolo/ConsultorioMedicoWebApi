@@ -124,7 +124,7 @@ Depende de Phase 1 y Phase 6.5.
 
 - [x] 8.1 Crear `Attachment/Web.config`: `<system.web><authorization><deny users="*"/></authorization></system.web>` + restricción `<system.webServer>` (bloquear acceso directo).
 - [x] 8.2 Crear `sql/migraciones_saas_03_archivos.sql` (idempotente): `UPDATE DatosInstitucion SET LogoRuta=REPLACE(...) WHERE LogoRuta LIKE '/Attachment/institucion/%'`; `UPDATE Anexo SET Ruta=REPLACE(Ruta,'/Attachment/','/Attachment/1/') WHERE Ruta LIKE '/Attachment/%' AND Ruta NOT LIKE '/Attachment/1/%'`.
-- [ ] 8.3 Movimiento físico (manual/apply): `Attachment/institucion/` → `Attachment/1/institucion/`; carpetas huérfanas `Attachment/{num}/` → `Attachment/1/{num}/`. → **PENDIENTE de aprobación (Phase 11). No se movió nada en este batch.**
+- [x] 8.3 Movimiento físico (manual/apply): `Attachment/institucion/` → `Attachment/1/institucion/`; carpetas huérfanas `Attachment/{num}/` → `Attachment/1/{num}/`. → **Ejecutado el 2026-11-04: movido a `Attachment/1/institucion` y `Attachment/1/3627`.**
 - [x] 8.4 Anexo modal/API (`_AnexosModal.cshtml`, endpoints): usar ruta `Attachment/{consultorioId}/{pacienteId}/[{consultaId}/]{guid}.ext`; list/upload/download por API con validación tenant; descarga por proxy MVC.
 - **Criterios**: logo bajo `Attachment/1/institucion/`; acceso directo a archivo denegado; rutas actualizadas.
 - **Verificación**: matriz anexos (Phase 11).
@@ -150,9 +150,9 @@ Depende de fases 1–9.
 
 ⛔ **Gate de aprobación**: antes de ejecutar `01/02/03` en el clon, pedir aprobación explícita del usuario. Orden: `01_esquema` → `02_procedimientos` → `03_archivos` (tras mover archivos físicos).
 
-- [ ] 11.1 Ejecutar `migraciones_saas_01_esquema.sql` en el clon (previa aprobación). Verificar backfill a 1, `ivanbartolo.CompaniaID=1`, `DatosFiscales` consultorio 1 vacío.
-- [ ] 11.2 Ejecutar `migraciones_saas_02_procedimientos.sql` (previa aprobación).
-- [ ] 11.3 Ejecutar `migraciones_saas_03_archivos.sql` (previa aprobación) tras mover archivos físicos.
+- [x] 11.1 Ejecutar `migraciones_saas_01_esquema.sql` en el clon (previa aprobación). Verificar backfill a 1, `ivanbartolo.CompaniaID=1`, `DatosFiscales` consultorio 1 vacío.
+- [x] 11.2 Ejecutar `migraciones_saas_02_procedimientos.sql` (previa aprobación).
+- [x] 11.3 Ejecutar `migraciones_saas_03_archivos.sql` (previa aprobación) tras mover archivos físicos.
 
 ### Matriz de pruebas manuales
 

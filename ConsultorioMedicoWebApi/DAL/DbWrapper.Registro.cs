@@ -153,7 +153,7 @@ namespace ConsultorioMedicoWebApi.DAL
         {
             var pars = new List<SqlParameter>
             {
-                new SqlParameter("@Id", 0),
+                new SqlParameter("@Id", SqlDbType.Int) { Value = 0 },
                 new SqlParameter("@Nombre", (object)d.NombreComercial ?? DBNull.Value),
                 new SqlParameter("@NoTrabajadores", DBNull.Value),
                 new SqlParameter("@Telefono1", (object)d.Telefono ?? DBNull.Value),
@@ -182,7 +182,7 @@ namespace ConsultorioMedicoWebApi.DAL
         {
             var pars = new List<SqlParameter>
             {
-                new SqlParameter("@Id", 0),
+                new SqlParameter("@Id", SqlDbType.Int) { Value = 0 },
                 new SqlParameter("@RazonSocial", (object)d.RazonSocial ?? DBNull.Value),
                 new SqlParameter("@RFC", (object)rfc ?? DBNull.Value),
                 new SqlParameter("@Telefono1", (object)d.Telefono ?? DBNull.Value),
@@ -209,7 +209,7 @@ namespace ConsultorioMedicoWebApi.DAL
         {
             var pars = new List<SqlParameter>
             {
-                new SqlParameter("@Id", 0),
+                new SqlParameter("@Id", SqlDbType.Int) { Value = 0 },
                 new SqlParameter("@UserName", (object)userName ?? DBNull.Value),
                 new SqlParameter("@Password", (object)passwordHash ?? DBNull.Value),
                 new SqlParameter("@Estatus", true),
