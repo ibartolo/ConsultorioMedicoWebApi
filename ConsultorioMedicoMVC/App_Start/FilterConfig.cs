@@ -20,7 +20,8 @@ namespace ConsultorioMedicoMVC.App_Start
         {
             "Home.Autentication", "Home.LogIn", "Home.LogOut",
             "Home.CambiarTema", "Home.Terminos", "Home.Privacidad",
-            "Registro.Index", "Registro.Guardar"
+            "Registro.Index", "Registro.Guardar",
+            "RecuperacionPassword.Solicitar", "RecuperacionPassword.Restablecer", "RecuperacionPassword.Guardar"
         };
 
         public void OnAuthorization(AuthorizationContext ctx)

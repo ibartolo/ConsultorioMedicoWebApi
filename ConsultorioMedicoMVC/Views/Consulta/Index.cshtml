@@ -3,6 +3,16 @@
 }
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
 <link href="@Url.Content("~/Content/fullcalendar-responsive.css")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/fullcalendar-responsive.css")).Ticks" rel="stylesheet" />
+<style>
+    #calendarioConsultas .fc-timegrid-slot-label,
+    #calendarioConsultas .fc-timegrid-slot-label-cushion {
+        text-transform: uppercase;
+    }
+
+    #calendarioConsultas .fc-timegrid-slot-label-cushion {
+        padding: 2px 8px;
+    }
+</style>
 <h2 class="page-title"><i class="fas fa-stethoscope me-2" style="color: var(--primary);"></i>Consultas</h2>
 
 <div class="card-custom">
@@ -25,8 +35,10 @@
                 <form id="consultaForm" autocomplete="off" novalidate>
                     <input type="hidden" name="Id" id="Id" />
                     <input type="hidden" name="Estatus" id="Estatus" value="true" />
+                    <input type="hidden" name="TratamientoID" id="TratamientoID" />
+                    <input type="hidden" name="CitaID" id="CitaID" />
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Paciente <span class="required">*</span></label>
                             <select class="form-select" name="PacienteID" id="PacienteID">
                                 <option value="">Seleccione...</option>
@@ -36,21 +48,11 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Tipo de Consulta</label>
                             <select class="form-select" name="TipoConsultaID" id="TipoConsultaID">
                                 <option value="">Seleccione...</option>
                                 @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.TipoConsulta>)ViewBag.TiposConsulta)
-                                {
-                                    <option value="@t.Id">@t.Nombre</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tratamiento</label>
-                            <select class="form-select" name="TratamientoID" id="TratamientoID">
-                                <option value="">Seleccione...</option>
-                                @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
                                 {
                                     <option value="@t.Id">@t.Nombre</option>
                                 }
@@ -67,29 +69,35 @@
                             <input type="datetime-local" class="form-control" name="FechaProximaConsulta" id="FechaProximaConsulta">
                         </div>
                     </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <label class="form-label">Descripción</label>
-                            <input type="text" class="form-control" name="Descripcion" id="Descripcion" placeholder="Descripción de la consulta">
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <label class="form-label">Receta</label>
-                            <textarea class="form-control" name="DescripcionReceta" id="DescripcionReceta" rows="2" placeholder="Descripción de la receta..."></textarea>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <label class="form-label">Comentarios</label>
-                            <textarea class="form-control" name="Comentarios" id="Comentarios" rows="2" placeholder="Comentarios de la consulta..."></textarea>
+                    <div class="mt-3">
+                        <ul class="nav nav-tabs" id="consultaEdicionTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="consultaTabDescripcionBtn" data-bs-toggle="tab" data-bs-target="#consultaTabDescripcion" type="button" role="tab">Descripción</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="consultaTabRecetaBtn" data-bs-toggle="tab" data-bs-target="#consultaTabReceta" type="button" role="tab">Receta</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="consultaTabComentariosBtn" data-bs-toggle="tab" data-bs-target="#consultaTabComentarios" type="button" role="tab">Comentarios</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content border border-top-0 rounded-bottom p-3">
+                            <div class="tab-pane fade show active" id="consultaTabDescripcion" role="tabpanel">
+                                <textarea class="form-control" name="Descripcion" id="Descripcion" rows="7" placeholder="Descripción de la consulta..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="consultaTabReceta" role="tabpanel">
+                                <textarea class="form-control" name="DescripcionReceta" id="DescripcionReceta" rows="7" placeholder="Descripción de la receta..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="consultaTabComentarios" role="tabpanel">
+                                <textarea class="form-control" name="Comentarios" id="Comentarios" rows="7" placeholder="Comentarios de la consulta..."></textarea>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <a href="#" id="btnReceta" class="btn btn-info me-auto" style="display:none;"><i class="fas fa-prescription me-1"></i> Ver Receta</a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger d-none" id="btnCancelarConsulta" onclick="cancelarConsulta()"><i class="fas fa-ban me-1"></i>Cancelar consulta</button>
                 <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarConsulta()" />
             </div>
         </div>
@@ -133,10 +141,20 @@
                 slotDuration: '00:30:00',
                 slotLabelInterval: '00:30:00',
                 snapDuration: '00:30:00',
-                slotMinTime: '08:00:00',
-                slotMaxTime: '20:00:00',
+                slotMinTime: '00:00:00',
+                slotMaxTime: '24:00:00',
                 scrollTime: '08:00:00',
                 allDaySlot: false,
+                displayEventTime: false,
+                slotLabelContent: function (arg) {
+                    var d = arg.date;
+                    var h = d.getHours();
+                    var m = d.getMinutes();
+                    var ampm = h >= 12 ? 'PM' : 'AM';
+                    var h12 = h % 12;
+                    if (h12 === 0) h12 = 12;
+                    return h12 + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+                },
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
                 events: function (info, success, failure) {
                     $.ajax({
@@ -172,13 +190,17 @@
             $('#Id').val(c ? c.Id : 0);
             $('#Estatus').val(c ? (c.Estatus ? 'true' : 'false') : 'true');
             $('#PacienteID').val(c ? c.PacienteID : '');
+            $('#PacienteID').prop('disabled', !!(c && c.Id > 0));
             $('#TipoConsultaID').val(c ? (c.TipoConsultaID || '') : '');
             $('#TratamientoID').val(c ? (c.TratamientoID || '') : '');
+            $('#CitaID').val(c ? (c.CitaID || '') : '');
             $('#FechaConsulta').val(c ? formatFechaLocal(c.FechaConsulta) : '');
             $('#FechaProximaConsulta').val(c ? formatFechaLocal(c.FechaProximaConsulta) : '');
             $('#Descripcion').val(c ? (c.Descripcion || '') : '');
             $('#DescripcionReceta').val(c ? (c.DescripcionReceta || '') : '');
             $('#Comentarios').val(c ? (c.Comentarios || '') : '');
+            $('#modalConsulta .modal-title').text(c && c.Id > 0 ? 'Editar Consulta' : 'Nueva Consulta');
+            $('#btnCancelarConsulta').toggleClass('d-none', !(c && c.Id > 0));
 
             if (c && c.Id > 0) {
                 $('#btnReceta').attr('href', recetaUrl + '/' + c.Id).attr('data-id', c.Id).show();
@@ -195,12 +217,21 @@
             return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
         }
 
+        function serializarConsulta() {
+            var data = $('#consultaForm').serialize();
+            if ($('#PacienteID').prop('disabled')) {
+                data += '&PacienteID=' + encodeURIComponent($('#PacienteID').val() || '');
+            }
+            return data;
+        }
+
         function guardarConsulta() {
             if (!$('#consultaForm').valid()) return;
+
             $.ajax({
                 url: guardarUrl,
                 type: 'POST',
-                data: $('#consultaForm').serialize(),
+                data: serializarConsulta(),
                 dataType: 'json',
                 success: function (response) {
                     var r = (typeof response === 'string') ? JSON.parse(response) : response;
@@ -216,6 +247,50 @@
                 error: function () {
                     Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
                 }
+            });
+        }
+
+        function cancelarConsulta() {
+            var id = parseInt($('#Id').val() || '0', 10);
+            if (!id) return;
+
+            Swal.fire({
+                title: '¿Cancelar la cita?',
+                text: '¿Estás seguro que quieres cancelar la cita?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cancelar cita',
+                cancelButtonText: 'No, volver',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#858796'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+
+                var estatusAnterior = $('#Estatus').val();
+                $('#Estatus').val('false');
+
+                $.ajax({
+                    url: guardarUrl,
+                    type: 'POST',
+                    data: serializarConsulta(),
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r.IsSuccess) {
+                            Swal.fire({ title: 'Cita cancelada', text: 'La cita se canceló correctamente.', icon: 'success', timer: 1500, showConfirmButton: false }).then(function () {
+                                $('#modalConsulta').modal('hide');
+                                calendar.refetchEvents();
+                            });
+                        } else {
+                            $('#Estatus').val(estatusAnterior);
+                            Swal.fire({ title: 'Error', text: r.Message || 'No fue posible cancelar la cita.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    },
+                    error: function () {
+                        $('#Estatus').val(estatusAnterior);
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                });
             });
         }
     </script>

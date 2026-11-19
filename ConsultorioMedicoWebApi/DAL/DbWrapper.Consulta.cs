@@ -224,7 +224,9 @@ namespace ConsultorioMedicoWebApi.DAL
                         CitaID = Convert.IsDBNull(r["CitaID"]) ? (int?)null : Convert.ToInt32(r["CitaID"]),
                         TipoConsultaID = Convert.IsDBNull(r["TipoConsultaID"]) ? (int?)null : Convert.ToInt32(r["TipoConsultaID"]),
                         TipoConsultaNombre = r["Nombre"] as string,
-                        DescripcionReceta = r["DescripcionReceta"] as string
+                        DescripcionReceta = r["DescripcionReceta"] as string,
+                        Comentarios = r["Comentarios"] as string,
+                        FechaProximaConsulta = Convert.IsDBNull(r["FechaProximaConsulta"]) ? (DateTime?)null : Convert.ToDateTime(r["FechaProximaConsulta"])
                     }),
                     CommandType.StoredProcedure,
                     new[]

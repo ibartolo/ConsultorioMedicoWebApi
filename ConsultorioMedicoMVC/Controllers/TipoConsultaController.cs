@@ -28,9 +28,9 @@ namespace ConsultorioMedicoMVC.Controllers
             if (id > 0)
             {
                 var tipo = await _tipoConsultaService.ObtenerTipoConsultaPorId(id);
-                return View(tipo ?? new TipoConsulta());
+                return PartialView("Nuevo", tipo ?? new TipoConsulta());
             }
-            return View(new TipoConsulta());
+            return PartialView("Nuevo", new TipoConsulta());
         }
         #endregion
 

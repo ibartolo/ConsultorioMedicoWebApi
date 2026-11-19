@@ -3,6 +3,7 @@
 }
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
 <link href="@Url.Content("~/Content/fullcalendar-responsive.css")?v=@System.IO.File.GetLastWriteTime(Server.MapPath("~/Content/fullcalendar-responsive.css")).Ticks" rel="stylesheet" />
+<style>#calendarioCitas .fc-event-time { text-transform: uppercase; }</style>
 <h2 class="page-title"><i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>Citas</h2>
 
 <div class="card-custom">
@@ -104,9 +105,19 @@
                 slotDuration: '00:30:00',
                 slotLabelInterval: '00:30:00',
                 snapDuration: '00:30:00',
-                slotMinTime: '08:00:00',
-                slotMaxTime: '20:00:00',
+                slotMinTime: '00:00:00',
+                slotMaxTime: '24:00:00',
                 scrollTime: '08:00:00',
+                slotLabelContent: function (arg) {
+                    var d = arg.date;
+                    var h = d.getHours();
+                    var m = d.getMinutes();
+                    var ampm = h >= 12 ? 'PM' : 'AM';
+                    var h12 = h % 12;
+                    if (h12 === 0) h12 = 12;
+                    return h12 + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+                },
+                eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short', hour12: true },
                 allDaySlot: false,
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
                 events: function (info, success, failure) {

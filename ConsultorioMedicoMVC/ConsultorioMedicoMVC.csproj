@@ -89,6 +89,7 @@
     <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="Controllers\RegistroController.cs" />
     <Compile Include="Controllers\TipoConsultaController.cs" />
+    <Compile Include="Controllers\RecuperacionPasswordController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Autenticacion.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="DAL\HttpClientConnection.Dashboard.cs" />
     <Compile Include="DAL\HttpClientConnection.Historial.cs" />
     <Compile Include="DAL\HttpClientConnection.Registro.cs" />
+    <Compile Include="DAL\HttpClientConnection.RecuperacionPassword.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -124,6 +126,7 @@
     <Compile Include="Services\DashboardService.cs" />
     <Compile Include="Services\HistorialService.cs" />
     <Compile Include="Services\RegistroService.cs" />
+    <Compile Include="Services\RecuperacionPasswordService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
@@ -170,6 +173,8 @@
     <Content Include="Views\Historial\Index.cshtml" />
     <Content Include="Views\Historial\Expediente.cshtml" />
     <Content Include="Views\Registro\Index.cshtml" />
+    <Content Include="Views\RecuperacionPassword\Restablecer.cshtml" />
+    <Content Include="Views\RecuperacionPassword\Invalido.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>

@@ -62,10 +62,10 @@
                 </div>
 
                 <div class="remember-forgot">
-                    <div class="remember-me">
+                    @*<div class="remember-me">
                         <input type="checkbox" id="remember" @(string.IsNullOrEmpty(usuarioRecordado) ? "" : "checked")>
                         <label for="remember">Recordar mi usuario</label>
-                    </div>
+                    </div>*@
                     <a href="#" class="forgot-password" id="forgotPassword">
                         ¿Olvidaste tu contraseña?
                     </a>
@@ -241,18 +241,56 @@
                 }).then((result) => {
                     if (result.isConfirmed && result.value) {
                         Swal.fire({
-                            title: 'Correo Enviado',
-                            text: 'Se han enviado instrucciones a ' + result.value,
-                            icon: 'success',
-                            confirmButtonColor: '#0099CC'
+                            title: 'Enviando...',
+                            text: 'Espere un momento.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: function () { Swal.showLoading(); }
+                        });
+
+                        $.ajax({
+                            url: '@Url.Action("Solicitar", "RecuperacionPassword")',
+                            type: 'POST',
+                            data: { email: result.value },
+                            dataType: 'json',
+                            timeout: 60000,
+                            success: function (response) {
+                                var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                                Swal.close();
+                                if (r.IsSuccess) {
+                                    Swal.fire({
+                                        title: 'Solicitud enviada',
+                                        text: r.Message || 'Se envió satisfactoriamente.',
+                                        icon: 'success',
+                                        confirmButtonColor: '#0099CC'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'No fue posible enviar el correo',
+                                        text: r.Message || 'Intente nuevamente.',
+                                        icon: 'error',
+                                        confirmButtonColor: '#0099CC'
+                                    });
+                                }
+                            },
+                            error: function () {
+                                Swal.close();
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Error de conexión. Intente nuevamente.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#0099CC'
+                                });
+                            }
                         });
                     }
                 });
             });
 
             $('#password, #username').on('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    $('#loginForm').submit();
+                if (e.key === 'Enter' || e.which === 13) {
+                    e.preventDefault();
+                    $('#loginBtn').trigger('click');
                 }
             });
 

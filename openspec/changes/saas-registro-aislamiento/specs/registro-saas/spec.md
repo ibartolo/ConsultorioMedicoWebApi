@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Registro público (ventana de captura sin autenticación) que crea un consultorio nuevo: tenant `DatosInstitucion` + fila fiscal `DatosFiscales` 1:1 + primer usuario admin (`UserName` = RFC normalizado, único global), todo en una sola transacción. No hay servicio de email, por lo que la contraseña se captura y se hashea antes de guardar. Sin roles/permisos, trial, vigencia, licencia ni pagos.
+Registro público (ventana de captura sin autenticación) que crea un consultorio nuevo: tenant `DatosInstitucion` + fila fiscal `DatosFiscales` 1:1 + primer usuario admin (`UserName` = RFC normalizado, único global), todo en una sola transacción. La contraseña se captura y se hashea antes de guardar; tras el alta, la WebApi envía un correo de bienvenida best-effort con el usuario (RFC) y link de login, sin incluir la contraseña. Sin roles/permisos, trial, vigencia, licencia ni pagos.
 
 ## Requirements
 
@@ -73,7 +73,7 @@ RFC, correo de contacto, NombreComercial, RazonSocial y `UserName` MUST ser úni
 
 ### Requirement: Alta transaccional
 
-El sistema SHALL crear `DatosInstitucion` + `DatosFiscales` + `Usuario` en UNA sola transacción. Si cualquiera falla, MUST hacer rollback total y MUST NOT dejar consultorio parcial. Un consultorio nuevo SHALL crear exactamente una fila fiscal. La contraseña MUST hashearse (PBKDF2) antes de guardar; MUST NOT enviarse contraseña temporal.
+El sistema SHALL crear `DatosInstitucion` + `DatosFiscales` + `Usuario` en UNA sola transacción. Si cualquiera falla, MUST hacer rollback total y MUST NOT dejar consultorio parcial. Un consultorio nuevo SHALL crear exactamente una fila fiscal. La contraseña MUST hashearse (PBKDF2) antes de guardar; MUST NOT enviarse contraseña temporal. El correo de bienvenida MUST enviarse de forma best-effort y MUST NOT incluir la contraseña ni el hash.
 
 #### Scenario: Alta exitosa
 
@@ -86,6 +86,22 @@ El sistema SHALL crear `DatosInstitucion` + `DatosFiscales` + `Usuario` en UNA s
 - GIVEN un error al insertar la fila fiscal o el usuario
 - WHEN se ejecuta el registro
 - THEN la transacción se revierte y no queda ningún registro parcial
+
+### Requirement: Correo de bienvenida
+
+Tras un alta exitosa, la WebApi SHALL enviar un correo de bienvenida a `CorreoContacto` con el nombre comercial, responsable, usuario (RFC), link al login y links de términos/privacidad. El correo MUST NOT incluir la contraseña ni el hash. El envío SHALL ser best-effort: si SMTP falla, el consultorio MUST quedar registrado y el error MUST registrarse en el log.
+
+#### Scenario: Envío exitoso
+
+- GIVEN un alta de consultorio exitosa
+- WHEN la WebApi procesa el registro
+- THEN envía el correo al contacto con el RFC como usuario y el link de login, sin contraseña
+
+#### Scenario: SMTP no disponible
+
+- GIVEN un alta exitosa y SMTP no disponible
+- WHEN la WebApi intenta enviar el correo
+- THEN el alta sigue siendo exitosa y se registra el error
 
 ### Requirement: Validación de correo y CP
 

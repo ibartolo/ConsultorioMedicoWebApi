@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Restablecer Contraseña";
+    Layout = "~/Views/Shared/_LayoutPublic.cshtml";
+    var token = ViewBag.Token as string ?? "";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+    .reset-card { max-width: 520px; margin: 0 auto; }
+    .reset-card .form-label { font-weight: 600; font-size: .9rem; }
+    .password-strength { margin-top: .5rem; }
+    .password-strength .progress { height: 8px; background: #e9ecef; border-radius: 999px; }
+    .password-strength .progress-bar { transition: width .2s ease, background-color .2s ease; }
+    .password-rules { list-style: none; padding-left: 0; margin: .5rem 0 0; font-size: .82rem; }
+    .password-rules li { color: #6c757d; margin-bottom: .2rem; }
+    .password-rules li.ok { color: #198754; }
+    .password-rules li.bad { color: #dc3545; }
+    .password-rules i { width: 1rem; text-align: center; margin-right: .25rem; }
+    #passwordStrengthText { font-size: .8rem; color: #6c757d; }
+</style>
+
+<div class="doc-card reset-card">
+    <h1>Restablecer contraseña</h1>
+    <p class="doc-meta">Ingrese y confirme su nueva contraseña (mínimo 6 caracteres).</p>
+
+    <form id="frmReset" autocomplete="off" novalidate>
+        <input type="hidden" name="Token" id="Token" value="@token" />
+
+        <div class="mb-3">
+            <label class="form-label" for="Password">Nueva contraseña</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" name="Password" id="Password" autocomplete="new-password" placeholder="Nueva contraseña">
+            </div>
+        </div>
+
+        <div class="password-strength mb-3">
+            <div class="progress" role="progressbar" aria-label="Fuerza de la contraseña" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div id="passwordStrengthBar" class="progress-bar" style="width: 0%; background-color: #adb5bd;"></div>
+            </div>
+            <small id="passwordStrengthText">Ingrese una contraseña</small>
+            <ul id="passwordRules" class="password-rules">
+                <li id="ruleLength" class="bad"><i class="far fa-circle"></i> Mínimo 6 caracteres</li>
+                <li id="ruleUpper" class="bad"><i class="far fa-circle"></i> Al menos una mayúscula</li>
+                <li id="ruleLower" class="bad"><i class="far fa-circle"></i> Al menos una minúscula</li>
+                <li id="ruleNumber" class="bad"><i class="far fa-circle"></i> Al menos un número</li>
+                <li id="ruleSymbol" class="bad"><i class="far fa-circle"></i> Al menos un símbolo</li>
+            </ul>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Confirmacion">Confirmar contraseña</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                <input type="password" class="form-control" name="Confirmacion" id="Confirmacion" autocomplete="new-password" placeholder="Repita la contraseña">
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="button" id="btnGuardar" class="btn btn-primary" onclick="guardarPassword()" disabled>
+                <i class="fas fa-save me-1"></i>Restablecer contraseña
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    var guardarUrl = '@Url.Action("Guardar", "RecuperacionPassword")';
+    var loginUrl = '@Url.Action("Autentication", "Home")';
+
+    $(document).ready(function () {
+        $('#frmReset').validate({
+            rules: {
+                Password: { required: true, minlength: 6 },
+                Confirmacion: { required: true, equalTo: '#Password' }
+            },
+            messages: {
+                Password: { required: "La contraseña es requerida.", minlength: "La contraseña debe tener al menos 6 caracteres." },
+                Confirmacion: { required: "La confirmación es requerida.", equalTo: "Las contraseñas no coinciden." }
+            },
+            errorElement: 'div',
+            errorClass: 'invalid-feedback',
+            highlight: function (element) { $(element).addClass('is-invalid'); },
+            unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+        });
+
+        $('#Password, #Confirmacion').on('input', function () {
+            evaluarPassword();
+        });
+        evaluarPassword();
+    });
+
+    var enviando = false;
+
+    function evaluarPassword() {
+        var pwd = $('#Password').val() || '';
+        var confirm = $('#Confirmacion').val() || '';
+
+        var reglas = {
+            length: pwd.length >= 6,
+            upper: /[A-Z]/.test(pwd),
+            lower: /[a-z]/.test(pwd),
+            number: /[0-9]/.test(pwd),
+            symbol: /[^A-Za-z0-9\s]/.test(pwd)
+        };
+
+        marcarRegla('ruleLength', reglas.length);
+        marcarRegla('ruleUpper', reglas.upper);
+        marcarRegla('ruleLower', reglas.lower);
+        marcarRegla('ruleNumber', reglas.number);
+        marcarRegla('ruleSymbol', reglas.symbol);
+
+        var cumple = reglas.length && reglas.upper && reglas.lower && reglas.number && reglas.symbol;
+        var score = 0;
+        if (reglas.length) score++;
+        if (reglas.upper) score++;
+        if (reglas.lower) score++;
+        if (reglas.number) score++;
+        if (reglas.symbol) score++;
+        if (pwd.length >= 10) score++;
+        if (pwd.length >= 14) score++;
+
+        var pct = Math.min(100, Math.round((score / 6) * 100));
+        var color = '#dc3545';
+        var texto = 'Débil';
+        if (pwd.length === 0) { pct = 0; color = '#adb5bd'; texto = 'Ingrese una contraseña'; }
+        else if (score >= 6) { color = '#198754'; texto = 'Fuerte'; }
+        else if (score >= 4) { color = '#ffc107'; texto = 'Media'; }
+
+        $('#passwordStrengthBar').css({ width: pct + '%', backgroundColor: color });
+        $('#passwordStrengthText').text(texto + (pwd.length > 0 ? ' (' + pct + '%)' : ''));
+
+        if (!enviando) {
+            $('#btnGuardar').prop('disabled', !(cumple && pwd === confirm && pwd.length > 0));
+        }
+    }
+
+    function puedeContinuar() {
+        var pwd = $('#Password').val() || '';
+        var confirm = $('#Confirmacion').val() || '';
+        return pwd.length >= 6 &&
+            /[A-Z]/.test(pwd) &&
+            /[a-z]/.test(pwd) &&
+            /[0-9]/.test(pwd) &&
+            /[^A-Za-z0-9\s]/.test(pwd) &&
+            pwd === confirm;
+    }
+
+    function marcarRegla(id, ok) {
+        var $li = $('#' + id);
+        $li.toggleClass('ok', ok).toggleClass('bad', !ok);
+        $li.find('i').attr('class', ok ? 'fas fa-check-circle' : 'far fa-circle');
+    }
+
+    function setCargando(activo) {
+        var btn = document.getElementById('btnGuardar');
+        if (!btn) return;
+
+        enviando = activo;
+        btn.disabled = activo || !puedeContinuar();
+        if (activo) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Restableciendo...';
+        } else {
+            btn.innerHTML = '<i class="fas fa-save me-1"></i>Restablecer contraseña';
+        }
+    }
+
+    function guardarPassword() {
+        if (!puedeContinuar() || !$('#frmReset').valid()) {
+            evaluarPassword();
+            return;
+        }
+
+        setCargando(true);
+        Swal.fire({
+            title: 'Restableciendo contraseña...',
+            text: 'Esto puede tardar unos segundos.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: function () { Swal.showLoading(); }
+        });
+
+        $.ajax({
+            url: guardarUrl,
+            type: 'POST',
+            data: $('#frmReset').serialize(),
+            dataType: 'json',
+            timeout: 60000,
+            success: function (response) {
+                var result = (typeof response === 'string') ? JSON.parse(response) : response;
+                Swal.close();
+
+                if (result.IsSuccess) {
+                    Swal.fire({
+                        title: '¡Contraseña actualizada!',
+                        text: result.Message || 'Su contraseña fue actualizada correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Iniciar sesión',
+                        confirmButtonColor: '#0099CC'
+                    }).then(function () {
+                        window.location.href = loginUrl;
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'No fue posible restablecer la contraseña',
+                        text: result.Message || 'El enlace es inválido o ha expirado.',
+                        icon: 'error',
+                        confirmButtonColor: '#0099CC'
+                    });
+                    setCargando(false);
+                }
+            },
+            error: function () {
+                Swal.close();
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error de conexión. Intente nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#0099CC'
+                });
+                setCargando(false);
+            }
+        });
+    }
+</script>

@@ -5,9 +5,9 @@
 <div class="page-title page-title-header">
     <span><i class="fas fa-folder-open me-2" style="color: var(--primary);"></i>Expediente Clínico</span>
     <div class="page-title-actions">
-        <button type="button" class="btn btn-primary btn-sm" onclick="nuevaCitaExpediente()">
+        @*<button type="button" class="btn btn-primary btn-sm" onclick="nuevaCitaExpediente()">
             <i class="fas fa-calendar-plus me-1"></i>Nuevo Tratamiento
-        </button>
+        </button>*@
         <button type="button" class="btn btn-primary btn-sm" onclick="nuevaConsultaExpediente()">
             <i class="fas fa-stethoscope me-1"></i>Nueva Consulta
         </button>
@@ -23,7 +23,8 @@
             <i class="fas fa-user me-1"></i>Información del paciente
         </button>
     </li>
-    <li class="nav-item" role="presentation">
+    @* SaaS: pestaña Historial de consultas oculta; el grid se movió a Información del paciente. *@
+    <li class="nav-item d-none" role="presentation">
         <button class="nav-link" id="tab-consultas-tab" data-bs-toggle="tab" data-bs-target="#tab-consultas" type="button" role="tab" aria-controls="tab-consultas" aria-selected="false">
             <i class="fas fa-stethoscope me-1"></i>Historial de consultas
         </button>
@@ -33,11 +34,11 @@
             <i class="fas fa-paperclip me-1"></i>Archivos
         </button>
     </li>
-    <li class="nav-item" role="presentation">
+    @*<li class="nav-item" role="presentation">
         <button class="nav-link" id="tab-paquetes-tab" data-bs-toggle="tab" data-bs-target="#tab-paquetes" type="button" role="tab" aria-controls="tab-paquetes" aria-selected="false">
             <i class="fas fa-box me-1"></i>Paquetes
         </button>
-    </li>
+    </li>*@
 </ul>
 
 <div class="tab-content" id="expedienteTabsContent">
@@ -84,7 +85,7 @@
             </div>
         </div>
 
-        <div class="card-custom">
+        @*<div class="card-custom">
             <div class="card-title"><i class="fas fa-pills"></i> Tratamientos Históricos</div>
             <div class="table-container">
                 <table id="tratamientosTable" class="table table-hover table-striped" style="width:100%">
@@ -92,10 +93,8 @@
                     <tbody></tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </div>*@
 
-    <div class="tab-pane fade" id="tab-consultas" role="tabpanel" aria-labelledby="tab-consultas-tab">
         <div class="card-custom">
             <div class="card-title"><i class="fas fa-stethoscope"></i> Consultas</div>
             <div class="table-container">
@@ -106,6 +105,8 @@
             </div>
         </div>
     </div>
+
+    <div class="tab-pane fade" id="tab-consultas" role="tabpanel" aria-labelledby="tab-consultas-tab"></div>
 
     <div class="tab-pane fade" id="tab-archivos" role="tabpanel" aria-labelledby="tab-archivos-tab"></div>
     <div class="tab-pane fade" id="tab-paquetes" role="tabpanel" aria-labelledby="tab-paquetes-tab">
@@ -209,26 +210,18 @@
                     <input type="hidden" name="Id" value="0" />
                     <input type="hidden" name="Estatus" value="true" />
                     <input type="hidden" name="PacienteID" value="@Model.Id" />
+                    <input type="hidden" name="TratamientoID" id="TratamientoID" value="" />
+                    <input type="hidden" name="CitaID" id="CitaID" value="" />
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Paciente</label>
                             <div class="form-control-plaintext fw-bold">@Model.Nombre @Model.ApellidoPaterno @Model.ApellidoMaterno</div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Tipo de Consulta</label>
                             <select class="form-select" name="TipoConsultaID">
                                 <option value="">Seleccione...</option>
                                 @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.TipoConsulta>)ViewBag.TiposConsulta)
-                                {
-                                    <option value="@t.Id">@t.Nombre</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tratamiento</label>
-                            <select class="form-select" name="TratamientoID">
-                                <option value="">Seleccione...</option>
-                                @foreach (var t in (List<ConsultorioMedicoEntities.Catalogos.Tratamiento>)ViewBag.Tratamientos)
                                 {
                                     <option value="@t.Id">@t.Nombre</option>
                                 }
@@ -245,16 +238,34 @@
                             <input type="datetime-local" class="form-control" name="FechaProximaConsulta">
                         </div>
                     </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <label class="form-label">Comentarios</label>
-                            <textarea class="form-control" name="Comentarios" rows="4" placeholder="Comentarios de la consulta..."></textarea>
+                    <div class="mt-3">
+                        <ul class="nav nav-tabs" id="expedienteConsultaTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="expedienteTabDescripcionBtn" data-bs-toggle="tab" data-bs-target="#expedienteTabDescripcion" type="button" role="tab">Descripción</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="expedienteTabRecetaBtn" data-bs-toggle="tab" data-bs-target="#expedienteTabReceta" type="button" role="tab">Receta</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="expedienteTabComentariosBtn" data-bs-toggle="tab" data-bs-target="#expedienteTabComentarios" type="button" role="tab">Comentarios</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content border border-top-0 rounded-bottom p-3">
+                            <div class="tab-pane fade show active" id="expedienteTabDescripcion" role="tabpanel">
+                                <textarea class="form-control" name="Descripcion" id="Descripcion" rows="7" placeholder="Descripción de la consulta..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="expedienteTabReceta" role="tabpanel">
+                                <textarea class="form-control" name="DescripcionReceta" id="DescripcionReceta" rows="7" placeholder="Medicamentos e indicaciones de la receta..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="expedienteTabComentarios" role="tabpanel">
+                                <textarea class="form-control" name="Comentarios" rows="7" placeholder="Comentarios de la consulta..."></textarea>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger d-none" id="btnCancelarConsultaExpediente" onclick="cancelarConsultaExpediente()"><i class="fas fa-ban me-1"></i>Cancelar cita</button>
                 <input type="button" value="Guardar" class="btn btn-primary" onclick="guardarConsultaExpediente()" />
             </div>
         </div>
@@ -286,6 +297,19 @@
             var h12 = hh % 12; if (h12 === 0) h12 = 12;
             return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear()
                  + ' ' + pad2(h12) + ':' + pad2(d.getMinutes()) + ' ' + ampm;
+        }
+
+        function formatFechaInput(iso) {
+            if (!iso) return '';
+            var d;
+            if (typeof iso === 'string' && iso.indexOf('/Date(') === 0) {
+                d = new Date(parseInt(iso.substr(6), 10));
+            } else {
+                d = new Date(iso);
+            }
+            if (isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+                 + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
         }
 
         function seleccionarPaquete(pacientePaqueteId) {
@@ -332,7 +356,8 @@
                         data: 'Id',
                         orderable: false,
                         render: function (data) {
-                            return '<button type="button" class="btn btn-sm btn-secondary btn-anexos-consulta" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i></button>';
+                            return '<button type="button" class="btn btn-sm btn-warning btn-editar-consulta me-1" data-id="' + data + '" title="Editar"><i class="fas fa-edit"></i></button>' +
+                                   '<button type="button" class="btn btn-sm btn-secondary btn-anexos-consulta" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i></button>';
                         }
                     }
                 ],
@@ -352,6 +377,12 @@
                 e.stopPropagation();
                 var id = $(this).data('id');
                 abrirModalAnexos(pacienteId, '', id);
+            });
+
+            consultasTable.on('click', '.btn-editar-consulta', function (e) {
+                e.stopPropagation();
+                var data = consultasTable.row($(this).closest('tr')).data();
+                abrirModalConsultaEdicion(data);
             });
 
             consultasTable.on('dblclick', '.btn-anexos-consulta', function (e) {
@@ -462,7 +493,74 @@
 
         function nuevaConsultaExpediente() {
             $('#consultaFormExpediente')[0].reset();
+            $('#consultaFormExpediente select[name="TipoConsultaID"]').val('');
+            $('#consultaFormExpediente .modal-title').text('Nueva Consulta');
+            $('#btnCancelarConsultaExpediente').addClass('d-none');
             $('#modalConsultaExpediente').modal('show');
+        }
+
+        function abrirModalConsultaEdicion(c) {
+            if (!c) return;
+
+            $('#consultaFormExpediente')[0].reset();
+            $('#consultaFormExpediente input[name="Id"]').val(c.Id || 0);
+            $('#consultaFormExpediente input[name="Estatus"]').val(c.Estatus ? 'true' : 'false');
+            $('#consultaFormExpediente input[name="PacienteID"]').val(c.PacienteID || @Model.Id);
+            $('#consultaFormExpediente input[name="TratamientoID"]').val(c.TratamientoID || '');
+            $('#consultaFormExpediente input[name="CitaID"]').val(c.CitaID || '');
+            $('#consultaFormExpediente textarea[name="DescripcionReceta"]').val(c.DescripcionReceta || '');
+            $('#consultaFormExpediente select[name="TipoConsultaID"]').val(c.TipoConsultaID || '');
+            $('#consultaFormExpediente input[name="FechaConsulta"]').val(formatFechaInput(c.FechaConsulta));
+            $('#consultaFormExpediente input[name="FechaProximaConsulta"]').val(formatFechaInput(c.FechaProximaConsulta));
+            $('#consultaFormExpediente textarea[name="Descripcion"]').val(c.Descripcion || '');
+            $('#consultaFormExpediente textarea[name="Comentarios"]').val(c.Comentarios || '');
+            $('#consultaFormExpediente .modal-title').text('Editar Consulta');
+            $('#btnCancelarConsultaExpediente').removeClass('d-none');
+            $('#modalConsultaExpediente').modal('show');
+        }
+
+        function cancelarConsultaExpediente() {
+            var id = parseInt($('#consultaFormExpediente input[name="Id"]').val() || '0', 10);
+            if (!id) return;
+
+            Swal.fire({
+                title: '¿Cancelar la cita?',
+                text: '¿Estás seguro que quieres cancelar la cita?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cancelar cita',
+                cancelButtonText: 'No, volver',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#858796'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+
+                var estatusAnterior = $('#consultaFormExpediente input[name="Estatus"]').val();
+                $('#consultaFormExpediente input[name="Estatus"]').val('false');
+
+                $.ajax({
+                    url: '@Url.Action("GuardarOActualizarConsulta", "Consulta")',
+                    type: 'POST',
+                    data: $('#consultaFormExpediente').serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        var r = (typeof response === 'string') ? JSON.parse(response) : response;
+                        if (r.IsSuccess) {
+                            Swal.fire({ title: 'Cita cancelada', text: 'La cita se canceló correctamente.', icon: 'success', timer: 1500, showConfirmButton: false }).then(function () {
+                                $('#modalConsultaExpediente').modal('hide');
+                                consultasTable.ajax.reload();
+                            });
+                        } else {
+                            $('#consultaFormExpediente input[name="Estatus"]').val(estatusAnterior);
+                            Swal.fire({ title: 'Error', text: r.Message || 'No fue posible cancelar la cita.', icon: 'error', confirmButtonColor: '#0099CC' });
+                        }
+                    },
+                    error: function () {
+                        $('#consultaFormExpediente input[name="Estatus"]').val(estatusAnterior);
+                        Swal.fire({ title: 'Error', text: 'Error de conexión. Intente nuevamente.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                });
+            });
         }
 
         function guardarConsultaExpediente() {

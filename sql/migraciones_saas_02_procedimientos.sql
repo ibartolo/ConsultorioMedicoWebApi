@@ -178,7 +178,7 @@ BEGIN
     SELECT
         c.Id, c.Estatus, c.FechaConsulta, c.PacienteID, c.TratamientoID, c.CitaID,
         c.Descripcion, c.TipoConsultaID, c.DescripcionReceta, c.Comentarios, c.FechaProximaConsulta,
-        p.Nombre + ' ' + ISNULL(p.ApellidoPaterno, '') AS PacienteNombre,
+        p.Nombre AS PacienteNombre,
         tc.Nombre AS TipoConsultaNombre
     FROM dbo.Consulta c
         LEFT JOIN dbo.Paciente p ON c.PacienteID = p.Id
@@ -304,7 +304,9 @@ BEGIN
            CO.CitaID,
            CO.TipoConsultaID,
            TC.Nombre,
-           CO.DescripcionReceta
+           CO.DescripcionReceta,
+           CO.Comentarios,
+           CO.FechaProximaConsulta
     FROM Consulta CO
         INNER JOIN Paciente P ON P.Id = CO.PacienteID
         LEFT JOIN TipoConsulta TC ON TC.Id = CO.TipoConsultaID

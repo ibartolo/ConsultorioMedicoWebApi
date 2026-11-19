@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Consultorio Médico</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin: 0; padding: 20px; background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+
+        <!-- Encabezado -->
+        <div style="background: linear-gradient(135deg, #0ea5a4 0%, #0d9488 100%); padding: 40px 30px; text-align: center;">
+            <div style="margin-bottom: 15px;">
+                <i class="fas fa-stethoscope" style="font-size: 3.5rem; color: white;"></i>
+            </div>
+            <h1 style="color: white; font-size: 1.8rem; margin: 10px 0 0 0; font-weight: 700;">Consultorio Médico</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 0.95rem;">Gestión de tu consultorio</p>
+        </div>
+
+        <!-- Cuerpo del correo -->
+        <div style="padding: 40px 30px;">
+            <!-- Saludo -->
+            <div style="font-size: 1.2rem; font-weight: 600; color: #5a5c69; margin-bottom: 20px;">
+                ¡Hola, <strong style="color: #0d9488;">{{Responsable}}</strong>!
+            </div>
+
+            <!-- Mensaje de bienvenida -->
+            <div style="color: #6c757d; margin-bottom: 25px; line-height: 1.6;">
+                <p style="margin: 0 0 15px 0;">
+                    <strong>¡Bienvenido a Consultorio Médico!</strong> Nos da mucho gusto tenerte con nosotros.
+                </p>
+                <p style="margin: 0;">
+                    Tu consultorio <strong>{{NombreComercial}}</strong> ha sido registrado exitosamente en nuestra plataforma.
+                    A continuación te proporcionamos los datos de acceso para que puedas comenzar a utilizarla.
+                </p>
+            </div>
+
+            <!-- Información del consultorio -->
+            <div style="background: #f8f9fc; border-radius: 12px; padding: 20px; margin: 25px 0; border-left: 4px solid #0d9488;">
+                <div style="font-weight: 700; color: #0d9488; margin-bottom: 15px; font-size: 1rem;">
+                    <i class="fas fa-hospital" style="margin-right: 8px;"></i> Datos de tu consultorio
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e3e6f0;">
+                    <span style="color: #6c757d; font-size: 0.85rem;">Nombre comercial:</span>
+                    <span style="color: #5a5c69; font-weight: 500; font-size: 0.85rem;">{{NombreComercial}}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                    <span style="color: #6c757d; font-size: 0.85rem;">Responsable:</span>
+                    <span style="color: #5a5c69; font-weight: 500; font-size: 0.85rem;">{{Responsable}}</span>
+                </div>
+            </div>
+
+            <!-- Acceso -->
+            <div style="background: #e8f4fd; border-radius: 12px; padding: 20px; margin: 25px 0; border-left: 4px solid #36b9cc;">
+                <div style="font-weight: 700; color: #36b9cc; margin-bottom: 15px; font-size: 1rem;">
+                    <i class="fas fa-key" style="margin-right: 8px;"></i> Tu acceso
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                    <span style="color: #6c757d; font-size: 0.85rem;">Usuario (tu RFC):</span>
+                    <span style="color: #2e59d9; font-weight: 600; font-size: 0.9rem; font-family: monospace;">{{Usuario}}</span>
+                </div>
+            </div>
+
+            <p style="font-size: 0.82rem; color: #6c757d; margin: -10px 0 20px 0;">
+                Tu nombre de usuario para iniciar sesión es tu <strong>RFC</strong>. Utiliza la contraseña que elegiste al momento de tu registro.
+            </p>
+
+            <!-- Instrucciones -->
+            <div style="background: #fff8e6; border-radius: 12px; padding: 20px; margin: 25px 0; border-left: 4px solid #f6c23e;">
+                <div style="font-weight: 700; color: #f6c23e; margin-bottom: 15px; font-size: 1rem;">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Instrucciones importantes
+                </div>
+                <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 0.9rem;">
+                    <li style="margin-bottom: 8px;">Si no solicitaste este registro, por favor ignora este mensaje.</li>
+                    <li style="margin-bottom: 8px;">Por tu seguridad, nunca compartas tu contraseña.</li>
+                    <li>Para cualquier duda o problema, contacta a nuestro equipo de soporte.</li>
+                </ul>
+            </div>
+
+            <!-- Botón de acción -->
+            <div style="text-align: center; margin: 35px 0 30px 0;">
+                <a href="{{UrlLogin}}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0ea5a4 0%, #0d9488 100%); color: white; text-decoration: none; padding: 14px 35px; border-radius: 8px; font-weight: 600; font-size: 1rem; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
+                    <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i> Iniciar Sesión
+                </a>
+            </div>
+        </div>
+
+        <!-- Términos y Condiciones -->
+        <div style="padding: 0 30px 25px 30px; color: #5a5c69; font-size: 0.78rem; line-height: 1.55; text-align: left;">
+            <hr style="border: 0; border-top: 1px solid #e3e6f0; margin: 0 0 18px 0;">
+            <h3 style="color: #1c2a4a; font-size: 1rem; margin: 0 0 10px 0;">Términos y Condiciones</h3>
+            <p style="margin: 0 0 8px 0;">
+                <strong>Consultorio Médico</strong> es un producto operado por <strong>Ivan Francisco Bartolo Castro</strong>,
+                nombre comercial <strong>Desarrollo de Software Inteligente (DESI)</strong>, RFC <strong>BACI901212R76</strong>,
+                con domicilio en <strong>Álamo #48 Alt 1, Col. Chapultepec, Poza Rica, Veracruz, México, C.P. 93270</strong>,
+                teléfono <strong>782 253 0107</strong> y correos <strong>contacto@desipr.com.mx</strong> y
+                <strong>bartolocastro@gmail.com</strong>.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>1. Objeto y aceptación.</strong> Estos Términos regulan el acceso y uso de la aplicación.
+                Al registrarte, iniciar sesión o usarla, aceptas estos Términos en su totalidad. Si no estás de acuerdo,
+                debes abstenerte de usarla.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>2. Registro y cuenta.</strong> El consultorio se registra desde la aplicación y el RFC capturado
+                será el usuario de acceso del primer administrador. Las credenciales son personales e intransferibles;
+                eres responsable de su confidencialidad y de toda actividad realizada con tu cuenta.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>3. Uso aceptable.</strong> No debes usar la aplicación para fines ilícitos, compartir credenciales,
+                suplantar identidades, acceder a información de otros consultorios o pacientes sin autorización, subir
+                contenido malicioso ni realizar extracción masiva de datos o acciones que afecten la infraestructura.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>4. Responsabilidad clínica.</strong> La clínica y el médico son responsables del acto clínico,
+                diagnóstico, tratamiento, expediente clínico y datos de sus pacientes. DESI únicamente proporciona la
+                herramienta tecnológica y no ejerce la medicina ni toma decisiones clínicas.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>5. Datos clínicos y confidencialidad.</strong> La información de salud es sensible. Su acceso debe
+                limitarse al personal autorizado por la clínica. Queda prohibido divulgar datos clínicos fuera de los fines
+                de atención, salvo obligación legal o autorización del paciente.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>6. Propiedad intelectual.</strong> La aplicación, su código, diseño, marca y documentación son
+                propiedad de DESI o de sus licenciantes. La información clínica capturada pertenece a la clínica y/o a los
+                pacientes, según corresponda.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>7. Disponibilidad y limitación.</strong> La aplicación se ofrece “tal cual” y “según disponibilidad”.
+                No se garantiza operación ininterrumpida ni libre de errores. DESI no responde por daños indirectos,
+                interrupciones de internet, fallas del hosting o del equipo del usuario, ni por el uso indebido de la
+                aplicación. La clínica debe mantener sus propios respaldos.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>8. Modificaciones y ley aplicable.</strong> Estos Términos pueden actualizarse; la versión vigente
+                se publicará en la aplicación. Se rigen por las leyes de los Estados Unidos Mexicanos y cualquier
+                controversia se someterá a los tribunales competentes de Poza Rica, Veracruz, México.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                <strong>9. Contacto.</strong> Dudas sobre estos Términos: <strong>contacto@desipr.com.mx</strong> o
+                <strong>bartolocastro@gmail.com</strong>, teléfono <strong>782 253 0107</strong>.
+            </p>
+            <p style="margin: 0 0 8px 0;">
+                Versión completa: <a href="{{UrlTerminos}}" style="color:#0d9488;text-decoration:none;">Términos y Condiciones</a>
+                · <a href="{{UrlPrivacidad}}" style="color:#0d9488;text-decoration:none;">Aviso de Privacidad</a>.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f8f9fc; padding: 25px 30px; text-align: center; border-top: 1px solid #e3e6f0;">
+            <div style="color: #858796; font-size: 0.7rem; margin-bottom: 12px;">
+                Consultorio Médico es un producto de <strong>DESI</strong>.<br>
+                <strong>by DESI</strong> · Todos los derechos reservados.<br>
+                <a href="{{UrlPrivacidad}}" style="color: #0d9488; text-decoration: none;">Aviso de Privacidad</a> |
+                <a href="{{UrlTerminos}}" style="color: #0d9488; text-decoration: none;">Términos y Condiciones</a>
+            </div>
+            <div style="color: #858796; font-size: 0.65rem;">
+                Este es un mensaje automático, por favor no responder a este correo.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

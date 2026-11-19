@@ -51,36 +51,38 @@
                     <span class="menu-text">Pacientes</span>
                 </a>
             </li>
-            <li>
-                <a href="@Url.Action("Index", "Cita")">
-                    <i class="fas fa-calendar-check"></i>
-                    <span class="menu-text">Citas</span>
-                </a>
-            </li>
+            @* SaaS: menú Citas oculto; se conservan controller, vistas y rutas.
+        <li>
+            <a href="@Url.Action("Index", "Cita")">
+                <i class="fas fa-calendar-check"></i>
+                <span class="menu-text">Citas</span>
+            </a>
+        </li>*@
             <li>
                 <a href="@Url.Action("Index", "Consulta")">
                     <i class="fas fa-stethoscope"></i>
                     <span class="menu-text">Consultas</span>
                 </a>
             </li>
+
             <li class="has-arrow @(catalogosAbierto ? "active" : "")">
                 <a href="#">
                     <i class="fas fa-tags"></i>
                     <span class="menu-text">Catálogos</span>
                 </a>
                 <ul>
-                    <li>
+                    @*<li>
                         <a href="@Url.Action("Index", "Tratamiento")" class="@(controllerActual == "Tratamiento" ? "active" : "")">
                             <i class="fas fa-pills"></i>
                             <span class="menu-text">Tratamientos</span>
                         </a>
-                    </li>
-                    <li>
+                    </li>*@
+                    @*<li>
                         <a href="@Url.Action("Index", "Paquete")" class="@(controllerActual == "Paquete" ? "active" : "")">
                             <i class="fas fa-box"></i>
                             <span class="menu-text">Paquetes</span>
                         </a>
-                    </li>
+                    </li>*@
                     <li>
                         <a href="@Url.Action("Index", "TipoConsulta")" class="@(controllerActual == "TipoConsulta" ? "active" : "")">
                             <i class="fas fa-clipboard-list"></i>

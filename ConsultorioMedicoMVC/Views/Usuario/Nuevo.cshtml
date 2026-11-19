@@ -17,6 +17,10 @@
                 <input type="text" class="form-control" name="UserName" id="UserName" value="@Model.UserName" placeholder="Ingrese el nombre de usuario">
             </div>
             <div class="col-md-6">
+                <label class="form-label" for="Email">Correo electrónico <small class="text-muted">(opcional)</small></label>
+                <input type="email" class="form-control" name="Email" id="Email" value="@Model.Email" maxlength="250" placeholder="Ingrese el correo (opcional)">
+            </div>
+            <div class="col-md-6">
                 <label class="form-label" for="Password">Contraseña <span class="required">*</span></label>
                 <input type="password" class="form-control" name="Password" id="Password" placeholder="Contraseña" autocomplete="new-password">
                 @if (Model.Id > 0)
@@ -50,11 +54,13 @@
             $('#usuarioForm').validate({
                 rules: {
                     UserName: { required: true },
+                    Email: { email: true },
                     Password: { required: esNuevo, minlength: 6 },
                     Confirmacion: { required: esNuevo, minlength: 6, equalTo: "#Password" }
                 },
                 messages: {
                     UserName: { required: "El nombre de usuario es requerido." },
+                    Email: { email: "Ingrese un formato de correo válido." },
                     Password: {
                         required: "La contraseña es requerida.",
                         minlength: "La contraseña debe tener al menos 6 caracteres."

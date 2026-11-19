@@ -66,30 +66,56 @@
                 return this.optional(element) || /^\d{10}$/.test(value);
             }, "El teléfono debe tener exactamente 10 dígitos.");
 
+            $.validator.addMethod("soloLetras", function (value, element) {
+                return this.optional(element) || /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(value);
+            }, "Solo se permiten letras y espacios.");
+
+            $.validator.addMethod("emailRegex", function (value, element) {
+                return this.optional(element) || /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/.test(value);
+            }, "Ingrese un formato de correo válido.");
+
             $('#pacienteForm').validate({
                 rules: {
-                    Nombre: { required: true },
-                    ApellidoPaterno: { required: true },
+                    Nombre: { required: true, soloLetras: true },
+                    ApellidoPaterno: { required: true, soloLetras: true },
+                    ApellidoMaterno: { soloLetras: true },
                     Sexo: { required: true },
                     TelefonoCel: { required: true, telefono10: true },
-                    Email: { email: true }
+                    Email: { emailRegex: true }
                 },
                 messages: {
-                    Nombre: { required: "El nombre es requerido." },
-                    ApellidoPaterno: { required: "El apellido paterno es requerido." },
+                    Nombre: {
+                        required: "El nombre es requerido.",
+                        soloLetras: "El nombre solo puede contener letras y espacios."
+                    },
+                    ApellidoPaterno: {
+                        required: "El apellido paterno es requerido.",
+                        soloLetras: "El apellido paterno solo puede contener letras y espacios."
+                    },
+                    ApellidoMaterno: {
+                        soloLetras: "El apellido materno solo puede contener letras y espacios."
+                    },
                     Sexo: { required: "Seleccione el sexo." },
                     TelefonoCel: {
                         required: "El teléfono es requerido.",
                         telefono10: "El teléfono debe tener exactamente 10 dígitos."
                     },
                     Email: {
-                        email: "Ingrese un formato de correo válido."
+                        emailRegex: "Ingrese un formato de correo válido."
                     }
                 },
                 errorElement: 'div',
                 errorClass: 'invalid-feedback',
                 highlight: function (element) { $(element).addClass('is-invalid'); },
                 unhighlight: function (element) { $(element).removeClass('is-invalid'); }
+            });
+
+            $('#Nombre, #ApellidoPaterno, #ApellidoMaterno').on('input', function () {
+                this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, '');
+            });
+
+            $('#TelefonoCel').on('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
             });
 
             tablaPacientes = $('#pacientesTable').DataTable({
@@ -116,7 +142,7 @@
                         orderable: false,
                         render: function (data) {
                             return '<a href="' + expedienteUrl + '/' + data + '" class="btn btn-sm btn-info me-1" title="Expediente Clínico"><i class="fas fa-folder-open"></i></a>' +
-                                   '<button type="button" class="btn btn-sm btn-secondary btn-anexos-paciente me-1" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i> Anexos</button>' +
+                                   '<button type="button" class="btn btn-sm btn-secondary btn-anexos-paciente me-1" data-id="' + data + '" title="Anexos"><i class="fas fa-paperclip"></i></button>' +
                                    '<button type="button" class="btn btn-sm btn-warning btn-editar-paciente me-1" data-id="' + data + '" title="Editar"><i class="fas fa-edit"></i></button>' +
                                    '<button type="button" class="btn btn-sm btn-danger btn-eliminar-paciente" data-id="' + data + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                         }

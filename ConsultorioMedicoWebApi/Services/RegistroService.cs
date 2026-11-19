@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Web.Hosting;
 using ConsultorioMedicoEntities.Registro;
 using ConsultorioMedicoEntities.Seguridad;
 using ConsultorioMedicoWebApi.DAL;
@@ -39,6 +43,11 @@ namespace ConsultorioMedicoWebApi.Services
 
                 var resultado = _dbWrapper.RegistrarConsultorio(datos, passwordHash);
 
+                // Correo de bienvenida best-effort: si el SMTP falla solo se registra el error;
+                // el consultorio ya quedó dado de alta y NO se revierte.
+                if (resultado.IsSuccess)
+                    EnviarCorreoBienvenida(datos);
+
                 return new ModelResponse
                 {
                     IsSuccess = resultado.IsSuccess,
@@ -49,6 +58,48 @@ namespace ConsultorioMedicoWebApi.Services
             {
                 Log.Error(ex, "Error en RegistrarConsultorio");
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al registrar el consultorio." };
+            }
+        }
+
+        /// <summary>
+        /// Envía el correo de bienvenida tras dar de alta el consultorio. Es best-effort:
+        /// si el envío falla solo se registra el error (el alta no se revierte).
+        /// Por seguridad, el correo NO incluye la contraseña elegida por el usuario.
+        /// </summary>
+        private static void EnviarCorreoBienvenida(RegistroDTO datos)
+        {
+            try
+            {
+                var ruta = HostingEnvironment.MapPath("~/Template/Template_AltaConsultorio.html");
+                if (string.IsNullOrEmpty(ruta) || !File.Exists(ruta))
+                {
+                    Log.Warning("Plantilla de correo de bienvenida no encontrada en {Ruta}", ruta);
+                    return;
+                }
+
+                var plantilla = File.ReadAllText(ruta);
+
+                var baseUri = ConfigurationManager.AppSettings["BaseUri"] ?? string.Empty;
+                if (!baseUri.EndsWith("/"))
+                    baseUri += "/";
+
+                var cuerpo = plantilla
+                    .Replace("{{NombreComercial}}", datos.NombreComercial ?? string.Empty)
+                    .Replace("{{Responsable}}", datos.Responsable ?? string.Empty)
+                    .Replace("{{Usuario}}", datos.RFC ?? string.Empty)
+                    .Replace("{{UrlLogin}}", baseUri + "Home/Autentication")
+                    .Replace("{{UrlTerminos}}", baseUri + "Home/Terminos")
+                    .Replace("{{UrlPrivacidad}}", baseUri + "Home/Privacidad");
+
+                EmailHelper.EnviarEmail(
+                    new List<string> { datos.CorreoContacto },
+                    "Bienvenido a Consultorio Médico - Tu acceso",
+                    cuerpo);
+            }
+            catch (Exception ex)
+            {
+                // Best-effort: el consultorio ya quedó registrado; solo se informa del fallo.
+                Log.Error(ex, "No se pudo enviar el correo de bienvenida a {Correo}", datos.CorreoContacto);
             }
         }
 

@@ -55,5 +55,5 @@
 
 - Matriz manual/UI M1–M19: login/rehash, registro desde UI, branding, anexos, receta, CRUD TipoConsulta, etc.
 - No se tomó respaldo previo (0.4). El clon tenía 0 filas de dominio y las migraciones fueron aditivas; considerar un respaldo post-migración antes de las pruebas de UI.
-- Envío de correo de bienvenida/credenciales: pendiente en Engram (`project/consultoriomedico-saas-email-pending`).
+- Correo de bienvenida: **implementado** desde la WebApi (`Helpers/EmailHelper.cs`, `Template/Template_AltaConsultorio.html`, claves SMTP en `Web.config`); es best-effort y **no incluye la contraseña**. Ver Engram `project/consultoriomedico-saas-email-pending` (actualizado).
 - No commitear `sql/reset_datos_consultorio.sql`.

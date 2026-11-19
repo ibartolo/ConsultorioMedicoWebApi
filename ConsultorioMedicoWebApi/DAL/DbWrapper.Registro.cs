@@ -58,7 +58,7 @@ namespace ConsultorioMedicoWebApi.DAL
                         return mr;
                     }
 
-                    var usuarioId = InsertarUsuario(userName, passwordHash, nuevoId);
+                    var usuarioId = InsertarUsuario(userName, passwordHash, email, nuevoId);
                     if (usuarioId <= 0)
                     {
                         RollbackTransaction();
@@ -66,6 +66,9 @@ namespace ConsultorioMedicoWebApi.DAL
                         mr.Message = "No fue posible registrar el usuario administrador.";
                         return mr;
                     }
+
+                    // Catálogo inicial del consultorio: Inicial, Seguimiento y Revisión/Control (30 min).
+                    InsertarTiposConsultaDefault(nuevoId);
 
                     CommitTransaction();
                     mr.IsSuccess = true;
@@ -205,19 +208,46 @@ namespace ConsultorioMedicoWebApi.DAL
         }
 
         /// <summary>Inserta el usuario administrador (UserName = RFC normalizado). Devuelve el nuevo Id o 0.</summary>
-        private int InsertarUsuario(string userName, string passwordHash, int companiaId)
+        private int InsertarUsuario(string userName, string passwordHash, string email, int companiaId)
         {
             var pars = new List<SqlParameter>
             {
                 new SqlParameter("@Id", SqlDbType.Int) { Value = 0 },
                 new SqlParameter("@UserName", (object)userName ?? DBNull.Value),
                 new SqlParameter("@Password", (object)passwordHash ?? DBNull.Value),
+                new SqlParameter("@Email", string.IsNullOrWhiteSpace(email) ? (object)DBNull.Value : email),
                 new SqlParameter("@Estatus", true),
                 new SqlParameter("@CompaniaID", companiaId)
             };
 
             var id = ExecuteScalar("sp_nh_SaveUsuario", CommandType.StoredProcedure, pars);
             return id == null ? 0 : Convert.ToInt32(id);
+        }
+
+        /// <summary>
+        /// Inserta el catálogo base de tipos de consulta del consultorio nuevo.
+        /// Se ejecuta dentro de la misma transacción del alta.
+        /// </summary>
+        private void InsertarTiposConsultaDefault(int consultorioId)
+        {
+            var nombres = new[] { "Inicial", "Seguimiento", "Revisión/Control" };
+
+            foreach (var nombre in nombres)
+            {
+                var pars = new List<SqlParameter>
+                {
+                    new SqlParameter("@Id", SqlDbType.Int) { Value = 0 },
+                    new SqlParameter("@Nombre", nombre),
+                    new SqlParameter("@Duracion", SqlDbType.Int) { Value = 30 },
+                    new SqlParameter("@Descripcion", DBNull.Value),
+                    new SqlParameter("@Estatus", true),
+                    new SqlParameter("@ConsultorioID", consultorioId)
+                };
+
+                var id = ExecuteScalar("sp_nh_SaveTipoConsulta", CommandType.StoredProcedure, pars);
+                if (id == null || id == DBNull.Value || Convert.ToInt32(id) <= 0)
+                    throw new InvalidOperationException("No fue posible crear el tipo de consulta inicial: " + nombre);
+            }
         }
     }
 }

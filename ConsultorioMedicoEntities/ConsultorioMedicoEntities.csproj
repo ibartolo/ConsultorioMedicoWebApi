@@ -68,8 +68,12 @@
     <Compile Include="Seguridad\ModelResponse.cs" />
     <Compile Include="Registro\RegistroDTO.cs" />
     <Compile Include="Registro\RegistroValidator.cs" />
+    <Compile Include="Recuperacion\SolicitarRecuperacionDTO.cs" />
+    <Compile Include="Recuperacion\RestablecerPasswordDTO.cs" />
+    <Compile Include="Recuperacion\RecuperacionTokenDTO.cs" />
     <Compile Include="Seguridad\Token.cs" />
     <Compile Include="Seguridad\TokenCookie.cs" />
+    <Compile Include="Seguridad\PasswordPolicy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

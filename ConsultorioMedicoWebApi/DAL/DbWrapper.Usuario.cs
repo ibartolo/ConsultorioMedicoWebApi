@@ -19,6 +19,7 @@ namespace ConsultorioMedicoWebApi.DAL
             {
                 Id = Convert.ToInt32(r["Id"]),
                 UserName = r["UserName"] as string,
+                Email = r["Email"] as string,
                 Estatus = Convert.ToBoolean(r["Estatus"]),
                 CompaniaID = Convert.IsDBNull(r["CompaniaID"]) ? (int?)null : Convert.ToInt32(r["CompaniaID"])
             };
@@ -85,6 +86,7 @@ namespace ConsultorioMedicoWebApi.DAL
                     new SqlParameter("@Id", u.Id),
                     new SqlParameter("@UserName", (object)u.UserName ?? DBNull.Value),
                     new SqlParameter("@Password", (object)u.Password ?? DBNull.Value),
+                    new SqlParameter("@Email", string.IsNullOrWhiteSpace(u.Email) ? (object)DBNull.Value : u.Email),
                     new SqlParameter("@Estatus", u.Estatus),
                     new SqlParameter("@CompaniaID", empresaId)
                 };
