@@ -32,7 +32,12 @@ namespace ConsultorioMedicoWebApi.DAL
                 LogoRuta = r["LogoRuta"] as string,
                 MedicoNombre = r["MedicoNombre"] as string,
                 MedicoCedula = r["MedicoCedula"] as string,
-                MedicoEspecialidad = r["MedicoEspecialidad"] as string
+                MedicoEspecialidad = r["MedicoEspecialidad"] as string,
+                Estatus = Convert.ToBoolean(r["Estatus"]),
+                FechaVigenciaInicio = Convert.IsDBNull(r["FechaVigenciaInicio"]) ? (DateTime?)null : Convert.ToDateTime(r["FechaVigenciaInicio"]),
+                FechaVigenciaFin = Convert.IsDBNull(r["FechaVigenciaFin"]) ? (DateTime?)null : Convert.ToDateTime(r["FechaVigenciaFin"]),
+                EsPeriodoPrueba = Convert.ToBoolean(r["EsPeriodoPrueba"]),
+                Plan = r["Plan"] as string
             };
         }
 

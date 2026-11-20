@@ -1,0 +1,282 @@
+﻿@{
+    ViewBag.Title = "Licencia";
+    var vigenciaVencida = (ViewBag.VigenciaVencida != null && (bool)ViewBag.VigenciaVencida);
+    var pagoBanco = (ViewBag.PagoBanco != null) ? ViewBag.PagoBanco.ToString() : "";
+    var pagoClabe = (ViewBag.PagoClabe != null) ? ViewBag.PagoClabe.ToString() : "";
+    var pagoTitular = (ViewBag.PagoTitular != null) ? ViewBag.PagoTitular.ToString() : "";
+    var pagoMontoAnual = (ViewBag.PagoMontoAnual != null) ? ViewBag.PagoMontoAnual.ToString() : "1200";
+}
+<h2 class="page-title"><i class="fas fa-key me-2" style="color: var(--primary);"></i>Licencia</h2>
+
+@if (vigenciaVencida)
+{
+    <div class="alert alert-danger d-flex align-items-center" role="alert" id="bannerVencida">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+            <strong>Tu licencia ha vencido.</strong>
+            <span id="bannerVencidaFecha"></span>
+            <br />
+            Para reactivar tu consultorio, realiza la transferencia por <strong>$@pagoMontoAnual MXN</strong> a los datos bancarios
+            de abajo y sube tu comprobante. Al subirlo se otorga una extensión provisional hasta el final del día; una vez
+            confirmado el pago, tu licencia se renueva por un año. Después de renovar, <strong>cierra sesión y vuelve a entrar</strong>.
+        </div>
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card-custom mb-3">
+            <div class="card-title"><i class="fas fa-id-card"></i> Estado de tu licencia</div>
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label text-muted mb-1">Plan</label>
+                    <div class="fs-5" id="licPlan">—</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted mb-1">Estatus</label>
+                    <div id="licEstatus">—</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted mb-1">Inicio de vigencia</label>
+                    <div id="licInicio">—</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted mb-1">Fin de vigencia</label>
+                    <div id="licFin">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom mb-3">
+            <div class="card-title"><i class="fas fa-upload"></i> Subir comprobante de pago</div>
+            <p class="text-muted">
+                Realiza la transferencia por el monto anual de tu plan y sube el comprobante.
+                Formatos PDF, JPG, JPEG o PNG, máximo 3 MB.
+            </p>
+            <input type="file" id="comprobanteArchivo" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="mt-2">
+                <button type="button" class="btn btn-primary" onclick="subirComprobante()">
+                    <i class="fas fa-cloud-upload-alt me-1"></i> Subir comprobante
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card-custom mb-3">
+            <div class="card-title"><i class="fas fa-university"></i> Datos bancarios</div>
+            <table class="table table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <th class="text-muted" style="width: 110px;">Banco</th>
+                        <td id="banco">@pagoBanco</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">CLABE</th>
+                        <td id="clabe" class="font-monospace">@pagoClabe</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Titular</th>
+                        <td id="titular">@pagoTitular</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Monto anual</th>
+                        <td id="montoAnual" class="fw-bold">$@pagoMontoAnual MXN</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="card-title"><i class="fas fa-history"></i> Historial de pagos</div>
+    <div class="table-responsive">
+        <table id="pagosTable" class="table table-hover align-middle" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Archivo</th>
+                    <th>Monto</th>
+                    <th>Estatus</th>
+                    <th>Comprobante</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var consultarUrl = '@Url.Action("Consultar", "Licencia")';
+        var consultarPagosUrl = '@Url.Action("ConsultarPagos", "Licencia")';
+        var descargarUrl = '@Url.Action("Descargar", "Licencia")';
+        var vigenciaVencida = @(vigenciaVencida ? "true" : "false");
+        var pagosTable = null;
+
+        $(document).ready(function () {
+            cargarLicencia();
+            inicializarTabla();
+            cargarPagos();
+        });
+
+        function parseRespuesta(r) {
+            return (typeof r === 'string') ? JSON.parse(r) : r;
+        }
+
+        function nombreEstatusPago(id) {
+            if (id === 2) return 'Confirmado';
+            if (id === 3) return 'Rechazado';
+            return 'Pendiente';
+        }
+
+        function badgeEstatusPago(id) {
+            if (id === 2) return '<span class="badge bg-success">Confirmado</span>';
+            if (id === 3) return '<span class="badge bg-danger">Rechazado</span>';
+            return '<span class="badge bg-warning text-dark">Pendiente</span>';
+        }
+
+        function formatFecha(valor) {
+            if (!valor) return 'Sin vencimiento';
+            var d = new Date(valor);
+            if (isNaN(d.getTime())) return valor;
+            return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function formatMonto(valor) {
+            var n = parseFloat(valor);
+            if (isNaN(n)) n = 0;
+            return '$' + n.toFixed(2);
+        }
+
+        function cargarLicencia() {
+            $.get(consultarUrl, function (response) {
+                var r = parseRespuesta(response);
+                if (r && r.IsSuccess && r.Response) {
+                    poblarLicencia(r.Response);
+                } else {
+                    $('#licPlan').text('—');
+                    $('#licEstatus').text((r && r.Message) || 'No se encontró la licencia.');
+                }
+            }).fail(function () {
+                $('#licEstatus').text('Error de conexión al cargar la licencia.');
+            });
+        }
+
+        function poblarLicencia(d) {
+            var plan = d.Plan || 'Basico';
+            $('#licPlan').text(plan);
+
+            if (plan === 'Intermedio' || plan === 'Avanzado') {
+                $('#licPlan').html(plan + ' <span class="badge bg-secondary">En desarrollo</span>');
+            }
+
+            var estatusHtml = d.Estatus ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>';
+            if (d.EsPeriodoPrueba) {
+                estatusHtml += ' <span class="badge bg-info text-dark">Periodo de prueba</span>';
+            }
+            $('#licEstatus').html(estatusHtml);
+
+            $('#licInicio').text(formatFecha(d.FechaVigenciaInicio));
+            $('#licFin').text(formatFecha(d.FechaVigenciaFin));
+
+            if (vigenciaVencida) {
+                $('#bannerVencidaFecha').text(' (venció el ' + formatFecha(d.FechaVigenciaFin) + ').');
+            }
+        }
+
+        function inicializarTabla() {
+            pagosTable = $('#pagosTable').DataTable({
+                language: { url: '@Url.Content("~/Content/datatables-es-ES.json")' },
+                ordering: false,
+                searching: false,
+                lengthChange: false,
+                pageLength: 10,
+                autoWidth: false,
+                columns: [
+                    { data: 'FechaCarga', render: function (d) { return formatFecha(d); } },
+                    { data: 'NombreArchivo', render: function (d) { return d || 'Sin comprobante'; } },
+                    { data: 'Monto', render: function (d) { return formatMonto(d); } },
+                    { data: 'EstatusPagoId', render: function (d) { return badgeEstatusPago(d); } },
+                    {
+                        data: 'Id',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            if (row.ArchivoRuta) {
+                                return '<a href="' + descargarUrl + '/' + data + '" class="btn btn-sm btn-outline-primary" title="Descargar comprobante"><i class="fas fa-download"></i></a>';
+                            }
+                            return '<span class="text-muted">—</span>';
+                        }
+                    }
+                ]
+            });
+        }
+
+        function cargarPagos() {
+            $.get(consultarPagosUrl, function (response) {
+                var r = parseRespuesta(response);
+                if (r && r.IsSuccess) {
+                    pagosTable.clear().rows.add(r.Response || []).draw();
+                } else {
+                    pagosTable.clear().draw();
+                }
+            }).fail(function () {
+                pagosTable.clear().draw();
+            });
+        }
+
+        function subirComprobante() {
+            var input = $('#comprobanteArchivo')[0];
+            var file = input && input.files ? input.files[0] : null;
+            if (!file) {
+                Swal.fire({ title: 'Archivo requerido', text: 'Seleccione un comprobante para subir.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+
+            var nombre = file.name || '';
+            var punto = nombre.lastIndexOf('.');
+            var ext = punto >= 0 ? nombre.substring(punto).toLowerCase() : '';
+            if (['.pdf', '.jpg', '.jpeg', '.png'].indexOf(ext) < 0) {
+                Swal.fire({ title: 'Archivo no válido', text: 'Solo se permiten comprobantes PDF, JPG, JPEG o PNG.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+            if (file.size > 3 * 1024 * 1024) {
+                Swal.fire({ title: 'Archivo no válido', text: 'El comprobante excede el tamaño máximo de 3 MB.', icon: 'warning', confirmButtonColor: '#0099CC' });
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('archivo', file);
+
+            Swal.fire({
+                title: 'Subiendo comprobante…',
+                allowOutsideClick: false,
+                didOpen: function () { Swal.showLoading(); }
+            });
+
+            $.ajax({
+                url: '@Url.Action("SubirComprobante", "Licencia")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (response) {
+                    var r = parseRespuesta(response);
+                    if (r && r.IsSuccess) {
+                        $('#comprobanteArchivo').val('');
+                        cargarPagos();
+                        cargarLicencia();
+                        Swal.fire({ title: '¡Comprobante recibido!', text: r.Message || 'Tu comprobante se recibió correctamente.', icon: 'success', timer: 2500, showConfirmButton: false });
+                    } else {
+                        Swal.fire({ title: 'Error', text: (r && r.Message) || 'No fue posible subir el comprobante.', icon: 'error', confirmButtonColor: '#0099CC' });
+                    }
+                },
+                error: function () {
+                    Swal.fire({ title: 'Error', text: 'Error de conexión al subir el comprobante.', icon: 'error', confirmButtonColor: '#0099CC' });
+                }
+            });
+        }
+    </script>
+}

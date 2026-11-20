@@ -9,6 +9,11 @@
     =====================================================================
 */
 
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
 IF COL_LENGTH('dbo.DatosInstitucion', 'LogoRuta') IS NULL
     ALTER TABLE dbo.DatosInstitucion ADD LogoRuta NVARCHAR(200) NULL;
 IF COL_LENGTH('dbo.DatosInstitucion', 'MedicoNombre') IS NULL

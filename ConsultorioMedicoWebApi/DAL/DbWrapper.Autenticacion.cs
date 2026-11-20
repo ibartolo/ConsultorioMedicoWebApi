@@ -24,8 +24,13 @@ namespace ConsultorioMedicoWebApi.DAL
                         Id = Convert.ToInt32(r["Id"]),
                         UserName = r["UserName"] as string,
                         Password = r["Password"] as string,
+                        Email = r["Email"] as string,
                         Estatus = Convert.ToBoolean(r["Estatus"]),
-                        CompaniaID = Convert.IsDBNull(r["CompaniaID"]) ? (int?)null : Convert.ToInt32(r["CompaniaID"])
+                        CompaniaID = Convert.IsDBNull(r["CompaniaID"]) ? (int?)null : Convert.ToInt32(r["CompaniaID"]),
+                        FechaVigenciaFin = Convert.IsDBNull(r["FechaVigenciaFin"]) ? (DateTime?)null : Convert.ToDateTime(r["FechaVigenciaFin"]),
+                        EsPeriodoPrueba = !Convert.IsDBNull(r["EsPeriodoPrueba"]) && Convert.ToBoolean(r["EsPeriodoPrueba"]),
+                        Plan = r["Plan"] as string,
+                        LicenciaEstatus = Convert.IsDBNull(r["LicenciaEstatus"]) ? (bool?)null : Convert.ToBoolean(r["LicenciaEstatus"])
                     }),
                     CommandType.StoredProcedure,
                     new[]

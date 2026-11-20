@@ -84,6 +84,7 @@
     <Compile Include="Controllers\HistorialController.cs" />
     <Compile Include="Controllers\RegistroController.cs" />
     <Compile Include="Controllers\RecuperacionPasswordController.cs" />
+    <Compile Include="Controllers\LicenciaController.cs" />
     <Compile Include="DAL\BaseDbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.cs" />
     <Compile Include="DAL\DbWrapper.Autenticacion.cs" />
@@ -101,8 +102,10 @@
     <Compile Include="DAL\DbWrapper.Historial.cs" />
     <Compile Include="DAL\DbWrapper.Registro.cs" />
     <Compile Include="DAL\DbWrapper.PasswordReset.cs" />
+    <Compile Include="DAL\DbWrapper.Licencia.cs" />
     <Compile Include="Helpers\Cryptography.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
+    <Compile Include="Helpers\LogJson.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -122,6 +125,7 @@
     <Compile Include="Services\HistorialService.cs" />
     <Compile Include="Services\RegistroService.cs" />
     <Compile Include="Services\RecuperacionPasswordService.cs" />
+    <Compile Include="Services\LicenciaService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
@@ -130,6 +134,7 @@
     <Content Include="Attachment\Web.config" />
     <Content Include="Template\Template_AltaConsultorio.html" />
     <Content Include="Template\Template_RecuperacionPassword.html" />
+    <Content Include="Template\Template_PagoRecibido.html" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>

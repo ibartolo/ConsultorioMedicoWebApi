@@ -28,26 +28,34 @@ namespace ConsultorioMedicoWebApi.Services
         {
             try
             {
+                Log.Information("RegistroService.RegistrarConsultorio ENTRADA: {Json}", LogJson.ToJson(DatosSeguros(datos)));
+
                 // Normaliza los campos de captura (trim) antes de validar y de insertar.
                 // El RFC se normaliza aparte (trim + mayúsculas); la contraseña NO se recorta.
                 Normalizar(datos);
 
                 var error = RegistroValidator.Validar(datos);
                 if (error != null)
+                {
+                    Log.Warning("RegistroService.RegistrarConsultorio VALIDACIÓN: {Mensaje}", error);
                     return new ModelResponse { IsSuccess = false, Message = error };
+                }
 
                 // RFC normalizado (trim + mayúsculas) como UserName del primer admin.
                 datos.RFC = (datos.RFC ?? string.Empty).Trim().ToUpperInvariant();
 
                 var passwordHash = Cryptography.HashPassword(datos.Password);
 
+                Log.Debug("RegistroService.RegistrarConsultorio DB_REQUEST: {Json}", LogJson.ToJson(DatosSeguros(datos)));
                 var resultado = _dbWrapper.RegistrarConsultorio(datos, passwordHash);
+                Log.Debug("RegistroService.RegistrarConsultorio DB_RESPONSE: {Json}", LogJson.ToJson(resultado));
 
                 // Correo de bienvenida best-effort: si el SMTP falla solo se registra el error;
                 // el consultorio ya quedó dado de alta y NO se revierte.
                 if (resultado.IsSuccess)
                     EnviarCorreoBienvenida(datos);
 
+                Log.Information("RegistroService.RegistrarConsultorio RESULTADO: IsSuccess={IsSuccess}, Message={Message}, Id={Id}", resultado.IsSuccess, resultado.Message, resultado.Response);
                 return new ModelResponse
                 {
                     IsSuccess = resultado.IsSuccess,
@@ -56,9 +64,33 @@ namespace ConsultorioMedicoWebApi.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error en RegistrarConsultorio");
+                Log.Error(ex, "RegistroService.RegistrarConsultorio ERROR: {Message}", ex.Message);
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al registrar el consultorio." };
             }
+        }
+
+        /// <summary>
+        /// Proyección para logging sin credenciales: excluye Password y Confirmacion.
+        /// </summary>
+        private static object DatosSeguros(RegistroDTO d)
+        {
+            if (d == null) return null;
+            return new
+            {
+                d.NombreComercial,
+                d.RazonSocial,
+                d.RFC,
+                d.Responsable,
+                d.Calle,
+                d.NoExterior,
+                d.NoInterior,
+                d.Colonia,
+                d.Municipio,
+                d.Estado,
+                d.CP,
+                d.Telefono,
+                d.CorreoContacto
+            };
         }
 
         /// <summary>

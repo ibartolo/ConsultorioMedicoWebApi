@@ -90,6 +90,7 @@
     <Compile Include="Controllers\RegistroController.cs" />
     <Compile Include="Controllers\TipoConsultaController.cs" />
     <Compile Include="Controllers\RecuperacionPasswordController.cs" />
+    <Compile Include="Controllers\LicenciaController.cs" />
     <Compile Include="DAL\HttpClientBase.cs" />
     <Compile Include="DAL\HttpClientConnection.cs" />
     <Compile Include="DAL\HttpClientConnection.Autenticacion.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="DAL\HttpClientConnection.Historial.cs" />
     <Compile Include="DAL\HttpClientConnection.Registro.cs" />
     <Compile Include="DAL\HttpClientConnection.RecuperacionPassword.cs" />
+    <Compile Include="DAL\HttpClientConnection.Licencia.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -127,6 +129,7 @@
     <Compile Include="Services\HistorialService.cs" />
     <Compile Include="Services\RegistroService.cs" />
     <Compile Include="Services\RecuperacionPasswordService.cs" />
+    <Compile Include="Services\LicenciaService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
@@ -169,6 +172,7 @@
     <Content Include="Views\Anexo\Index.cshtml" />
     <Content Include="Views\DatosInstitucion\Index.cshtml" />
     <Content Include="Views\DatosFiscales\Index.cshtml" />
+    <Content Include="Views\Licencia\Index.cshtml" />
     <Content Include="Views\Configuracion\Index.cshtml" />
     <Content Include="Views\Historial\Index.cshtml" />
     <Content Include="Views\Historial\Expediente.cshtml" />

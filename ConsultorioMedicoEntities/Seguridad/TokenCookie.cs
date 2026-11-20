@@ -11,5 +11,12 @@
         public string UserName { get; set; }
         public string ProfileImage { get; set; }
         public string UserAvatar { get; set; }
+
+        /// <summary>
+        /// Modo restringido por licencia vencida. Se calcula en el login desde
+        /// FechaVigenciaFin; false por defecto (cookies previas sin el campo
+        /// se tratan como no restringidas).
+        /// </summary>
+        public bool VigenciaVencida { get; set; }
     }
 }

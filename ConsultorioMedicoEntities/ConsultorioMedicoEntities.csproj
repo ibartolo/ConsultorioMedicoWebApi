@@ -61,6 +61,8 @@
     <Compile Include="Catalogos\DatosInstitucionValidator.cs" />
     <Compile Include="Catalogos\DatosFiscales.cs" />
     <Compile Include="Catalogos\DatosFiscalesValidator.cs" />
+    <Compile Include="Catalogos\ConsultorioPago.cs" />
+    <Compile Include="Catalogos\LicenciaDTO.cs" />
     <Compile Include="Catalogos\DashboardDTO.cs" />
     <Compile Include="Autenticacion\Usuario.cs" />
     <Compile Include="Autenticacion\UsuarioDTO.cs" />

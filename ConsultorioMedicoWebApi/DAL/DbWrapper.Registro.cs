@@ -49,6 +49,15 @@ namespace ConsultorioMedicoWebApi.DAL
                         return mr;
                     }
 
+                    // Licencia de prueba (trial 60 días) dentro de la misma transacción.
+                    if (!InicializarLicencia(nuevoId))
+                    {
+                        RollbackTransaction();
+                        mr.IsSuccess = false;
+                        mr.Message = "No fue posible inicializar la licencia de prueba del consultorio.";
+                        return mr;
+                    }
+
                     var fiscalId = InsertarDatosFiscales(d, rfc, nuevoId);
                     if (fiscalId <= 0)
                     {
@@ -149,6 +158,18 @@ namespace ConsultorioMedicoWebApi.DAL
                 return "Los datos ya se encuentran registrados.";
             }
             return "Ocurrió un error al registrar el consultorio.";
+        }
+
+        /// <summary>
+        /// Inicializa la licencia de prueba (trial 60 días) del consultorio recién creado.
+        /// SP: sp_nh_SetLicenciaInicial. Devuelve true si @@ROWCOUNT > 0.
+        /// </summary>
+        private bool InicializarLicencia(int consultorioId)
+        {
+            var filas = ExecuteScalar("sp_nh_SetLicenciaInicial", CommandType.StoredProcedure,
+                new[] { new SqlParameter("@ConsultorioID", consultorioId) });
+
+            return filas != null && Convert.ToInt32(filas) > 0;
         }
 
         /// <summary>Inserta DatosInstitucion (tenant) con Id=0. Devuelve el nuevo Id o 0.</summary>

@@ -1,4 +1,6 @@
-﻿namespace ConsultorioMedicoEntities.Autenticacion
+﻿using System;
+
+namespace ConsultorioMedicoEntities.Autenticacion
 {
     /// <summary>
     /// Entidad Usuario. La tabla dbo.Usuario NO tiene columnas de auditoría,
@@ -12,5 +14,11 @@
         public string Email { get; set; }
         public bool Estatus { get; set; }
         public int? CompaniaID { get; set; }
+
+        // Licencia del consultorio (LEFT JOIN en sp_nh_AutenticacionUsuario).
+        public DateTime? FechaVigenciaFin { get; set; }
+        public bool EsPeriodoPrueba { get; set; }
+        public string Plan { get; set; }
+        public bool? LicenciaEstatus { get; set; }
     }
 }

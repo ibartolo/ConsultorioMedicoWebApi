@@ -43,31 +43,44 @@ namespace ConsultorioMedicoWebApi.Services
         {
             try
             {
+                Log.Information("RecuperacionPasswordService.Solicitar ENTRADA: {Json}", LogJson.ToJson(new { email }));
+
                 var correo = (email ?? string.Empty).Trim();
 
                 // Correo vacío o con formato inválido: respuesta genérica, sin enviar.
                 if (string.IsNullOrEmpty(correo) || !EsEmailValido(correo))
+                {
+                    Log.Information("RecuperacionPasswordService.Solicitar RESULTADO: IsSuccess=True, Message={Message}", MensajeEnviado);
                     return new ModelResponse { IsSuccess = true, Message = MensajeEnviado };
+                }
 
                 // Usuario activo con ese correo. Si no existe o está inactivo: respuesta genérica, sin enviar.
+                Log.Debug("RecuperacionPasswordService.Solicitar DB_REQUEST: {Json}", LogJson.ToJson(new { correo }));
                 var usuario = _dbWrapper.ObtenerUsuarioPorEmail(correo);
+                Log.Debug("RecuperacionPasswordService.Solicitar DB_RESPONSE: {Json}", LogJson.ToJson(new { usuario?.Id, usuario?.UserName, usuario?.Email, usuario?.Estatus }));
+
                 if (usuario == null)
+                {
+                    Log.Information("RecuperacionPasswordService.Solicitar RESULTADO: IsSuccess=True, Message={Message}", MensajeEnviado);
                     return new ModelResponse { IsSuccess = true, Message = MensajeEnviado };
+                }
 
                 // Token de un solo uso con expiración de 10 minutos. El SP calcula la
                 // expiración con GETDATE() e invalida los tokens no usados previos.
                 var token = Guid.NewGuid();
 
+                Log.Debug("RecuperacionPasswordService.Solicitar DB_REQUEST (crear token): {Json}", LogJson.ToJson(new { usuario.Id, MinutosExpiracion }));
                 _dbWrapper.CrearTokenRecuperacion(usuario.Id, token, MinutosExpiracion);
 
                 EnviarCorreoRecuperacion(usuario.UserName, usuario.Email, token);
 
+                Log.Information("RecuperacionPasswordService.Solicitar RESULTADO: IsSuccess=True, Message={Message}", MensajeEnviado);
                 return new ModelResponse { IsSuccess = true, Message = MensajeEnviado };
             }
             catch (Exception ex)
             {
                 // Error real (BD, plantilla faltante o SMTP): se informa el fallo.
-                Log.Error(ex, "Error al solicitar la recuperación de contraseña");
+                Log.Error(ex, "RecuperacionPasswordService.Solicitar ERROR: {Message}", ex.Message);
                 return new ModelResponse { IsSuccess = false, Message = MensajeErrorEnvio };
             }
         }
@@ -79,19 +92,31 @@ namespace ConsultorioMedicoWebApi.Services
         {
             try
             {
+                Log.Information("RecuperacionPasswordService.Validar ENTRADA: {Json}", LogJson.ToJson(new { TokenProporcionado = !string.IsNullOrWhiteSpace(token) }));
+
                 Guid tokenGuid;
                 if (!Guid.TryParse(token, out tokenGuid))
+                {
+                    Log.Warning("RecuperacionPasswordService.Validar VALIDACIÓN: {Mensaje}", MensajeEnlaceInvalido);
                     return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                }
 
+                Log.Debug("RecuperacionPasswordService.Validar DB_REQUEST: {Json}", LogJson.ToJson(new { TokenProporcionado = true }));
                 var registro = _dbWrapper.ObtenerTokenRecuperacion(tokenGuid);
-                if (registro == null || !registro.Vigente)
-                    return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                Log.Debug("RecuperacionPasswordService.Validar DB_RESPONSE: {Json}", LogJson.ToJson(new { registro?.UsuarioId, registro?.UserName, registro?.Email, registro?.Vigente }));
 
+                if (registro == null || !registro.Vigente)
+                {
+                    Log.Warning("RecuperacionPasswordService.Validar VALIDACIÓN: {Mensaje}", MensajeEnlaceInvalido);
+                    return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                }
+
+                Log.Information("RecuperacionPasswordService.Validar RESULTADO: IsSuccess=True, Message=El enlace es válido.");
                 return new ModelResponse { IsSuccess = true, Message = "El enlace es válido." };
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al validar el token de recuperación");
+                Log.Error(ex, "RecuperacionPasswordService.Validar ERROR: {Message}", ex.Message);
                 return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
             }
         }
@@ -105,28 +130,46 @@ namespace ConsultorioMedicoWebApi.Services
         {
             try
             {
+                Log.Information("RecuperacionPasswordService.Restablecer ENTRADA: {Json}", LogJson.ToJson(new { TokenProporcionado = !string.IsNullOrWhiteSpace(token), PasswordProporcionada = !string.IsNullOrWhiteSpace(password), ConfirmacionProporcionada = !string.IsNullOrWhiteSpace(confirmacion) }));
+
                 Guid tokenGuid;
                 if (!Guid.TryParse(token, out tokenGuid))
+                {
+                    Log.Warning("RecuperacionPasswordService.Restablecer VALIDACIÓN: {Mensaje}", MensajeEnlaceInvalido);
                     return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                }
 
                 var passwordError = PasswordPolicy.Validar(password);
                 if (passwordError != null)
+                {
+                    Log.Warning("RecuperacionPasswordService.Restablecer VALIDACIÓN: {Mensaje}", passwordError);
                     return new ModelResponse { IsSuccess = false, Message = passwordError };
+                }
 
                 if (!string.Equals(password, confirmacion, StringComparison.Ordinal))
+                {
+                    Log.Warning("RecuperacionPasswordService.Restablecer VALIDACIÓN: {Mensaje}", MensajeConfirmacion);
                     return new ModelResponse { IsSuccess = false, Message = MensajeConfirmacion };
+                }
 
                 var passwordHash = Cryptography.HashPassword(password);
 
+                Log.Debug("RecuperacionPasswordService.Restablecer DB_REQUEST: {Json}", LogJson.ToJson(new { TokenProporcionado = true }));
                 var resultado = _dbWrapper.RestablecerPasswordConToken(tokenGuid, passwordHash);
-                if (resultado == 0)
-                    return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                Log.Debug("RecuperacionPasswordService.Restablecer DB_RESPONSE: {Json}", LogJson.ToJson(resultado));
 
+                if (resultado == 0)
+                {
+                    Log.Warning("RecuperacionPasswordService.Restablecer VALIDACIÓN: {Mensaje}", MensajeEnlaceInvalido);
+                    return new ModelResponse { IsSuccess = false, Message = MensajeEnlaceInvalido };
+                }
+
+                Log.Information("RecuperacionPasswordService.Restablecer RESULTADO: IsSuccess=True, Message={Message}", MensajeActualizado);
                 return new ModelResponse { IsSuccess = true, Message = MensajeActualizado };
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al restablecer la contraseña");
+                Log.Error(ex, "RecuperacionPasswordService.Restablecer ERROR: {Message}", ex.Message);
                 return new ModelResponse { IsSuccess = false, Message = "Ocurrió un error al restablecer la contraseña." };
             }
         }

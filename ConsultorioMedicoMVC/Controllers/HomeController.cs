@@ -105,6 +105,12 @@ namespace ConsultorioMedicoMVC.Controllers
                 token.ExpirationDate = DateTime.Now.AddSeconds(token.expires_in);
                 var usuario = response.Response;
 
+                // Licencia: el login NUNCA se bloquea por vigencia vencida.
+                // FechaVigenciaFin == NULL no restringe. EsPeriodoPrueba y
+                // LicenciaEstatus son informativos (no bloquean ni restringen).
+                bool vigenciaVencida = usuario.FechaVigenciaFin.HasValue &&
+                                       usuario.FechaVigenciaFin.Value < SessionHelper.GetDateCenterMexico();
+
                 var tokenCookie = new TokenCookie
                 {
                     Token = token,
@@ -112,7 +118,8 @@ namespace ConsultorioMedicoMVC.Controllers
                     EmpresaID = usuario.CompaniaID ?? 0,
                     UserName = user,
                     ProfileImage = null,
-                    UserAvatar = GenerarAvatarIniciales(user)
+                    UserAvatar = GenerarAvatarIniciales(user),
+                    VigenciaVencida = vigenciaVencida
                 };
                 SessionHelper.CreateSession(JsonConvert.SerializeObject(tokenCookie));
 

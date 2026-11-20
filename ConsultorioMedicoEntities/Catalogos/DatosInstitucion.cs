@@ -1,4 +1,6 @@
-﻿namespace ConsultorioMedicoEntities.Catalogos
+﻿using System;
+
+namespace ConsultorioMedicoEntities.Catalogos
 {
     /// <summary>
     /// Entidad DatosInstitucion. La tabla dbo.DatosInstitucion no tiene columnas de auditoría (POCO plano).
@@ -24,5 +26,12 @@
         public string MedicoNombre { get; set; }
         public string MedicoCedula { get; set; }
         public string MedicoEspecialidad { get; set; }
+
+        // Licencia / consultorio (SaaS)
+        public bool Estatus { get; set; }
+        public DateTime? FechaVigenciaInicio { get; set; }
+        public DateTime? FechaVigenciaFin { get; set; }
+        public bool EsPeriodoPrueba { get; set; }
+        public string Plan { get; set; }
     }
 }
